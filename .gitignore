@@ -1,0 +1,13 @@
+# Maven build
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+# IDE - NetBeans
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+# IDE - VS Code
+.vscode/
