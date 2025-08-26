@@ -48,6 +48,7 @@
             <TableColumn fx:id="colRoom" text="Room Number" prefWidth="120"/>
             <TableColumn fx:id="colCheckin" text="Check-in" prefWidth="150"/>
             <TableColumn fx:id="colCheckout" text="Check-out" prefWidth="150"/>
+            <TableColumn fx:id="colPrice" text="Price ($)" prefWidth="100"/>
         </columns>
     </TableView>
 
