@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.collections.FXCollections?>
+
+<VBox xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="HotelApp.RoomMgmtController"
+      spacing="15" alignment="TOP_LEFT" styleClass="view-pane">
+
+    <Label text="Room Management" styleClass="section-title"/>
+
+    <!-- Form nhập thông tin phòng -->
+    <GridPane hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT" minWidth="120"/>
+            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <children>
+            <Label text="Room Number:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtRoomNumber" promptText="e.g. 101" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <Label text="Type:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <ChoiceBox fx:id="cbType" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Single"/>
+                        <String fx:value="Double"/>
+                        <String fx:value="Suite"/>
+                    </FXCollections>
+                </items>
+            </ChoiceBox>
+
+            <Label text="Status:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <ChoiceBox fx:id="cbStatus" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Available"/>
+                        <String fx:value="Occupied"/>
+                    </FXCollections>
+                </items>
+            </ChoiceBox>
+        </children>
+        <padding>
+            <Insets top="10" bottom="10"/>
+        </padding>
+    </GridPane>
+
+    <!-- Buttons -->
+    <HBox spacing="10">
+        <Button text="Add Room" onAction="#onAddRoom"/>
+        <Button text="Clear" onAction="#onClear"/>
+    </HBox>
+
+    <!-- Table danh sách phòng -->
+    <TableView fx:id="tblRooms" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colRoom" text="Room Number" prefWidth="120"/>
+            <TableColumn fx:id="colType" text="Type" prefWidth="150"/>
+            <TableColumn fx:id="colStatus" text="Status" prefWidth="150"/>
+        </columns>
+    </TableView>
+
+</VBox>

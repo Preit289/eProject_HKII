@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HotelApp.PricingController" spacing="15" alignment="TOP_LEFT" styleClass="view-pane">
+    <children>
+        <Label text="Set Room Pricing" styleClass="section-title" />
+        <HBox spacing="10" alignment="CENTER">
+            <Label text="Room Type:" />
+            <ChoiceBox fx:id="cbRoomType" prefWidth="150" />
+        </HBox>
+        <HBox spacing="10" alignment="CENTER">
+            <Label text="Price ($):" />
+            <TextField fx:id="txtPrice" prefWidth="150" />
+        </HBox>
+        <HBox spacing="10" alignment="CENTER">
+            <Button text="Save" onAction="#onSave" />
+            <Button text="Clear" onAction="#onClear" />
+        </HBox>
+        <TableView fx:id="tblPrices" prefHeight="300">
+            <columns>
+                <TableColumn fx:id="colRoomType" text="Room Type" prefWidth="200" />
+                <TableColumn fx:id="colPrice" text="Price ($)" prefWidth="100" />
+            </columns>
+        </TableView>
+    </children>
+</VBox>

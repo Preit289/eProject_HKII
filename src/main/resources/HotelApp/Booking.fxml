@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="HotelApp.BookingController"
+      spacing="15" alignment="TOP_LEFT" styleClass="view-pane">
+
+    <Label text="Booking Management" styleClass="section-title"/>
+
+    <!-- Form nhập booking -->
+    <GridPane hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT" minWidth="120"/>
+            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <children>
+            <Label text="Guest Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtGuestName" promptText="Enter guest name" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <Label text="Room Number:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtRoomNumber" promptText="e.g. 101" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+            <Label text="Check-in Date:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <DatePicker fx:id="dpCheckin" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+            <Label text="Check-out Date:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <DatePicker fx:id="dpCheckout" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        </children>
+        <padding>
+            <Insets top="10" bottom="10"/>
+        </padding>
+    </GridPane>
+
+    <!-- Buttons -->
+    <HBox spacing="10">
+        <Button text="Save" onAction="#onSave"/>
+        <Button text="Clear" onAction="#onClear"/>
+    </HBox>
+
+    <!-- Table hiển thị booking -->
+    <TableView fx:id="tblBookings" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colGuest" text="Guest Name" prefWidth="200"/>
+            <TableColumn fx:id="colRoom" text="Room Number" prefWidth="120"/>
+            <TableColumn fx:id="colCheckin" text="Check-in" prefWidth="150"/>
+            <TableColumn fx:id="colCheckout" text="Check-out" prefWidth="150"/>
+        </columns>
+    </TableView>
+
+</VBox>

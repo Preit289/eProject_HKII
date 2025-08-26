@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="HotelApp.CheckOutController"
+      spacing="15" alignment="TOP_LEFT" styleClass="view-pane">
+
+    <Label text="Check-out Management" styleClass="section-title"/>
+
+    <TableView fx:id="tblBookings" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colGuest" text="Guest Name" prefWidth="200"/>
+            <TableColumn fx:id="colRoom" text="Room" prefWidth="100"/>
+            <TableColumn fx:id="colCheckIn" text="Check-in Date" prefWidth="150"/>
+            <TableColumn fx:id="colCheckOut" text="Check-out Date" prefWidth="150"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Button fx:id="btnCheckOut" text="Check-out" onAction="#onCheckOut"/>
+    </HBox>
+</VBox>
