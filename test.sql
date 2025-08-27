@@ -1,6 +1,0 @@
-select dbo.fn_GenerateNextAmenityID()
-select dbo.fn_GenerateNextBookingID()
-select dbo.fn_GenerateNextCustomerID()
-select dbo.fn_GenerateNextServiceID()
-select dbo.fn_GenerateNextStayingID()
-select dbo.fn_GenerateNextRoomID()
