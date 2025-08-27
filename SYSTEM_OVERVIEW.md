@@ -24,6 +24,9 @@ Hệ thống Quản lý Khách sạn đã được cải tiến hoàn toàn đ�
 - **Booking_Room**: Liên kết đặt phòng và phòng
 - **Staying_Room**: Liên kết thời gian lưu trú và phòng
 
+
+![ChartDB](DBdiagram.png)
+
 ## Kiến trúc hệ thống
 
 ### 1. Model Layer
