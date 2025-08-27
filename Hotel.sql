@@ -171,3 +171,132 @@ ALTER TABLE [dbo].[Staying_Service]
 ALTER TABLE [dbo].[Room_Amenity]
     ADD CONSTRAINT [FK_Room_Amenity_Room] FOREIGN KEY([Room_id]) REFERENCES [dbo].[Room_Management]([Room_id]);
 
+GO
+
+-- ================== FUNCTION ==================
+-- Room_ID
+CREATE FUNCTION dbo.fn_GenerateNextRoomID()
+RETURNS NVARCHAR(20)
+AS
+BEGIN
+    DECLARE @NextID NVARCHAR(20);
+    DECLARE @MaxNum INT;
+
+    -- Lấy số lớn nhất từ Room_id (bỏ chữ 'R')
+    SELECT @MaxNum = MAX(CAST(SUBSTRING(Room_id, 2, LEN(Room_id)) AS INT))
+    FROM Room_Management;
+
+    -- Nếu chưa có dữ liệu thì bắt đầu từ 1
+    IF @MaxNum IS NULL
+        SET @NextID = 'R1';
+    ELSE
+        SET @NextID = 'R' + CAST(@MaxNum + 1 AS NVARCHAR(20));
+
+    RETURN @NextID;
+END;
+GO
+-- Amenity_ID
+CREATE FUNCTION dbo.fn_GenerateNextAmenityID()
+RETURNS NVARCHAR(20)
+AS
+BEGIN
+    DECLARE @NextID NVARCHAR(20);
+    DECLARE @MaxNum INT;
+
+    -- Lấy số lớn nhất từ Room_id (bỏ chữ 'R')
+    SELECT @MaxNum = MAX(CAST(SUBSTRING(Amenity_id, 2, LEN(Amenity_id)) AS INT))
+    FROM Amenity_Management;
+
+    -- Nếu chưa có dữ liệu thì bắt đầu từ 1
+    IF @MaxNum IS NULL
+        SET @NextID = 'A1';
+    ELSE
+        SET @NextID = 'A' + CAST(@MaxNum + 1 AS NVARCHAR(20));
+
+    RETURN @NextID;
+END;
+GO
+-- Customer_ID
+CREATE FUNCTION dbo.fn_GenerateNextCustomerID()
+RETURNS NVARCHAR(20)
+AS
+BEGIN
+    DECLARE @NextID NVARCHAR(20);
+    DECLARE @MaxNum INT;
+
+    -- Lấy số lớn nhất từ Room_id (bỏ chữ 'R')
+    SELECT @MaxNum = MAX(CAST(SUBSTRING(Customer_id, 2, LEN(Customer_id)) AS INT))
+    FROM Customer_Management;
+
+    -- Nếu chưa có dữ liệu thì bắt đầu từ 1
+    IF @MaxNum IS NULL
+        SET @NextID = 'C1';
+    ELSE
+        SET @NextID = 'C' + CAST(@MaxNum + 1 AS NVARCHAR(20));
+
+    RETURN @NextID;
+END;
+GO
+-- Staying_ID
+CREATE FUNCTION dbo.fn_GenerateNextStayingID()
+RETURNS NVARCHAR(20)
+AS
+BEGIN
+    DECLARE @NextID NVARCHAR(20);
+    DECLARE @MaxNum INT;
+
+    -- Lấy số lớn nhất từ Room_id (bỏ chữ 'R')
+    SELECT @MaxNum = MAX(CAST(SUBSTRING(Staying_id, 3, LEN(Staying_id)) AS INT))
+    FROM Staying_Management;
+
+    -- Nếu chưa có dữ liệu thì bắt đầu từ 1
+    IF @MaxNum IS NULL
+        SET @NextID = 'ST1';
+    ELSE
+        SET @NextID = 'ST' + CAST(@MaxNum + 1 AS NVARCHAR(20));
+
+    RETURN @NextID;
+END;
+GO
+-- Service_ID
+CREATE FUNCTION dbo.fn_GenerateNextServiceID()
+RETURNS NVARCHAR(20)
+AS
+BEGIN
+    DECLARE @NextID NVARCHAR(20);
+    DECLARE @MaxNum INT;
+
+    -- Lấy số lớn nhất từ Room_id (bỏ chữ 'R')
+    SELECT @MaxNum = MAX(CAST(SUBSTRING(Service_id, 2, LEN(Service_id)) AS INT))
+    FROM Service_Management;
+
+    -- Nếu chưa có dữ liệu thì bắt đầu từ 1
+    IF @MaxNum IS NULL
+        SET @NextID = 'S1';
+    ELSE
+        SET @NextID = 'S' + CAST(@MaxNum + 1 AS NVARCHAR(20));
+
+    RETURN @NextID;
+END;
+GO
+-- Booking_ID
+CREATE FUNCTION dbo.fn_GenerateNextBookingID()
+RETURNS NVARCHAR(20)
+AS
+BEGIN
+    DECLARE @NextID NVARCHAR(20);
+    DECLARE @MaxNum INT;
+
+    -- Lấy số lớn nhất từ Room_id (bỏ chữ 'R')
+    SELECT @MaxNum = MAX(CAST(SUBSTRING(Booking_id, 2, LEN(Booking_id)) AS INT))
+    FROM Booking_Management;
+
+    -- Nếu chưa có dữ liệu thì bắt đầu từ 1
+    IF @MaxNum IS NULL
+        SET @NextID = 'B1';
+    ELSE
+        SET @NextID = 'B' + CAST(@MaxNum + 1 AS NVARCHAR(20));
+
+    RETURN @NextID;
+END;
+GO
