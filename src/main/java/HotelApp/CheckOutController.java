@@ -1,5 +1,8 @@
 package HotelApp;
 
+import HotelApp.repository.BookingRepository;
+import HotelApp.model.Room;
+import HotelApp.model.Booking;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

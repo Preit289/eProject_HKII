@@ -1,5 +1,6 @@
-package HotelApp;
+package HotelApp.repository;
 
+import HotelApp.model.Booking;
 import java.util.ArrayList;
 import java.util.List;
 

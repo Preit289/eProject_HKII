@@ -1,4 +1,4 @@
-package HotelApp;
+package HotelApp.model;
 
 import javafx.beans.property.*;
 import java.time.LocalDate;
