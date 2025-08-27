@@ -45,12 +45,6 @@ CREATE TABLE [dbo].[Staying_Service] (
     PRIMARY KEY ([Staying_id], [Service_id])
 );
 
-CREATE TABLE [dbo].[Room_Amenity] (
-    [Room_id] nvarchar(100) NOT NULL,
-    [Amenity_id] nvarchar(100) NOT NULL,
-    [Quantity] int,
-    PRIMARY KEY ([Room_id], [Amenity_id])
-);
 
 CREATE TABLE [dbo].[Account_Management] (
     [username] nvarchar(100) NOT NULL,
@@ -62,14 +56,20 @@ CREATE TABLE [dbo].[Account_Management] (
 CREATE TABLE [dbo].[Room_Management] (
     [Room_id] nvarchar(100) NOT NULL,
     -- 0 = single, 1 = double, 2 = suite
-    [Room_category] tinyint NOT NULL,
+    [Room_category] nvarchar(50) NOT NULL,
     [Room_num] nvarchar(100),
     -- each category room have different quality name
-    [Room_quality] tinyint NOT NULL,
+    [Room_quality] nvarchar(50) NOT NULL,
     [Room_price] int NOT NULL,
     -- 0 = Empty, 1 = Occupied, 2 = Cleaning
     [Room_status] tinyint NOT NULL,
     PRIMARY KEY ([Room_id])
+);
+CREATE TABLE [dbo].[RoomType_Amenity] (
+    [Room_category] nvarchar(50) NOT NULL,
+    [Room_quality] nvarchar(50) NOT NULL,
+    [Room_amenity] nvarchar(300) NOT NULL,
+    PRIMARY KEY ([Room_category], [Room_quality])
 );
 
 CREATE TABLE [dbo].[Customer_Management] (
@@ -109,14 +109,7 @@ CREATE TABLE [dbo].[Service_Management] (
     PRIMARY KEY ([Service_id])
 );
 
-CREATE TABLE [dbo].[Amenity_Management] (
-    [Amenity_id] nvarchar(100) NOT NULL,
-    [Amenity_name] nvarchar(100) NOT NULL,
-    [Amenity_description] nvarchar(100) NOT NULL,
-    [Total_quantity] int,
-    [Available_quantity] int,
-    PRIMARY KEY ([Amenity_id])
-);
+
 
 CREATE TABLE [dbo].[Staying_Room_Customer] (
     [Staying_id] nvarchar(100) NOT NULL,
@@ -140,9 +133,6 @@ CREATE TABLE [dbo].[Staying_Room] (
 -- ================== FOREIGN KEYS ==================
 ALTER TABLE [dbo].[Staying_Service]
     ADD CONSTRAINT [FK_Staying_Service_Service] FOREIGN KEY([Service_id]) REFERENCES [dbo].[Service_Management]([Service_id]);
-
-ALTER TABLE [dbo].[Room_Amenity]
-    ADD CONSTRAINT [FK_Room_Amenity_Amenity] FOREIGN KEY([Amenity_id]) REFERENCES [dbo].[Amenity_Management]([Amenity_id]);
 
 ALTER TABLE [dbo].[Booking_Room]
     ADD CONSTRAINT [FK_Booking_Room_Room] FOREIGN KEY([Room_id]) REFERENCES [dbo].[Room_Management]([Room_id]);
@@ -168,8 +158,7 @@ ALTER TABLE [dbo].[Booking_Room]
 ALTER TABLE [dbo].[Staying_Service]
     ADD CONSTRAINT [FK_Staying_Service_Staying] FOREIGN KEY([Staying_id]) REFERENCES [dbo].[Staying_Management]([Staying_id]);
 
-ALTER TABLE [dbo].[Room_Amenity]
-    ADD CONSTRAINT [FK_Room_Amenity_Room] FOREIGN KEY([Room_id]) REFERENCES [dbo].[Room_Management]([Room_id]);
+
 
 GO
 
@@ -195,27 +184,7 @@ BEGIN
     RETURN @NextID;
 END;
 GO
--- Amenity_ID
-CREATE FUNCTION dbo.fn_GenerateNextAmenityID()
-RETURNS NVARCHAR(20)
-AS
-BEGIN
-    DECLARE @NextID NVARCHAR(20);
-    DECLARE @MaxNum INT;
 
-    -- Lấy số lớn nhất từ Room_id (bỏ chữ 'R')
-    SELECT @MaxNum = MAX(CAST(SUBSTRING(Amenity_id, 2, LEN(Amenity_id)) AS INT))
-    FROM Amenity_Management;
-
-    -- Nếu chưa có dữ liệu thì bắt đầu từ 1
-    IF @MaxNum IS NULL
-        SET @NextID = 'A1';
-    ELSE
-        SET @NextID = 'A' + CAST(@MaxNum + 1 AS NVARCHAR(20));
-
-    RETURN @NextID;
-END;
-GO
 -- Customer_ID
 CREATE FUNCTION dbo.fn_GenerateNextCustomerID()
 RETURNS NVARCHAR(20)
@@ -224,7 +193,7 @@ BEGIN
     DECLARE @NextID NVARCHAR(20);
     DECLARE @MaxNum INT;
 
-    -- Lấy số lớn nhất từ Room_id (bỏ chữ 'R')
+    -- Lấy số lớn nhất từ Customer_id (bỏ chữ 'C')
     SELECT @MaxNum = MAX(CAST(SUBSTRING(Customer_id, 2, LEN(Customer_id)) AS INT))
     FROM Customer_Management;
 
@@ -245,7 +214,7 @@ BEGIN
     DECLARE @NextID NVARCHAR(20);
     DECLARE @MaxNum INT;
 
-    -- Lấy số lớn nhất từ Room_id (bỏ chữ 'R')
+    -- Lấy số lớn nhất từ Staying_id (bỏ chữ 'ST')
     SELECT @MaxNum = MAX(CAST(SUBSTRING(Staying_id, 3, LEN(Staying_id)) AS INT))
     FROM Staying_Management;
 
@@ -266,7 +235,7 @@ BEGIN
     DECLARE @NextID NVARCHAR(20);
     DECLARE @MaxNum INT;
 
-    -- Lấy số lớn nhất từ Room_id (bỏ chữ 'R')
+    -- Lấy số lớn nhất từ Service_id (bỏ chữ 'S')
     SELECT @MaxNum = MAX(CAST(SUBSTRING(Service_id, 2, LEN(Service_id)) AS INT))
     FROM Service_Management;
 
@@ -287,7 +256,7 @@ BEGIN
     DECLARE @NextID NVARCHAR(20);
     DECLARE @MaxNum INT;
 
-    -- Lấy số lớn nhất từ Room_id (bỏ chữ 'R')
+    -- Lấy số lớn nhất từ Booking_id (bỏ chữ 'B')
     SELECT @MaxNum = MAX(CAST(SUBSTRING(Booking_id, 2, LEN(Booking_id)) AS INT))
     FROM Booking_Management;
 

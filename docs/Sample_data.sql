@@ -1,100 +1,129 @@
 -- ================== FULL SAMPLE DATA (FIXED) ==================
 
 -- 1. Account
-INSERT INTO [dbo].[Account_Management] VALUES
+INSERT INTO Account_Management VALUES
 ('admin', '123456', 1),
 ('staff1', 'staff123', 0),
 ('staff2', 'staff234', 0),
 ('reception1', 'recep123', 0);
 
 -- 2. Room
-INSERT INTO [dbo].[Room_Management] VALUES
-('R1', 0, '101', 0, 500000, 0),   -- Standard
-('R2', 1, '102', 1, 800000, 0),   -- Deluxe
-('R3', 2, '201', 2, 1500000, 0),  -- Suite Premium
-('R4', 0, '103', 0, 500000, 0),   -- Standard
-('R5', 1, '202', 1, 900000, 0),   -- Deluxe
-('R6', 2, '203', 3, 2000000, 0),  -- Suite VIP
-('R7', 0, '104', 0, 520000, 1),   -- Standard
-('R8', 1, '105', 1, 850000, 0),   -- Deluxe
-('R9', 2, '204', 2, 1600000, 1),  -- Suite Premium
-('R10', 0, '106', 0, 500000, 0),   -- Standard
-('R11', 1, '205', 1, 950000, 1),   -- Deluxe
-('R12', 2, '206', 3, 2100000, 0),  -- Suite VIP
-('R13', 0, '107', 0, 550000, 1),   -- Standard
-('R14', 1, '108', 1, 880000, 0),   -- Deluxe
-('R15', 2, '207', 2, 1700000, 1),  -- Suite Premium
-('R16', 2, '208', 3, 2200000, 0);  -- Suite VIP
+INSERT INTO Room_Management VALUES
+('R1','Single','101','Standard',500000,0),
+('R2','Single','102','Deluxe',700000,0),
+('R3','Single','103','Premium',900000,0),
+('R4','Double','201','Standard',800000,0),
+('R5','Double','202','Deluxe',1000000,0),
+('R6','Double','203','Premium',1200000,0),
+('R7','Double','204','Superior',1400000,0),
+('R8','Suite','301','Standard',1500000,0),
+('R9','Suite','302','Deluxe',1800000,0),
+('R10','Suite','303','Premium',2200000,0),
+('R11','Suite','304','Royal',3000000,0);
+
 
 -- 3. Customer
-INSERT INTO [dbo].[Customer_Management] VALUES
-('C1', 'Nguyen Van A', '1995-05-20', '123456789', 1, 1, '0901234567'),
-('C2', 'John Smith', '1988-09-15', 'P1234567', 0, 1, '+12015550123'),
-('C3', N'Le Thi B', '1998-12-01', '987654321', 1, 0, '0912345678'),
-('C4', N'Pham Van C', '1990-07-11', '2468101214', 1, 1, '0923456789'),
-('C5', 'Alice Johnson', '1985-03-09', 'P7654321', 0, 0, '+12015550999');
+INSERT INTO Customer_Management VALUES
+('C1','Nguyễn Văn A','1985-01-10','123456789','1','1','0912345678'),
+('C2','Trần Thị B','1990-05-21','987654321','1','0','0987654321'),
+('C3','Lê Văn C','1982-07-12','112233445','1','1','0909123456'),
+('C4','Phạm Thị D','1995-11-01','556677889','1','0','0911223344'),
+('C5','Ngô Văn E','1978-03-08','667788990','1','1','0933445566'),
+('C6','Hoàng Thị F','1988-08-18','334455667','1','0','0944556677'),
+('C7','Đặng Văn G','1992-02-20','998877665','1','1','0955667788'),
+('C8','Bùi Thị H','1987-09-15','776655443','1','0','0966778899'),
+('C9','Vũ Văn I','1993-06-05','889900112','1','1','0977889900'),
+('C10','Phan Thị J','1991-12-25','445566778','1','0','0988990011'),
+('C11','Trịnh Văn K','1980-04-30','223344556','1','1','0999001122');
 
 -- 4. Service
-INSERT INTO [dbo].[Service_Management] VALUES
-('S1', 'Laundry', 50000),
-('S2', 'Breakfast Buffet', 100000),
-('S3', 'Airport Pickup', 300000),
-('S4', 'Spa', 400000),
-('S5', 'Dinner Set', 250000);
+INSERT INTO Service_Management VALUES
+('S1','Dọn phòng',50000),
+('S2','Giặt ủi',70000),
+('S3','Đưa đón sân bay',150000),
+('S4','Massage',200000),
+('S5','Ăn sáng',100000),
+('S6','Tour du lịch',300000),
+('S7','Thuê xe',250000),
+('S8','Dọn minibar',50000),
+('S9','Spa',400000),
+('S10','Tư vấn sự kiện',100000),
+('S11','Ăn tối',150000);
 
--- 5. Amenity
-INSERT INTO [dbo].[Amenity_Management] VALUES
-('A1', 'TV', 'Smart TV 42 inch', 20, 20),
-('A2', 'Air Conditioner', 'Daikin Inverter', 15, 15),
-('A3', 'Mini Bar', 'With free drinks', 10, 10),
-('A4', 'Hair Dryer', 'Philips 2000W', 8, 8),
-('A5', 'Kettle', 'Electric kettle 1.5L', 12, 12);
 
--- 6. Room_Amenity
-INSERT INTO [dbo].[Room_Amenity] VALUES
-('R1', 'A1', 1),
-('R1', 'A2', 1),
-('R2', 'A1', 1),
-('R2', 'A2', 1),
-('R2', 'A3', 1),
-('R3', 'A1', 2),
-('R3', 'A2', 2),
-('R3', 'A3', 1);
+-- 5. Roomtype Amenity
+INSERT INTO RoomType_Amenity VALUES
+('Single', 'Standard', 'Giường đơn, TV, Wifi, Tủ lạnh'),
+('Single', 'Deluxe', 'Giường đơn, TV, Wifi, Tủ lạnh, Máy sấy'),
+('Double', 'Standard', 'Giường đôi, TV, Wifi'),
+('Double', 'Deluxe', 'Giường đôi, TV, Wifi, Mini bar'),
+('Double', 'Premium', 'Giường đôi, TV, Wifi, Mini bar, Máy pha cà phê'),
+('Suite', 'Standard', 'Phòng khách, Giường đôi, TV, Wifi'),
+('Suite', 'Deluxe', 'Phòng khách, Giường đôi, TV, Wifi, Mini bar'),
+('Suite', 'Premium', 'Phòng khách, Giường đôi, TV, Wifi, Mini bar, Ban công'),
+('Single', 'Premium', 'Giường đơn, TV, Wifi, Tủ lạnh, Ban công'),
+('Double', 'Superior', 'Giường đôi, TV, Wifi, Mini bar, Ban công'),
+('Suite', 'Royal', 'Phòng khách, Giường đôi, TV, Wifi, Mini bar, Ban công, Jacuzzi');
+
 
 -- 7. Booking
-INSERT INTO [dbo].[Booking_Management] VALUES
-('B1', 200000, 'Cash', 2, GETDATE(), '2025-09-01', '2025-09-03', 'Nguyen Van A', '0901234567', GETDATE(), GETDATE()),
-('B2', 300000, 'Credit Card', 2, GETDATE(), '2025-09-05', '2025-09-08', 'John Smith', '+12015550123', GETDATE(), GETDATE()),
-('B3', 150000, 'Cash', 3, GETDATE(), '2025-09-10', '2025-09-12', 'Le Thi B', '0912345678', GETDATE(), GETDATE()),
-('B4', 0, 'Cash', 0, GETDATE(), '2025-09-15', '2025-09-17', 'Alice Johnson', '+12015550999', GETDATE(), GETDATE()),
-('B5', 300000, 'Credit Card', 4, GETDATE(), '2025-09-05', '2025-09-07', 'John Smith', '+12015550123', GETDATE(), GETDATE());  -- ID mới
+INSERT INTO Booking_Management VALUES
+('B1',200000,'Tiền mặt',2,'2025-08-01','2025-08-10','2025-08-12','Nguyễn Văn A','0912345678','2025-08-01','2025-08-01'),
+('B2',500000,'Chuyển khoản',2,'2025-08-02','2025-08-15','2025-08-18','Trần Thị B','0987654321','2025-08-02','2025-08-02'),
+('B3',300000,'Tiền mặt',2,'2025-08-03','2025-08-20','2025-08-22','Lê Văn C','0909123456','2025-08-03','2025-08-03'),
+('B4',400000,'Ví điện tử',2,'2025-08-04','2025-08-05','2025-08-07','Phạm Thị D','0911223344','2025-08-04','2025-08-04'),
+('B5',100000,'Chuyển khoản',2,'2025-08-05','2025-08-08','2025-08-09','Ngô Văn E','0933445566','2025-08-05','2025-08-05'),
+('B6',250000,'Tiền mặt',2,'2025-08-06','2025-08-09','2025-08-10','Hoàng Thị F','0944556677','2025-08-06','2025-08-06'),
+('B7',600000,'Ví điện tử',2,'2025-08-07','2025-08-12','2025-08-14','Đặng Văn G','0955667788','2025-08-07','2025-08-07'),
+('B8',350000,'Tiền mặt',2,'2025-08-08','2025-08-11','2025-08-13','Bùi Thị H','0966778899','2025-08-08','2025-08-08'),
+('B9',450000,'Chuyển khoản',2,'2025-08-09','2025-08-15','2025-08-16','Vũ Văn I','0977889900','2025-08-09','2025-08-09'),
+('B10',500000,'Tiền mặt',2,'2025-08-10','2025-08-20','2025-08-21','Phan Thị J','0988990011','2025-08-10','2025-08-10'),
+('B11',550000,'Ví điện tử',2,'2025-08-11','2025-08-22','2025-08-23','Trịnh Văn K','0999001122','2025-08-11','2025-08-11');
+
 
 -- 8. Booking_Room
-INSERT INTO [dbo].[Booking_Room] VALUES
-('B1', 'R1'),
-('B2', 'R2'),
-('B3', 'R4'),
-('B4', 'R5'),
-('B5', 'R2'),
-('B5', 'R3');
+INSERT INTO Booking_Room VALUES
+('B1','R1'),('B2','R2'),('B3','R3'),('B4','R4'),('B5','R5'),
+('B6','R6'),('B7','R7'),('B8','R8'),('B9','R9'),('B10','R10'),('B11','R11');
+
 
 -- 9. Staying
-INSERT INTO [dbo].[Staying_Management] VALUES
-('ST1', 'B1', '2025-09-01 14:00:00', '2025-09-03 12:00:00', 'Cash', 0, 1000000, GETDATE(), GETDATE()),
-('ST2', NULL, '2025-08-20 15:00:00', '2025-08-22 11:00:00', 'Credit Card', 1, 1600000, GETDATE(), GETDATE());
+INSERT INTO Staying_Management VALUES
+('ST1','B1','2025-08-10','2025-08-12','Tiền mặt',0,1000000,'2025-08-01','2025-08-01'),
+('ST2','B2','2025-08-18','2025-08-20','Chuyển khoản',0,1500000,'2025-08-02','2025-08-02'),
+('ST3','B3','2025-08-22','2025-08-25','Tiền mặt',0,1200000,'2025-08-03','2025-08-03'),
+('ST4','B4','2025-08-05','2025-08-07','Ví điện tử',0,800000,'2025-08-04','2025-08-04'),
+('ST5','B5','2025-08-08','2025-08-09','Chuyển khoản',0,600000,'2025-08-05','2025-08-05'),
+('ST6','B6','2025-08-09','2025-08-10','Tiền mặt',0,700000,'2025-08-06','2025-08-06'),
+('ST7','B7','2025-08-14','2025-08-16','Ví điện tử',0,1300000,'2025-08-07','2025-08-07'),
+('ST8','B8','2025-08-13','2025-08-15','Tiền mặt',0,900000,'2025-08-08','2025-08-08'),
+('ST9','B9','2025-08-16','2025-08-18','Chuyển khoản',0,1100000,'2025-08-09','2025-08-09'),
+('ST10','B10','2025-08-21','2025-08-23','Tiền mặt',0,1400000,'2025-08-10','2025-08-10'),
+('ST11','B11','2025-08-23','2025-08-25','Ví điện tử',0,1600000,'2025-08-11','2025-08-11');
 
 -- 10. Staying_Room
-INSERT INTO [dbo].[Staying_Room] VALUES
-('ST1', 'R1'),
-('ST2', 'R2');
+INSERT INTO Staying_Room VALUES
+('ST1','R1'),('ST2','R2'),('ST3','R3'),('ST4','R4'),('ST5','R5'),
+('ST6','R6'),('ST7','R7'),('ST8','R8'),('ST9','R9'),('ST10','R10'),('ST11','R11');
+
 
 -- 11. Staying_Room_Customer
-INSERT INTO [dbo].[Staying_Room_Customer] VALUES
-('ST1', 'C1', 'R1'),
-('ST2', 'C2', 'R2');
+INSERT INTO Staying_Room_Customer VALUES
+('ST1','C1','R1'),('ST2','C2','R2'),('ST3','C3','R3'),('ST4','C4','R4'),('ST5','C5','R5'),
+('ST6','C6','R6'),('ST7','C7','R7'),('ST8','C8','R8'),('ST9','C9','R9'),('ST10','C10','R10'),('ST11','C11','R11');
+
 
 -- 12. Staying_Service
-INSERT INTO [dbo].[Staying_Service] VALUES
-('ST1', 'S1', 'Laundry 2 items'),
-('ST1', 'S2', 'Breakfast for 2 days'),
-('ST2', 'S3', 'Airport pickup from SGN');
+INSERT INTO Staying_Service VALUES
+('ST1','S1','Dọn phòng 2 lần/ngày'),
+('ST2','S2','Giặt ủi 5kg quần áo'),
+('ST3','S3','Đưa đón sân bay'),
+('ST4','S4','Massage thư giãn'),
+('ST5','S5','Ăn sáng tự chọn'),
+('ST6','S6','Tour du lịch 1 ngày'),
+('ST7','S7','Thuê xe 7 chỗ'),
+('ST8','S8','Dọn minibar'),
+('ST9','S9','Spa VIP'),
+('ST10','S10','Tư vấn tổ chức sự kiện'),
+('ST11','S11','Ăn tối tại nhà hàng');
+
