@@ -29,7 +29,7 @@ CREATE TABLE [dbo].[Staying_Management] (
     [Booking_id] nvarchar(100),
     [Checkin_date] datetime NOT NULL,
     [Checkout_date] datetime NOT NULL,
-    [Payment_method] nvarchar(100) NOT NULL,
+    [Payment_method] nvarchar(50) NOT NULL,
     -- 0 = occupied, 1 = checked out
     [Staying_status] tinyint NOT NULL DEFAULT 0,
     [Total_amount] int NOT NULL DEFAULT 0,
@@ -64,7 +64,8 @@ CREATE TABLE [dbo].[Room_Management] (
     -- 0 = single, 1 = double, 2 = suite
     [Room_category] tinyint NOT NULL,
     [Room_num] nvarchar(100),
-    [Room_quality] nvarchar(50) NOT NULL,
+    -- each category room have different quality name
+    [Room_quality] tinyint NOT NULL,
     [Room_price] int NOT NULL,
     -- 0 = Empty, 1 = Occupied, 2 = Cleaning
     [Room_status] tinyint NOT NULL,
@@ -87,7 +88,7 @@ CREATE TABLE [dbo].[Customer_Management] (
 CREATE TABLE [dbo].[Booking_Management] (
     [Booking_id] nvarchar(100) NOT NULL,
     [Deposit_amount] int NOT NULL,
-    [Payment_method] nvarchar(100) NOT NULL,
+    [Payment_method] nvarchar(50) NOT NULL,
     -- 4 = Room received, 3 = Late arrival, 2 = Booking active,
     -- 1 = Cancelled by hotel, 0 = Cancelled by customer
     [Booking_status] tinyint NOT NULL,
@@ -137,36 +138,36 @@ CREATE TABLE [dbo].[Staying_Room] (
 );
 
 -- ================== FOREIGN KEYS ==================
-ALTER TABLE [dbo].[Staying_Service] 
+ALTER TABLE [dbo].[Staying_Service]
     ADD CONSTRAINT [FK_Staying_Service_Service] FOREIGN KEY([Service_id]) REFERENCES [dbo].[Service_Management]([Service_id]);
 
-ALTER TABLE [dbo].[Room_Amenity] 
+ALTER TABLE [dbo].[Room_Amenity]
     ADD CONSTRAINT [FK_Room_Amenity_Amenity] FOREIGN KEY([Amenity_id]) REFERENCES [dbo].[Amenity_Management]([Amenity_id]);
 
-ALTER TABLE [dbo].[Booking_Room] 
+ALTER TABLE [dbo].[Booking_Room]
     ADD CONSTRAINT [FK_Booking_Room_Room] FOREIGN KEY([Room_id]) REFERENCES [dbo].[Room_Management]([Room_id]);
 
-ALTER TABLE [dbo].[Staying_Room_Customer] 
+ALTER TABLE [dbo].[Staying_Room_Customer]
     ADD CONSTRAINT [FK_Staying_Customer] FOREIGN KEY([Customer_id]) REFERENCES [dbo].[Customer_Management]([Customer_id]);
 
-ALTER TABLE [dbo].[Staying_Management] 
+ALTER TABLE [dbo].[Staying_Management]
     ADD CONSTRAINT [FK_Staying_Booking] FOREIGN KEY([Booking_id]) REFERENCES [dbo].[Booking_Management]([Booking_id]);
 
-ALTER TABLE [dbo].[Staying_Room] 
+ALTER TABLE [dbo].[Staying_Room]
     ADD CONSTRAINT [FK_Staying_Room_Staying] FOREIGN KEY([Staying_id]) REFERENCES [dbo].[Staying_Management]([Staying_id]);
 
-ALTER TABLE [dbo].[Staying_Room] 
+ALTER TABLE [dbo].[Staying_Room]
     ADD CONSTRAINT [FK_Staying_Room_Room] FOREIGN KEY([Room_id]) REFERENCES [dbo].[Room_Management]([Room_id]);
 
-ALTER TABLE [dbo].[Staying_Room_Customer] 
+ALTER TABLE [dbo].[Staying_Room_Customer]
     ADD CONSTRAINT [FK_Staying_Room_Customer] FOREIGN KEY([Staying_id], [Room_id]) REFERENCES [dbo].[Staying_Room]([Staying_id], [Room_id]);
 
-ALTER TABLE [dbo].[Booking_Room] 
+ALTER TABLE [dbo].[Booking_Room]
     ADD CONSTRAINT [FK_Booking_Room_Booking] FOREIGN KEY([Booking_id]) REFERENCES [dbo].[Booking_Management]([Booking_id]);
 
-ALTER TABLE [dbo].[Staying_Service] 
+ALTER TABLE [dbo].[Staying_Service]
     ADD CONSTRAINT [FK_Staying_Service_Staying] FOREIGN KEY([Staying_id]) REFERENCES [dbo].[Staying_Management]([Staying_id]);
 
-ALTER TABLE [dbo].[Room_Amenity] 
+ALTER TABLE [dbo].[Room_Amenity]
     ADD CONSTRAINT [FK_Room_Amenity_Room] FOREIGN KEY([Room_id]) REFERENCES [dbo].[Room_Management]([Room_id]);
 
