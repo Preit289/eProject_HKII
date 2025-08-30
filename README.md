@@ -1,69 +1,4 @@
-# Hotel Management System - System Overview
-
-## Tổng quan hệ thống
-
-Hệ thống Quản lý Khách sạn đã được cải tiến hoàn toàn để đáp ứng đầy đủ cấu trúc database từ file `Hotel_data.sql`. Hệ thống bao gồm các chức năng chính sau:
-
-## Cấu trúc Database
-
-### 1. Bảng chính (Core Tables)
-
-- **Room_Management**: Quản lý phòng (ID, loại, số phòng, chất lượng, giá, trạng thái)
-- **Customer_Management**: Quản lý khách hàng (thông tin cá nhân, quốc tịch, giới tính)
-- **Booking_Management**: Quản lý đặt phòng (thông tin đặt phòng, trạng thái, thanh toán)
-- **Staying_Management**: Quản lý thời gian lưu trú (check-in, check-out, thanh toán)
-- **Service_Management**: Quản lý dịch vụ (tên dịch vụ, giá)
-- **Amenity_Management**: Quản lý tiện ích (tên, mô tả, số lượng)
-- **Account_Management**: Quản lý tài khoản (username, password, quyền admin)
-
-### 2. Bảng quan hệ (Relationship Tables)
-
-- **Staying_Room_Customer**: Liên kết khách hàng, phòng và thời gian lưu trú
-- **Staying_Service**: Dịch vụ sử dụng trong thời gian lưu trú
-- **Room_Amenity**: Tiện ích của từng phòng
-- **Booking_Room**: Liên kết đặt phòng và phòng
-- **Staying_Room**: Liên kết thời gian lưu trú và phòng
-
-
-![ChartDB](docs/DBdiagram.png)
-
-## Kiến trúc hệ thống
-
-### 1. Model Layer
-
-- **Room.java**: Model cho phòng
-- **Customer.java**: Model cho khách hàng
-- **Booking.java**: Model cho đặt phòng
-- **Staying.java**: Model cho thời gian lưu trú
-- **Service.java**: Model cho dịch vụ
-- **Amenity.java**: Model cho tiện ích
-- **Account.java**: Model cho tài khoản
-
-### 2. Repository Layer
-
-- **RoomRepository**: Xử lý CRUD cho phòng
-- **CustomerRepository**: Xử lý CRUD cho khách hàng
-- **BookingRepository**: Xử lý CRUD cho đặt phòng
-- **StayingRepository**: Xử lý CRUD cho thời gian lưu trú
-- **ServiceRepository**: Xử lý CRUD cho dịch vụ
-- **AmenityRepository**: Xử lý CRUD cho tiện ích
-- **AccountRepository**: Xử lý authentication
-- **StayingServiceRepository**: Xử lý dịch vụ trong thời gian lưu trú
-- **RoomAmenityRepository**: Xử lý tiện ích của phòng
-- **StayingRoomCustomerRepository**: Xử lý mối quan hệ khách hàng-phòng-lưu trú
-
-### 3. Service Layer
-
-- **HotelService**: Xử lý business logic chung
-- **AuthService**: Xử lý authentication và authorization
-- **ReportService**: Xử lý báo cáo và thống kê
-
-### 4. Utility Layer
-
-- **IdGenerator**: Tạo ID tự động cho các entity
-- **ValidationUtil**: Validation cho input
-- **CommonUtil**: Các hàm tiện ích chung
-
+# 🏨 Hotel Management System - System Overview
 ## Chức năng chính
 
 ### 1. Quản lý Phòng
@@ -78,7 +13,7 @@ Hệ thống Quản lý Khách sạn đã được cải tiến hoàn toàn đ�
 
 - Thêm/sửa/xóa thông tin khách hàng
 - Tìm kiếm khách hàng
-- Phân loại khách hàng (Việt Nam/Nước ngoài)
+- Phân loại khách hàng (Việt Nam/Nước ngoài/Người lớn/Trẻ em)
 - Quản lý thông tin cá nhân
 
 ### 3. Quản lý Đặt phòng
@@ -122,55 +57,133 @@ Hệ thống Quản lý Khách sạn đã được cải tiến hoàn toàn đ�
 - Thay đổi mật khẩu
 - Quản lý tài khoản
 
+## Tổng quan hệ thống
+
+Hệ thống Quản lý Khách sạn đã được cải tiến hoàn toàn để đáp ứng đầy đủ cấu trúc database từ file `Hotel.sql`. Hệ thống bao gồm các chức năng chính sau:
+
+## Cấu trúc Database
+
+### 1. Bảng chính (Core Tables)
+
+- **Room_Management**: Quản lý phòng (ID, loại, số phòng, chất lượng, giá, trạng thái)
+- **Customer_Management**: Quản lý khách hàng (thông tin cá nhân, quốc tịch, giới tính)
+- **Booking_Management**: Quản lý đặt phòng (thông tin đặt phòng, trạng thái, thanh toán)
+- **Staying_Management**: Quản lý thời gian lưu trú (check-in, check-out, thanh toán)
+- **Service_Management**: Quản lý dịch vụ (tên dịch vụ, giá)
+- **Amenity_Management**: Quản lý tiện ích (tên, mô tả, số lượng)
+- **Account_Management**: Quản lý tài khoản (username, password, quyền admin)
+
+### 2. Bảng quan hệ (Relationship Tables)
+
+- **Staying_Room_Customer**: Liên kết khách hàng, phòng và thời gian lưu trú
+- **Staying_Service**: Dịch vụ sử dụng trong thời gian lưu trú
+- **Room_Amenity**: Tiện ích của từng phòng
+- **Booking_Room**: Liên kết đặt phòng và phòng
+- **Staying_Room**: Liên kết thời gian lưu trú và phòng
+
+
+![ChartDB](docs/DBdiagram.png)
+
+# 🏨 Hotel Management System - Database & Business Backend Flow
+## Kiến trúc hệ thống
+### 1. Model Layer
+- **Room.java**: Model cho phòng (`Room_Management`, `RoomType_Amenity`)
+- **Customer.java**: Model cho khách hàng (`Customer_Management`)
+- **Booking.java**: Model cho đặt phòng (`Booking_Management`)
+- **Staying.java**: Model cho thời gian lưu trú (`Staying_Management`)
+- **Service.java**: Model cho dịch vụ (`Service_Management`, `Staying_Service`)
+- **Account.java**: Model cho tài khoản (`Account_Management`)
+
+### 2. Repository Layer
+- **RoomRepository**: CRUD cho phòng, kiểm tra trạng thái trống/đầy
+- **CustomerRepository**: CRUD cho khách hàng, quản lý trẻ em
+- **BookingRepository**: CRUD cho booking, quản lý Booking_Room
+- **StayingRepository**: CRUD cho staying
+- **ServiceRepository**: CRUD cho dịch vụ
+- **AccountRepository**: Authentication
+- **StayingServiceRepository**: Quản lý dịch vụ trong thời gian lưu trú
+- **StayingRoomCustomerRepository**: Quản lý mối quan hệ khách-phòng-staying
+
+### 3. Service Layer
+- **HotelService**: Xử lý business logic chung, check room availability, tính tổng tiền
+- **AuthService**: Authentication / Authorization
+- **ReportService**: Thống kê, báo cáo
+
+### 4. Utility Layer
+- **IdGenerator**: Sinh tự động `Room_id`, `Customer_id`, `Booking_id`, `Staying_id`, `Service_id`
+- **ValidationUtil**: Kiểm tra input, số lượng khách ≤ `Room_capacity`
+- **CommonUtil**: Các hàm tiện ích chung
+
+
 ## Cách sử dụng
 
-### 1. Khởi tạo Database
+### Khởi tạo Database
 
 ```sql
--- Chạy file Hotel_data.sql để tạo database và dữ liệu mẫu
--- Kết nối database qua DButil.java
+-- Chạy file Hotel.sql để tạo database và dữ liệu mẫu Sample_data.sql (Microsoft SQL Server)
+-- Chạy Project thông qua Netbeans IDE
 ```
 
-### 2. Chạy ứng dụng
 
-```bash
-# Compile và chạy
-javac -cp "lib/*" src/main/java/HotelApp/*.java
-java -cp "lib/*:src/main/java" HotelApp.App
-```
+# 🏨 Hotel Management System - Database & Business Frondend Flow
 
-### 3. Đăng nhập
+## 📌 Tổng quan
+Hệ thống quản lý khách sạn với các nghiệp vụ chính:
+- Đặt phòng (**Booking**)
+- Nhận phòng (**Check-in**)
+- Quản lý khách ở (**Staying**)
+- Trả phòng & thanh toán (**Check-out**)
 
-- **Admin**: username: `admin`, password: `123456`
-- **Staff**: username: `staff1`, password: `staff123`
+Database đã tối giản và đủ để code giao diện frontend.
 
-## Tính năng nổi bật
+---
 
-1. **Hệ thống phân quyền**: Admin có toàn quyền, Staff có quyền hạn chế
-2. **Validation đầy đủ**: Kiểm tra tính hợp lệ của tất cả input
-3. **Xử lý lỗi**: Exception handling cho database operations
-4. **Business Logic**: Tự động tính toán giá, kiểm tra tính khả dụng của phòng
-5. **Báo cáo chi tiết**: Thống kê đa dạng cho quản lý
-6. **Mở rộng**: Dễ dàng thêm tính năng mới
+## 🔗 Flow nghiệp vụ
 
-## Cải tiến so với phiên bản cũ
+### 1️⃣ Booking (Đặt phòng trước)
+- **Input (Frontend form):**
+  - Người đặt: `Book_by`, `Book_contact`
+  - Thông tin phòng: loại, ngày check-in/out, số lượng khách
+- **DB:**
+  - Ghi vào `Booking_Management`
+  - Liên kết phòng → `Booking_Room`
+- **Trạng thái:** Pending / Confirmed / Cancelled
 
-1. **Cấu trúc rõ ràng**: Tách biệt rõ ràng các layer
-2. **Database đầy đủ**: Sử dụng đầy đủ cấu trúc database
-3. **Business Logic**: Xử lý logic nghiệp vụ phức tạp
-4. **Validation**: Kiểm tra tính hợp lệ toàn diện
-5. **Error Handling**: Xử lý lỗi chuyên nghiệp
-6. **Scalability**: Dễ dàng mở rộng và bảo trì
+---
 
-## Hướng phát triển
+### 2️⃣ Check-in (Khách tới nhận phòng)
+- **Input (Frontend form):**
+  - Chọn booking (nếu có) → xác nhận khách đến
+  - Nếu walk-in (không booking) → tạo trực tiếp `Staying_Management`
+  - Thêm danh sách khách → `Staying_Room_Customer` (link tới `Customer_Management`)
+- **DB:**
+  - Booking → Checked-in
+  - Tạo mới `Staying_Management`
+  - Gán phòng → `Staying_Room_Customer`
 
-1. **Giao diện người dùng**: Cải thiện UI/UX
-2. **API REST**: Tạo REST API cho mobile app
-3. **Real-time**: Cập nhật real-time cho trạng thái phòng
-4. **Payment Integration**: Tích hợp thanh toán online
-5. **Multi-language**: Hỗ trợ đa ngôn ngữ
-6. **Cloud Deployment**: Triển khai trên cloud
+---
+
+### 3️⃣ Staying (Trong thời gian khách ở)
+- **Frontend:**
+  - Dashboard danh sách khách đang ở
+  - Order dịch vụ → `Staying_Service`
+- **DB:**
+  - Phòng → trạng thái Occupied
+  - Dịch vụ → cộng dồn vào bill tạm tính
+
+---
+
+### 4️⃣ Check-out (Khách trả phòng)
+- **Input (Frontend form):**
+  - Chọn staying → tạo hóa đơn
+  - Kiểm tra dịch vụ đã dùng (`Staying_Service`)
+  - Tổng hợp tiền phòng + dịch vụ
+- **DB:**
+  - `Staying_Management` → status = Checked-out
+  - Phòng → Empty
+  - Xuất hóa đơn (có thể thêm bảng `Invoice` nếu cần)
+
+---
 
 ## Liên hệ
-
 Để biết thêm thông tin hoặc hỗ trợ, vui lòng liên hệ team phát triển.
