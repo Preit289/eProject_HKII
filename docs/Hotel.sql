@@ -26,7 +26,7 @@ GO
 -- ================== TABLES ==================
 CREATE TABLE [dbo].[Staying_Management] (
     [Staying_id] nvarchar(100) NOT NULL,
-    [Booking_id] nvarchar(100),
+    [Booking_id] nvarchar(100) UNIQUE,
     [Checkin_date] datetime NOT NULL,
     [Checkout_date] datetime NOT NULL,
     [Payment_method] nvarchar(50) NOT NULL,
