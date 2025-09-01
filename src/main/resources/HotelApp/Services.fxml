@@ -2,26 +2,50 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
-<VBox xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HotelApp.PricingController" spacing="15" alignment="TOP_LEFT" styleClass="view-pane">
+<VBox xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="HotelApp.ServicesController"
+    spacing="15" styleClass="view-pane">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20" />
+    </padding>
     <children>
-        <Label text="Set Room Pricing" styleClass="section-title" />
+        <Label text="Services Management" styleClass="section-title" />
+
+        <!-- Input Form -->
+        <GridPane hgap="10" vgap="10">
+            <columnConstraints>
+                <ColumnConstraints minWidth="100" prefWidth="120" />
+                <ColumnConstraints minWidth="200" prefWidth="250" />
+            </columnConstraints>
+
+            <Label text="Service Name:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+            <TextField fx:id="txtServiceName" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+            <Label text="Price (VND):" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+            <TextField fx:id="txtServicePrice" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
+            <Label text="Description:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+            <TextArea fx:id="txtServiceDescription" prefRowCount="3" wrapText="true"
+                GridPane.rowIndex="2" GridPane.columnIndex="1" />
+        </GridPane>
+
+        <!-- Buttons -->
         <HBox spacing="10" alignment="CENTER">
-            <Label text="Room Type:" />
-            <ChoiceBox fx:id="cbRoomType" prefWidth="150" />
-        </HBox>
-        <HBox spacing="10" alignment="CENTER">
-            <Label text="Price ($):" />
-            <TextField fx:id="txtPrice" prefWidth="150" />
-        </HBox>
-        <HBox spacing="10" alignment="CENTER">
-            <Button text="Save" onAction="#onSave" />
+            <Button text="Add" onAction="#onAdd" styleClass="button-primary" />
+            <Button text="Update" onAction="#onUpdate" />
+            <Button text="Delete" onAction="#onDelete" />
             <Button text="Clear" onAction="#onClear" />
         </HBox>
-        <TableView fx:id="tblPrices" prefHeight="300">
+
+        <!-- Table -->
+        <TableView fx:id="tblServices" VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="colRoomType" text="Room Type" prefWidth="200" />
-                <TableColumn fx:id="colPrice" text="Price ($)" prefWidth="100" />
+                <TableColumn fx:id="colServiceId" text="ID" prefWidth="100" />
+                <TableColumn fx:id="colServiceName" text="Service Name" prefWidth="200" />
+                <TableColumn fx:id="colServicePrice" text="Price (VND)" prefWidth="150" />
+                <TableColumn fx:id="colServiceDescription" text="Description" prefWidth="300" />
             </columns>
         </TableView>
     </children>
