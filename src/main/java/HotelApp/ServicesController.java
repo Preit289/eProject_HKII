@@ -1,13 +1,13 @@
 package HotelApp;
 
-import HotelApp.repository.PricingRepository;
+import HotelApp.repository.ServicesRepository;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.beans.property.*;
 
-public class PricingController {
+public class ServicesController {
 
     @FXML
     private ChoiceBox<String> cbRoomType;
@@ -32,7 +32,7 @@ public class PricingController {
         colPrice.setCellValueFactory(data -> data.getValue().priceProperty().asObject());
 
         // Load prices from repository
-        prices.addAll(PricingRepository.getAll());
+        prices.addAll(ServicesRepository.getAll());
         tblPrices.setItems(prices);
     }
 
@@ -56,7 +56,7 @@ public class PricingController {
             RoomPrice roomPrice = new RoomPrice(roomType, price);
             prices.removeIf(p -> p.getRoomType().equals(roomType));
             prices.add(roomPrice);
-            PricingRepository.save(roomPrice); // Save to repository
+            ServicesRepository.save(roomPrice); // Save to repository
             clearForm();
         } catch (NumberFormatException e) {
             showAlert("Please enter a valid price.");

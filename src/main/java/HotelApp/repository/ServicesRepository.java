@@ -1,14 +1,14 @@
 package HotelApp.repository;
 
-import HotelApp.PricingController;
+import HotelApp.ServicesController;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PricingRepository {
+public class ServicesRepository {
 
-    private static final List<PricingController.RoomPrice> prices = new ArrayList<>();
+    private static final List<ServicesController.RoomPrice> prices = new ArrayList<>();
 
-    public static List<PricingController.RoomPrice> getAll() {
+    public static List<ServicesController.RoomPrice> getAll() {
         return new ArrayList<>(prices);
     }
 
@@ -16,11 +16,11 @@ public class PricingRepository {
         return prices.stream()
                 .filter(p -> p.getRoomType().equals(roomType))
                 .findFirst()
-                .map(PricingController.RoomPrice::getPrice)
+                .map(ServicesController.RoomPrice::getPrice)
                 .orElse(0.0); // Default to 0 if not found
     }
 
-    public static void save(PricingController.RoomPrice price) {
+    public static void save(ServicesController.RoomPrice price) {
         prices.removeIf(p -> p.getRoomType().equals(price.getRoomType()));
         prices.add(price);
     }

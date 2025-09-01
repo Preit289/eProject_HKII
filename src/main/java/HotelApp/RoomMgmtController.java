@@ -1,57 +1,61 @@
 package HotelApp;
 
-import HotelApp.repository.RoomRepository;
 import HotelApp.model.Room;
+import HotelApp.repository.RoomRepository;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.beans.property.SimpleStringProperty;
 
 public class RoomMgmtController {
 
-    @FXML
-    private TextField txtRoomNumber;
-    @FXML
-    private ChoiceBox<String> cbType;
-    @FXML
-    private ChoiceBox<String> cbStatus;
+    @FXML private TextField txtRoomNumber;
+    @FXML private ChoiceBox<String> cbType;    // Single / Double / Suite
+    @FXML private ChoiceBox<String> cbStatus;  // Empty / Occupied / Cleaning
 
-    @FXML
-    private TableView<Room> tblRooms;
-    @FXML
-    private TableColumn<Room, String> colRoom;
-    @FXML
-    private TableColumn<Room, String> colType;
-    @FXML
-    private TableColumn<Room, String> colStatus;
+    @FXML private TableView<Room> tblRooms;
+    @FXML private TableColumn<Room, String> colRoom;
+    @FXML private TableColumn<Room, String> colType;
+    @FXML private TableColumn<Room, String> colStatus;
 
     private final ObservableList<Room> rooms = FXCollections.observableArrayList();
 
     @FXML
     private void initialize() {
-        colRoom.setCellValueFactory(data -> data.getValue().roomNumberProperty());
-        colType.setCellValueFactory(data -> data.getValue().typeProperty());
-        colStatus.setCellValueFactory(data -> data.getValue().statusProperty());
+        colRoom.setCellValueFactory(d -> d.getValue().roomNumberProperty());
+        colType.setCellValueFactory(d -> d.getValue().categoryProperty());
+        colStatus.setCellValueFactory(d -> d.getValue().statusProperty());
 
-        // Load rooms from repository
-        rooms.addAll(RoomRepository.getAll());
+        cbType.setItems(FXCollections.observableArrayList("Single", "Double", "Suite"));
+        cbStatus.setItems(FXCollections.observableArrayList("Empty", "Occupied", "Cleaning"));
+
+        rooms.setAll(RoomRepository.getAll());
         tblRooms.setItems(rooms);
     }
 
     @FXML
     private void onAddRoom() {
-        String roomNum = txtRoomNumber.getText();
-        String type = cbType.getValue();
-        String status = cbStatus.getValue();
+        String roomNum = safe(txtRoomNumber.getText());
+        String type    = cbType.getValue();
+        String statusL = cbStatus.getValue();
 
-        if (roomNum.isBlank() || type == null || status == null) {
+        if (roomNum.isEmpty() || type == null || statusL == null) {
             showAlert("Please fill in all fields.");
             return;
         }
 
-        Room room = new Room(roomNum, type, status);
-        rooms.add(room);
-        RoomRepository.save(room); // Save to repository
+        Room room = new Room(
+            null,         // id: DB sinh bằng fn_GenerateNextRoomID()
+            type,         // category
+            roomNum,      // roomNumber
+            "Standard",   // quality mặc định
+            0.0,          // price mặc định
+            statusL       // status dạng String
+        );
+
+        RoomRepository.save(room);              // ghi DB (nhớ map String->int trong repo)
+        rooms.setAll(RoomRepository.getAll());  // refresh bảng
         clearForm();
     }
 
@@ -65,6 +69,8 @@ public class RoomMgmtController {
         cbType.setValue(null);
         cbStatus.setValue(null);
     }
+
+    private static String safe(String s) { return s == null ? "" : s.trim(); }
 
     private void showAlert(String msg) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
