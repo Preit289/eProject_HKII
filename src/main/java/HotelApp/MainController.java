@@ -1,11 +1,13 @@
 package HotelApp;
 
+import java.io.IOException;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
-import java.io.IOException;
 
 public class MainController {
 
@@ -61,8 +63,8 @@ public class MainController {
     }
 
     @FXML
-    private void showPricing() {
-        loadView("Pricing.fxml", "Pricing");
+    private void showServices() {
+        loadView("Services.fxml", "Services");
     }
 
     @FXML

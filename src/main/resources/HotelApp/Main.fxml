@@ -8,21 +8,23 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<BorderPane id="AnchorPane" prefHeight="1200" prefWidth="750" styleClass="mainFxmlClass" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HotelApp.MainController" stylesheets="@styles.css">
+<BorderPane id="AnchorPane" prefHeight="1200" prefWidth="750" styleClass="mainFxmlClass"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="HotelApp.MainController"
+    stylesheets="@styles.css">
     <!-- Sidebar -->
     <left>
         <VBox styleClass="sidebar" spacing="10">
             <children>
-                <Label text="Hotel Manager" styleClass="brand"/>
-                <Button text="Dashboard" onAction="#showDashboard" styleClass="nav-btn"/>
-                <Button text="Booking" onAction="#showBooking" styleClass="nav-btn"/>
-                <Button text="Check-in" onAction="#showCheckin" styleClass="nav-btn"/>
-                <Button text="Check-out" onAction="#showCheckout" styleClass="nav-btn"/>
-                <Button text="Pricing" onAction="#showPricing" styleClass="nav-btn"/>
-                <Button text="Room Management" onAction="#showRoomManagement" styleClass="nav-btn"/>
+                <Label text="Hotel Manager" styleClass="brand" />
+                <Button text="Dashboard" onAction="#showDashboard" styleClass="nav-btn" />
+                <Button text="Booking" onAction="#showBooking" styleClass="nav-btn" />
+                <Button text="Check-in" onAction="#showCheckin" styleClass="nav-btn" />
+                <Button text="Check-out" onAction="#showCheckout" styleClass="nav-btn" />
+                <Button text="Services" onAction="#showServices" styleClass="nav-btn" />
+                <Button text="Room Management" onAction="#showRoomManagement" styleClass="nav-btn" />
             </children>
             <padding>
-                <Insets top="20" left="12" right="12" bottom="20"/>
+                <Insets top="20" left="12" right="12" bottom="20" />
             </padding>
         </VBox>
     </left>
@@ -31,38 +33,38 @@
     <top>
         <HBox styleClass="header" spacing="10">
             <children>
-                <Label fx:id="pageTitle" text="Dashboard" styleClass="page-title"/>
-                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="pageTitle" text="Dashboard" styleClass="page-title" />
+                <Region HBox.hgrow="ALWAYS" />
                 <TextField fx:id="searchField" promptText="Search..." />
-                <Button text="Search" onAction="#onSearch"/>
+                <Button text="Search" onAction="#onSearch" />
                 <MenuButton text="Admin">
                     <items>
-                        <MenuItem text="Profile"/>
-                        <MenuItem text="Logout"/>
+                        <MenuItem text="Profile" />
+                        <MenuItem text="Logout" />
                     </items>
                 </MenuButton>
             </children>
             <padding>
-                <Insets top="12" bottom="12" left="16" right="16"/>
+                <Insets top="12" bottom="12" left="16" right="16" />
             </padding>
         </HBox>
     </top>
 
     <!-- Content -->
     <center>
-        <StackPane fx:id="contentArea" styleClass="content-area" BorderPane.alignment="CENTER"/>
+        <StackPane fx:id="contentArea" styleClass="content-area" BorderPane.alignment="CENTER" />
     </center>
 
     <!-- Status bar -->
     <bottom>
         <HBox styleClass="statusbar">
             <children>
-                <Label fx:id="statusLabel" text="Ready"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Label text="Hotel Management v1.0"/>
+                <Label fx:id="statusLabel" text="Ready" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label text="Hotel Management v1.0" />
             </children>
             <padding>
-                <Insets top="6" bottom="6" left="12" right="12"/>
+                <Insets top="6" bottom="6" left="12" right="12" />
             </padding>
         </HBox>
     </bottom>
