@@ -48,9 +48,9 @@ public class CheckInController {
         if (selected != null) {
             selected.setStatus("Checked-in");
             Room room = selected.getRoom();
-            if (room != null) {
-                room.setStatus("Occupied");
-            }
+//            if (room != null) {
+//                room.setStatus("Occupied");
+//            }
             tblBookings.getItems().remove(selected); // Remove from list
         }
     }

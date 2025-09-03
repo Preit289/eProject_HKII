@@ -48,9 +48,9 @@ public class CheckOutController {
         if (selected != null) {
             selected.setStatus("Checked-out");
             Room room = selected.getRoom();
-            if (room != null) {
-                room.setStatus("Available");
-            }
+//            if (room != null) {
+//                room.setStatus("Available");
+//            }
             tblBookings.getItems().remove(selected); // Remove from list
         }
     }

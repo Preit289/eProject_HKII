@@ -1,6 +1,6 @@
 package HotelApp;
 
-import HotelApp.repository.PricingRepository;
+import HotelApp.repository.ServicesRepository;
 import HotelApp.repository.RoomRepository;
 import HotelApp.repository.BookingRepository;
 import HotelApp.model.Room;
@@ -65,23 +65,23 @@ public class BookingController {
             return;
         }
 
-        // Find the room by room number (assumes RoomRepository exists)
-        Room room = RoomRepository.findByRoomNumber(roomNumber);
-        if (room == null) {
-            showAlert("Room not found.");
-            return;
-        }
-
-        // Calculate price based on room type and duration
-        double pricePerNight = PricingRepository.getPriceForRoomType(room.getType());
-        long nights = ChronoUnit.DAYS.between(checkin, checkout);
-        double totalPrice = pricePerNight * nights;
-
-        Booking newBooking = new Booking(guest, roomNumber, checkin, checkout, room);
-        newBooking.setPrice(totalPrice);
-        bookings.add(newBooking);
-        BookingRepository.save(newBooking); // Save to repository
-        clearForm();
+//        // Find the room by room number (assumes RoomRepository exists)
+//        Room room = RoomRepository.findByRoomNumber(roomNumber);
+//        if (room == null) {
+//            showAlert("Room not found.");
+//            return;
+//        }
+//
+//        // Calculate price based on room type and duration
+//        double pricePerNight = ServicesRepository.getPriceForRoomType(room.getType());
+//        long nights = ChronoUnit.DAYS.between(checkin, checkout);
+//        double totalPrice = pricePerNight * nights;
+//
+//        Booking newBooking = new Booking(guest, roomNumber, checkin, checkout, room);
+//        newBooking.setPrice(totalPrice);
+//        bookings.add(newBooking);
+//        BookingRepository.save(newBooking); // Save to repository
+//        clearForm();
     }
 
     @FXML
