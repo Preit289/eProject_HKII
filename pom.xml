@@ -25,6 +25,31 @@
             <artifactId>mssql-jdbc</artifactId>
             <version>13.2.0.jre11</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.kordamp.ikonli/ikonli-javafx -->
+        <!-- https://kordamp.org/ikonli/ -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-javafx</artifactId>
+            <version>12.4.0</version>
+        </dependency>
+        <!-- https://kordamp.org/ikonli/cheat-sheet-fontawesome.html -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-fontawesome-pack</artifactId>
+            <version>12.4.0</version>
+        </dependency>
+        <!-- https://kordamp.org/ikonli/cheat-sheet-boxicons.html -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-boxicons-pack</artifactId>
+            <version>12.4.0</version>
+        </dependency>
+        <!-- https://kordamp.org/ikonli/cheat-sheet-coreui.html -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-coreui-pack</artifactId>
+            <version>12.4.0</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
