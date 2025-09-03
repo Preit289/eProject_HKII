@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox alignment="TOP_LEFT" prefHeight="600.0" prefWidth="800.0" spacing="15" styleClass="view-pane"
+      xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="HotelApp.RoomTypeAmenitiesController">
+
+    <Label styleClass="section-title" text="Room Types &amp; Amenities Management" />
+
+    <!-- Form nhập thông tin -->
+    <GridPane hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT" minWidth="120" />
+            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" />
+        </columnConstraints>
+
+        <children>
+            <Label text="Room Category:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <ChoiceBox fx:id="cbCategory" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="single" />
+                        <String fx:value="double" />
+                        <String fx:value="suite" />
+                    </FXCollections>
+                </items>
+            </ChoiceBox>
+
+            <Label text="Quality Level:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <ChoiceBox fx:id="cbQuality" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="standard" />
+                        <String fx:value="superior" />
+                        <String fx:value="deluxe" />
+                        <String fx:value="premium" />
+                    </FXCollections>
+                </items>
+            </ChoiceBox>
+
+            <Label text="Capacity:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <TextField fx:id="txtCapacity" promptText="Enter room capacity" GridPane.columnIndex="1"
+                       GridPane.rowIndex="2" />
+
+            <Label text="Amenities:" GridPane.columnIndex="0" GridPane.rowIndex="3"
+                   GridPane.valignment="TOP" />
+            <TextArea fx:id="txtAreaAmenities" prefRowCount="3"
+                      promptText="Enter room amenities (separate with commas)"
+                      wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        </children>
+        <padding>
+            <Insets bottom="10" top="10" />
+        </padding>
+        <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+        </rowConstraints>
+    </GridPane>
+
+    <!-- Buttons -->
+    <HBox spacing="10">
+        <Button onAction="#onAdd" text="Add">
+            <graphic>
+                <FontIcon iconLiteral="fa-plus-circle" />
+            </graphic>
+        </Button>
+        <Button onAction="#onUpdate" text="Update">
+            <graphic>
+                <FontIcon iconLiteral="fa-edit" />
+            </graphic>
+        </Button>
+        <Button onAction="#onDelete" text="Delete">
+            <graphic>
+                <FontIcon iconLiteral="fa-trash" />
+            </graphic>
+        </Button>
+        <Button onAction="#onClear" text="Clear">
+            <graphic>
+                <FontIcon iconLiteral="fa-eraser" />
+            </graphic>
+        </Button>
+    </HBox>
+
+    <!-- Table danh sách room types -->
+    <TableView fx:id="tblRoomTypes" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colCategory" text="Room Category" prefWidth="120" />
+            <TableColumn fx:id="colQuality" text="Quality Level" prefWidth="120" />
+            <TableColumn fx:id="colCapacity" text="Capacity" prefWidth="80" />
+            <TableColumn fx:id="colAmenities" text="Amenities" prefWidth="300" />
+        </columns>
+        <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+        </columnResizePolicy>
+    </TableView>
+
+</VBox>
