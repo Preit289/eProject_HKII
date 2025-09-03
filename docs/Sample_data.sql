@@ -103,8 +103,16 @@ INSERT INTO Staying_Room_Customer VALUES
 ('ST7','R7','C7'),('ST8','R8','C8'),('ST9','R9','C9'),
 ('ST10','R10','C10'),('ST11','R11','C11');
 
--- 10. Staying_Service
-INSERT INTO Staying_Service VALUES
-('ST1','S1'),('ST2','S2'),('ST3','S3'),('ST4','S4'),
-('ST5','S5'),('ST6','S6'),('ST7','S7'),('ST8','S8'),
-('ST9','S9'),('ST10','S10'),('ST11','S11');
+-- 10. Staying_Room_Service
+INSERT INTO Staying_Room_Service VALUES
+('ST1','R1','S1',1),
+('ST2','R2','S2',2),
+('ST3','R3','S3',1),
+('ST4','R4','S4',1),
+('ST5','R5','S5',2),
+('ST6','R6','S6',1),
+('ST7','R7','S7',1),
+('ST8','R8','S8',1),
+('ST9','R9','S9',1),
+('ST10','R10','S10',1),
+('ST11','R11','S11',1);
