@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="HotelApp.BookingFormController"
+      spacing="12" styleClass="panel" stylesheets="@style.css">
+
+  <!-- Header -->
+  <HBox spacing="8" styleClass="panelHeader" alignment="CENTER_LEFT">
+    <Label text="Booking form" styleClass="panelTitle"/>
+    <Pane HBox.hgrow="ALWAYS"/>
+    <Label fx:id="lblDate" styleClass="panelDate"/>
+    <Label fx:id="lblUser" styleClass="panelDate" style="-fx-padding:0 0 0 16;"/>
+  </HBox>
+
+  <!-- List of booked rooms -->
+  <VBox spacing="6" style="-fx-padding:0 8;">
+    <Label text="List of booked rooms"/>
+    <TableView fx:id="tblRooms" prefHeight="220">
+      <columns>
+        <TableColumn fx:id="colRoom"  text="Room"                 prefWidth="90"/>
+        <TableColumn fx:id="colCap"   text="Capacity"             prefWidth="90"/>
+        <TableColumn fx:id="colType"  text="Type"                 prefWidth="120"/>
+        <TableColumn fx:id="colIn"    text="Check-in"             prefWidth="140"/>
+        <TableColumn fx:id="colOut"   text="Check-out"            prefWidth="140"/>
+        <TableColumn fx:id="colPrice" text="Unit price (VND)"     prefWidth="160"/>
+        <TableColumn fx:id="colDaysX" text="Day × Unit Price (VND)" prefWidth="200"/>
+      </columns>
+    </TableView>
+  </VBox>
+
+  <!-- Customer + payment -->
+  <GridPane hgap="14" vgap="12" style="-fx-padding:8 8 0 8;">
+    <columnConstraints>
+      <ColumnConstraints percentWidth="13"/>
+      <ColumnConstraints percentWidth="37"/>
+      <ColumnConstraints percentWidth="13"/>
+      <ColumnConstraints percentWidth="37"/>
+    </columnConstraints>
+
+    <Label text="Customer name*" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+    <TextField fx:id="txtCustomerName" promptText="Enter full name"
+               GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+    <Label text="Phone number*" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+    <TextField fx:id="txtPhone" promptText="083 xxxx xxx"
+               GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+    <Label text="ID card number" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+    <TextField fx:id="txtIdCard" promptText="xxxx xxxx xxxx"
+               GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+    <Label text="Children (&lt;120cm)" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+    <ChoiceBox fx:id="cbChildren" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+    <Label text="Payment method" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+    <ChoiceBox fx:id="cbPayment" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+    <Label text="Reserve or check in?" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+    <ChoiceBox fx:id="cbReserveOrCheckin" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+
+    <Label text="Email (optional)" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+    <TextField fx:id="txtEmail" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+
+    <Label text="Notes" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+    <TextArea fx:id="txNotes" prefRowCount="4"
+              GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+
+    <!-- Totals -->
+    <VBox spacing="6" GridPane.columnIndex="3" GridPane.rowIndex="3">
+      <HBox spacing="8"><Label text="VAT (10%)"/><Pane HBox.hgrow="ALWAYS"/><Label fx:id="lblVat"/></HBox>
+      <HBox spacing="8"><Label text="Total (VND)"/><Pane HBox.hgrow="ALWAYS"/><Label fx:id="lblTotal"/></HBox>
+      <HBox spacing="8"><Label text="Deposit (30%)"/><Pane HBox.hgrow="ALWAYS"/><Label fx:id="lblDeposit"/></HBox>
+    </VBox>
+  </GridPane>
+
+  <!-- Actions -->
+  <HBox spacing="10" alignment="CENTER_RIGHT">
+    <Button text="Reserve"  onAction="#onReserve" styleClass="button primary"/>
+    <Button text="Check-in" onAction="#onCheckin" styleClass="button ghost"/>
+  </HBox>
+</VBox>

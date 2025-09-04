@@ -2,135 +2,149 @@ package HotelApp.repository;
 
 import HotelApp.db.DButil;
 import HotelApp.model.Booking;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public final class BookingRepository {
     private BookingRepository(){}
 
-    // Hiển thị tất cả booking (kể cả chưa gán phòng)
-    public static ObservableList<Booking> getAll() {
-        ObservableList<Booking> list = FXCollections.observableArrayList();
-        final String sql =
-            "SELECT bm.Book_by, CAST(bm.Checkin_date AS date) ci, CAST(bm.Checkout_date AS date) co, " +
-            "       rm.Room_num, COALESCE(rm.Room_price,0) price, " +
-            "       COALESCE(DATEDIFF(DAY,bm.Checkin_date,bm.Checkout_date),0) nights " +
-            "FROM dbo.Booking_Management bm " +
-            "LEFT JOIN dbo.Booking_Room br ON br.Booking_id = bm.Booking_id " +
-            "LEFT JOIN dbo.Room_Management rm ON rm.Room_id = br.Room_id " +
-            "ORDER BY bm.Created_at DESC";
-        try (Connection cn = DButil.getConnection();
-             PreparedStatement st = cn.prepareStatement(sql);
-             ResultSet rs = st.executeQuery()) {
-            while (rs.next()) {
-                String guest = rs.getString("Book_by");
-                String room  = rs.getString("Room_num");
-                LocalDate ci = rs.getDate("ci").toLocalDate();
-                LocalDate co = rs.getDate("co").toLocalDate();
-                int nights   = Math.max(1, rs.getInt("nights"));
-                double total = rs.getDouble("price") * nights;
+    /** Helper convert */
+    private static LocalDate toLocalDate(Timestamp ts){
+        return ts == null ? null : ts.toLocalDateTime().toLocalDate();
+    }
 
-                Booking b = new Booking(guest, room == null ? "" : room, ci, co, null);
-                b.setPrice(total);
+    /** Lấy toàn bộ booking kèm Room_num (nếu có) để dùng cho bảng và checkout */
+    public static List<Booking> getAll() {
+        final String sql =
+            "SELECT b.Booking_id, b.Booking_status, b.Book_contact, " +
+            "       b.Planned_checkin_date, b.Planned_checkout_date, " +
+            "       rm.Room_num, rm.Room_price " +
+            "FROM dbo.Booking_Management b " +
+            "LEFT JOIN dbo.Booking_Room br ON br.Booking_id = b.Booking_id " +
+            "LEFT JOIN dbo.Room_Management rm ON rm.Room_id = br.Room_id " +
+            "ORDER BY b.Booking_date DESC";
+        List<Booking> list = new ArrayList<>();
+        try (Connection c = DButil.getConnection();
+             Statement st = c.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                String id = rs.getString("Booking_id");
+                int status = rs.getInt("Booking_status");
+                String contact = rs.getString("Book_contact"); // người đặt (text)
+                LocalDate ci = toLocalDate(rs.getTimestamp("Planned_checkin_date"));
+                LocalDate co = toLocalDate(rs.getTimestamp("Planned_checkout_date"));
+                String roomNum = rs.getString("Room_num");
+                double price = rs.getDouble("Room_price");
+
+                Booking b = new Booking(id, contact, roomNum, ci, co, status);
+                b.setPrice(price);
                 list.add(b);
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return list;
     }
 
-    // Kiểm tra trùng lịch (overlap) cùng Room_num
-    public static boolean hasConflict(String roomNum, LocalDate ci, LocalDate co) {
+    /** SELECT kiểm tra conflict. Dùng cùng connection/transaction để an toàn. */
+    private static boolean hasConflictTx(Connection c, String roomNum, LocalDate ci, LocalDate co) throws SQLException {
         final String sql =
             "SELECT 1 " +
-            "FROM dbo.Booking_Management bm " +
-            "JOIN dbo.Booking_Room br ON br.Booking_id = bm.Booking_id " +
+            "FROM dbo.Booking_Management bm WITH (UPDLOCK, HOLDLOCK) " +
+            "JOIN dbo.Booking_Room br WITH (UPDLOCK, HOLDLOCK) ON br.Booking_id = bm.Booking_id " +
             "JOIN dbo.Room_Management rm ON rm.Room_id = br.Room_id " +
             "WHERE LTRIM(RTRIM(rm.Room_num)) = LTRIM(RTRIM(?)) " +
-            "  AND NOT (CAST(bm.Checkout_date AS date) <= ? OR CAST(bm.Checkin_date AS date) >= ?)";
-        try (Connection cn = DButil.getConnection();
-             PreparedStatement st = cn.prepareStatement(sql)) {
-            st.setString(1, roomNum);
-            st.setDate(2, Date.valueOf(ci));
-            st.setDate(3, Date.valueOf(co));
-            try (ResultSet rs = st.executeQuery()) { return rs.next(); }
-        } catch (SQLException e) { e.printStackTrace(); return true; }
+            "  AND bm.Booking_status IN (2,3,4) " +
+            "  AND NOT (bm.Planned_checkout_date <= ? OR bm.Planned_checkin_date >= ?)";
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, roomNum);
+            ps.setTimestamp(2, Timestamp.valueOf(ci.atStartOfDay()));
+            ps.setTimestamp(3, Timestamp.valueOf(co.atStartOfDay()));
+            try (ResultSet rs = ps.executeQuery()) { return rs.next(); }
+        }
     }
-    
-    public static void updateStatus(String bookingId, int status) {
-    final String sql = "UPDATE dbo.Booking_Management SET Booking_status=?, Updated_at=GETDATE() WHERE Booking_id=?";
-    try (var cn = DButil.getConnection(); var st = cn.prepareStatement(sql)) {
-        st.setInt(1, status);
-        st.setString(2, bookingId);
-        st.executeUpdate();
-    } catch (Exception e) { throw new RuntimeException(e); }
-}
 
-    // Lưu booking; gán phòng nếu người dùng nhập Room_num
-    public static void save(Booking b) {
-        final String qNewId = "SELECT dbo.fn_GenerateNextBookingID() AS NewId";
-        final String insBM  =
+    /**
+     * Tạo 1 booking cho N phòng.
+     * - Book_by = currentUsername; By_role = currentUsername (tạm theo yêu cầu)
+     * - Book_contact = bookContact (text input của khách)
+     * - Kiểm tra trùng lịch từng phòng trước khi insert
+     * @return Booking_id nếu thành công, null nếu conflict hoặc lỗi
+     */
+    public static String createWithRooms(
+            List<String> roomNums,
+            LocalDate plannedIn,
+            LocalDate plannedOut,
+            int depositAmount,
+            String paymentMethod,
+            int bookingStatus,
+            String currentUsername, // -> Book_by & By_role
+            String bookContact      // -> Book_contact (text khách)
+    ) {
+        final String nextIdSql = "SELECT dbo.fn_GenerateNextBookingID() AS NextId";
+        final String insertBookingSql =
             "INSERT INTO dbo.Booking_Management " +
-            "(Booking_id,Deposit_amount,Payment_method,Booking_status,Booking_date," +
-            " Checkin_date,Checkout_date,Book_by,Book_contact,Created_at,Updated_at) " +
-            "VALUES(?,0,'Cash',2,GETDATE(),?,?,?,?,GETDATE(),GETDATE())";
-        final String qRoom  = "SELECT Room_id FROM dbo.Room_Management " +
-                              "WHERE LTRIM(RTRIM(Room_num))=LTRIM(RTRIM(?))";
-        final String insBR  = "INSERT INTO dbo.Booking_Room(Booking_id,Room_id) VALUES(?,?)";
+            "(Booking_id, Deposit_amount, Payment_method, Booking_status, " +
+            " Booking_date, Planned_checkin_date, Planned_checkout_date, " +
+            " Book_by, Book_contact, Created_at, Updated_at, By_role) " +
+            "VALUES (?,?,?,?, GETDATE(), ?, ?, ?, ?, GETDATE(), GETDATE(), ?)";
+        final String linkRoomSql =
+            "INSERT INTO dbo.Booking_Room (Booking_id, Room_id) " +
+            "SELECT ?, rm.Room_id FROM dbo.Room_Management rm " +
+            "WHERE LTRIM(RTRIM(rm.Room_num)) = LTRIM(RTRIM(?))";
 
-        Connection cn = null;
-        try {
-            cn = DButil.getConnection();
-            cn.setAutoCommit(false);
+        try (Connection c = DButil.getConnection()) {
+            c.setAutoCommit(false);
 
-            String roomNum = b.getRoomNumber() == null ? "" : b.getRoomNumber().trim();
-            String roomId  = null;
-
-            if (!roomNum.isEmpty()) {
-                if (hasConflict(roomNum, b.getCheckInDate(), b.getCheckOutDate())) {
-                    throw new SQLException("Room schedule conflict: " + roomNum);
+            // 1) Conflict check tất cả phòng
+            for (String rn : roomNums) {
+                if (hasConflictTx(c, rn, plannedIn, plannedOut)) {
+                    c.rollback();
+                    return null;
                 }
-                try (PreparedStatement st = cn.prepareStatement(qRoom)) {
-                    st.setString(1, roomNum);
-                    try (ResultSet rs = st.executeQuery()) {
-                        if (!rs.next()) throw new SQLException("Room not found: " + roomNum);
-                        roomId = rs.getString("Room_id");
+            }
+
+            // 2) New id
+            String bookingId;
+            try (Statement st = c.createStatement(); ResultSet rs = st.executeQuery(nextIdSql)) {
+                rs.next(); bookingId = rs.getString("NextId");
+            }
+
+            // 3) Insert header
+            try (PreparedStatement ps = c.prepareStatement(insertBookingSql)) {
+                ps.setString(1, bookingId);
+                ps.setInt(2, depositAmount);
+                ps.setString(3, paymentMethod);
+                ps.setInt(4, bookingStatus);
+                ps.setTimestamp(5, Timestamp.valueOf(plannedIn.atStartOfDay()));
+                ps.setTimestamp(6, Timestamp.valueOf(plannedOut.atStartOfDay()));
+                ps.setString(7, currentUsername); // Book_by
+                ps.setString(8, bookContact);     // Book_contact
+                ps.setString(9, currentUsername); // By_role (tạm = username)
+                ps.executeUpdate();
+            }
+
+            // 4) Link rooms
+            try (PreparedStatement ps = c.prepareStatement(linkRoomSql)) {
+                for (String rn : roomNums) {
+                    ps.setString(1, bookingId);
+                    ps.setString(2, rn);
+                    if (ps.executeUpdate() != 1) {
+                        c.rollback();
+                        throw new SQLException("Room_num not found: " + rn);
                     }
                 }
             }
 
-            String bookingId;
-            try (Statement st = cn.createStatement();
-                 ResultSet rs = st.executeQuery(qNewId)) {
-                rs.next();
-                bookingId = rs.getString("NewId");
-            }
-
-            try (PreparedStatement st = cn.prepareStatement(insBM)) {
-                st.setString(1, bookingId);
-                st.setDate(2, Date.valueOf(b.getCheckInDate()));
-                st.setDate(3, Date.valueOf(b.getCheckOutDate()));
-                st.setString(4, b.getGuestName());
-                st.setString(5, "");
-                st.executeUpdate();
-            }
-
-            if (roomId != null) {
-                try (PreparedStatement st = cn.prepareStatement(insBR)) {
-                    st.setString(1, bookingId);
-                    st.setString(2, roomId);
-                    st.executeUpdate();
-                }
-            }
-
-            cn.commit();
+            c.commit();
+            return bookingId;
         } catch (SQLException e) {
-            try { if (cn != null) cn.rollback(); } catch (SQLException ignore) {}
-            throw new RuntimeException(e);
-        } finally {
-            try { if (cn != null) cn.close(); } catch (SQLException ignore) {}
+            e.printStackTrace();
+            return null;
         }
     }
 }

@@ -1,54 +1,48 @@
 package HotelApp.model;
 
-import javafx.beans.property.*;
 import java.time.LocalDate;
 
+
 public class Booking {
-    private final StringProperty bookingId   = new SimpleStringProperty();
-    private final StringProperty guestName   = new SimpleStringProperty();
-    private final StringProperty roomNumber  = new SimpleStringProperty();
-    private final ObjectProperty<LocalDate> checkInDate  = new SimpleObjectProperty<>();
-    private final ObjectProperty<LocalDate> checkOutDate = new SimpleObjectProperty<>();
-    private final IntegerProperty status = new SimpleIntegerProperty(2);   // 2 = Booking active
-    private final DoubleProperty price  = new SimpleDoubleProperty(0.0);
+    private String bookingId;
+    private String guestName;     
+    private String roomNumber;    
+    private LocalDate checkInDate;   
+    private LocalDate checkOutDate;  
+    private int status;             
+    private double price;            
 
-    public Booking(String id, String guest, String room, LocalDate ci, LocalDate co, int status) {
-        this.bookingId.set(id);
-        this.guestName.set(guest);
-        this.roomNumber.set(room);
-        this.checkInDate.set(ci);
-        this.checkOutDate.set(co);
-        this.status.set(status);
+    public Booking() {}
+
+    public Booking(String id, String guest, String room,
+                   LocalDate ci, LocalDate co, int status) {
+        this.bookingId = id;
+        this.guestName = guest;
+        this.roomNumber = room;
+        this.checkInDate = ci;
+        this.checkOutDate = co;
+        this.status = status;
     }
 
-    public Booking(String guest, String room, LocalDate ci, LocalDate co, Object unused) {
-        this(null, guest, room, ci, co, 2);
-    }
+    // getters/setters
+    public String getBookingId() { return bookingId; }
+    public void setBookingId(String bookingId) { this.bookingId = bookingId; }
 
-    // properties
-    public StringProperty bookingIdProperty() { return bookingId; }
-    public StringProperty guestNameProperty() { return guestName; }
-    public StringProperty roomNumberProperty() { return roomNumber; }
-    public ObjectProperty<LocalDate> checkInDateProperty() { return checkInDate; }
-    public ObjectProperty<LocalDate> checkOutDateProperty() { return checkOutDate; }
-    public IntegerProperty statusProperty() { return status; }
-    public DoubleProperty priceProperty() { return price; }
+    public String getGuestName() { return guestName; }
+    public void setGuestName(String guestName) { this.guestName = guestName; }
 
-    // getters
-    public String getBookingId() { return bookingId.get(); }
-    public String getGuestName() { return guestName.get(); }
-    public String getRoomNumber() { return roomNumber.get(); }
-    public LocalDate getCheckInDate() { return checkInDate.get(); }
-    public LocalDate getCheckOutDate() { return checkOutDate.get(); }
-    public int getStatus() { return status.get(); }
-    public double getPrice() { return price.get(); }
+    public String getRoomNumber() { return roomNumber; }
+    public void setRoomNumber(String roomNumber) { this.roomNumber = roomNumber; }
 
-    // setters
-    public void setBookingId(String id) { bookingId.set(id); }
-    public void setGuestName(String g) { guestName.set(g); }
-    public void setRoomNumber(String r) { roomNumber.set(r); }
-    public void setCheckInDate(LocalDate d) { checkInDate.set(d); }
-    public void setCheckOutDate(LocalDate d) { checkOutDate.set(d); }
-    public void setStatus(int s) { status.set(s); }
-    public void setPrice(double v) { price.set(v); }
+    public LocalDate getCheckInDate() { return checkInDate; }
+    public void setCheckInDate(LocalDate checkInDate) { this.checkInDate = checkInDate; }
+
+    public LocalDate getCheckOutDate() { return checkOutDate; }
+    public void setCheckOutDate(LocalDate checkOutDate) { this.checkOutDate = checkOutDate; }
+
+    public int getStatus() { return status; }
+    public void setStatus(int status) { this.status = status; }
+
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
 }
