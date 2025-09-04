@@ -39,10 +39,12 @@ CREATE TABLE [dbo].[Staying_Management] (
     PRIMARY KEY ([Staying_id])
 );
 
-CREATE TABLE [dbo].[Staying_Service] (
+CREATE TABLE [dbo].[Staying_Room_Service] (
     [Staying_id] nvarchar(100) NOT NULL,
+    [Room_id] NVARCHAR(100) NOT NULL,
     [Service_id] nvarchar(100) NOT NULL,
-    PRIMARY KEY ([Staying_id], [Service_id])
+    [Quantity] INT NOT NULL DEFAULT 0,  -- số lần dùng dịch vụ
+    PRIMARY KEY ([Staying_id],[Room_id], [Service_id])
 );
 
 
@@ -131,12 +133,15 @@ CREATE TABLE [dbo].[Booking_Room] (
 
 
 -- ================== FOREIGN KEYS ==================
-ALTER TABLE [dbo].[Staying_Service]
-    ADD CONSTRAINT [FK_SS_Service] FOREIGN KEY([Service_id]) REFERENCES [dbo].[Service_Management]([Service_id]);
+ALTER TABLE [dbo].[Staying_Room_Service]
+    ADD CONSTRAINT [FK_SRS_Service] FOREIGN KEY([Service_id]) REFERENCES [dbo].[Service_Management]([Service_id]);
 	
-ALTER TABLE [dbo].[Staying_Service]
-    ADD CONSTRAINT [FK_SS_Staying] FOREIGN KEY([Staying_id]) REFERENCES [dbo].[Staying_Management]([Staying_id]);
-	
+ALTER TABLE [dbo].[Staying_Room_Service]
+    ADD CONSTRAINT [FK_SRS_Staying] FOREIGN KEY([Staying_id]) REFERENCES [dbo].[Staying_Management]([Staying_id]);
+
+ALTER TABLE [dbo].[Staying_Room_Service]
+    ADD CONSTRAINT [FK_SRS_Room] FOREIGN KEY([Room_id]) REFERENCES [dbo].[Room_Management]([Room_id]);
+
 ALTER TABLE [dbo].[Booking_Room]
     ADD CONSTRAINT [FK_BR_Room] FOREIGN KEY([Room_id]) REFERENCES [dbo].[Room_Management]([Room_id]);
 

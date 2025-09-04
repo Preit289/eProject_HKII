@@ -1,55 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 
-<VBox xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="HotelApp.BookingController"
-      spacing="15" alignment="TOP_LEFT" styleClass="view-pane">
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="HotelApp.BookingController" spacing="12" styleClass="panel">
 
-    <Label text="Booking Management" styleClass="section-title"/>
-
-    <!-- Form nhập booking -->
-    <GridPane hgap="10" vgap="10">
-        <columnConstraints>
-            <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS"/>
-        </columnConstraints>
-
-        <children>
-            <Label text="Guest Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-            <TextField fx:id="txtGuestName" promptText="Enter guest name" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-
-            <Label text="Room Number:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-            <TextField fx:id="txtRoomNumber" promptText="e.g. 101" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-
-            <Label text="Check-in Date:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-            <DatePicker fx:id="dpCheckin" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-
-            <Label text="Check-out Date:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-            <DatePicker fx:id="dpCheckout" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-        </children>
-        <padding>
-            <Insets top="10" bottom="10"/>
-        </padding>
-    </GridPane>
-
-    <!-- Buttons -->
-    <HBox spacing="10">
-        <Button text="Save" onAction="#onSave"/>
-        <Button text="Clear" onAction="#onClear"/>
+    <!-- Header -->
+    <HBox spacing="8" styleClass="panelHeader" alignment="CENTER_LEFT">
+        <Label text="Booking" styleClass="panelTitle"/>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblDate" text="24th August 2025" styleClass="panelDate"/>
+        <Label text="Lee | Manager" styleClass="panelDate" style="-fx-padding:0 0 0 16;"/>
     </HBox>
 
-    <!-- Table hiển thị booking -->
-    <TableView fx:id="tblBookings" VBox.vgrow="ALWAYS">
+    <!-- Bộ lọc -->
+    <GridPane hgap="12" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="10"/>
+            <ColumnConstraints percentWidth="20"/>
+            <ColumnConstraints percentWidth="10"/>
+            <ColumnConstraints percentWidth="20"/>
+            <ColumnConstraints percentWidth="10"/>
+            <ColumnConstraints percentWidth="10"/>
+        </columnConstraints>
+
+        <Label text="Capacity" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <ChoiceBox fx:id="cbCapacity" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Type" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+        <ChoiceBox fx:id="cbType" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+        <Label text="Check-in" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <DatePicker fx:id="dpCheckin" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <Label text="Check-out" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+        <DatePicker fx:id="dpCheckout" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+        <Button text="Filter" onAction="#onFilter" styleClass="button,primary"
+                GridPane.rowIndex="0" GridPane.columnIndex="5" GridPane.rowSpan="2"/>
+        <Button text="Book"   onAction="#onBook"   styleClass="button,ghost"
+                GridPane.rowIndex="0" GridPane.columnIndex="4" GridPane.rowSpan="2"/>
+    </GridPane>
+
+    <!-- Bảng -->
+    <TableView fx:id="tblRooms" VBox.vgrow="ALWAYS">
         <columns>
-            <TableColumn fx:id="colGuest" text="Guest Name" prefWidth="200"/>
-            <TableColumn fx:id="colRoom" text="Room Number" prefWidth="120"/>
-            <TableColumn fx:id="colCheckin" text="Check-in" prefWidth="150"/>
-            <TableColumn fx:id="colCheckout" text="Check-out" prefWidth="150"/>
-            <TableColumn fx:id="colPrice" text="Price ($)" prefWidth="100"/>
+            <TableColumn fx:id="colRoomNum"   text="Room Number" prefWidth="120"/>
+            <TableColumn fx:id="colCapacity"  text="Capacity"    prefWidth="90"/>
+            <TableColumn fx:id="colType"      text="Type"        prefWidth="120"/>
+            <TableColumn fx:id="colNearestIn" text="Nearest Check-in"  prefWidth="160"/>
+            <TableColumn fx:id="colNearestOut" text="Nearest Check-out" prefWidth="170"/>
+            <TableColumn fx:id="colPrice"     text="Unit price (VND)"  prefWidth="150"/>
+            <TableColumn fx:id="colAvail"     text="Availability"      prefWidth="120"/>
         </columns>
     </TableView>
-
 </VBox>

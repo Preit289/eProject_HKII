@@ -8,62 +8,33 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<BorderPane id="AnchorPane" prefHeight="1200" prefWidth="750" styleClass="mainFxmlClass" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HotelApp.MainController" stylesheets="@styles.css">
-    <!-- Sidebar -->
-    <left>
-        <VBox styleClass="sidebar" spacing="10">
-            <children>
-                <Label text="Hotel Manager" styleClass="brand"/>
-                <Button text="Dashboard" onAction="#showDashboard" styleClass="nav-btn"/>
-                <Button text="Booking" onAction="#showBooking" styleClass="nav-btn"/>
-                <Button text="Check-in" onAction="#showCheckin" styleClass="nav-btn"/>
-                <Button text="Check-out" onAction="#showCheckout" styleClass="nav-btn"/>
-                <Button text="Pricing" onAction="#showPricing" styleClass="nav-btn"/>
-                <Button text="Room Management" onAction="#showRoomManagement" styleClass="nav-btn"/>
-            </children>
-            <padding>
-                <Insets top="20" left="12" right="12" bottom="20"/>
-            </padding>
-        </VBox>
-    </left>
 
-    <!-- Header -->
-    <top>
-        <HBox styleClass="header" spacing="10">
-            <children>
-                <Label fx:id="pageTitle" text="Dashboard" styleClass="page-title"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <TextField fx:id="searchField" promptText="Search..." />
-                <Button text="Search" onAction="#onSearch"/>
-                <MenuButton text="Admin">
-                    <items>
-                        <MenuItem text="Profile"/>
-                        <MenuItem text="Logout"/>
-                    </items>
-                </MenuButton>
-            </children>
-            <padding>
-                <Insets top="12" bottom="12" left="16" right="16"/>
-            </padding>
-        </HBox>
-    </top>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="HotelApp.MainController" prefWidth="1100" prefHeight="680">
+  <top>
+    <HBox style="-fx-background-color:#2d6fa3; -fx-padding:10 16;" spacing="16" alignment="CENTER_LEFT">
+      <HBox spacing="8" onMouseClicked="#openDashboard" style="-fx-cursor:hand;" alignment="CENTER_LEFT">
+        <javafx.scene.image.ImageView fx:id="imgLogo" fitWidth="32" fitHeight="32" preserveRatio="true"/>
+        <Label text="The Lotus Hotel" style="-fx-text-fill:white; -fx-font-size:20; -fx-font-weight:bold;"/>
+      </HBox>
+      <Pane HBox.hgrow="ALWAYS"/>
+      <Label text="Manager" style="-fx-text-fill:white;"/>
+    </HBox>
+  </top>
 
-    <!-- Content -->
-    <center>
-        <StackPane fx:id="contentArea" styleClass="content-area" BorderPane.alignment="CENTER"/>
-    </center>
+  <left>
+    <VBox style="-fx-background-color:#17324a; -fx-padding:12;" spacing="8" prefWidth="220">
+      <Button text="Booking"        onAction="#openBooking"  styleClass="side-btn"/>
+      <Button text="Check in"       onAction="#openCheckin"  styleClass="side-btn"/>
+      <Button text="Check out"      onAction="#openCheckout" styleClass="side-btn"/>
+      <Button text="Cancel booking" onAction="#openCancel"   styleClass="side-btn"/>
+      <Button text="Service"        onAction="#openService"  styleClass="side-btn"/>
+      <Button text="Room"           onAction="#openRoom"     styleClass="side-btn"/>
+      <Pane VBox.vgrow="ALWAYS"/>
+    </VBox>
+  </left>
 
-    <!-- Status bar -->
-    <bottom>
-        <HBox styleClass="statusbar">
-            <children>
-                <Label fx:id="statusLabel" text="Ready"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Label text="Hotel Management v1.0"/>
-            </children>
-            <padding>
-                <Insets top="6" bottom="6" left="12" right="12"/>
-            </padding>
-        </HBox>
-    </bottom>
+  <center><StackPane fx:id="content"/></center>
+  <stylesheets><URL value="@styles.css"/></stylesheets>
 </BorderPane>
+
