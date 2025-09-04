@@ -1,104 +1,84 @@
 package HotelApp;
 
-import HotelApp.model.Booking;
-import HotelApp.repository.BookingRepository;
+import HotelApp.repository.RoomRepository;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Map;
 
 public class BookingController {
 
-    @FXML private TextField txtGuestName;
-    @FXML private TextField txtRoomNumber;        // có thể để trống
-    @FXML private DatePicker dpCheckin;
-    @FXML private DatePicker dpCheckout;
+    @FXML private ChoiceBox<String> cbCapacity, cbType;
+    @FXML private DatePicker dpCheckin, dpCheckout;
 
-    @FXML private TableView<Booking> tblBookings;
-    @FXML private TableColumn<Booking,String> colGuest;
-    @FXML private TableColumn<Booking,String> colRoom;
-    @FXML private TableColumn<Booking,String> colCheckin;
-    @FXML private TableColumn<Booking,String> colCheckout;
-    @FXML private TableColumn<Booking,String> colPrice;
+    @FXML private TableView<Map<String,Object>> tblRooms;
+    @FXML private TableColumn<Map<String,Object>, String> colRoomNum, colCapacity, colType,
+            colNearestIn, colNearestOut, colPrice, colAvail;
 
-    private final ObservableList<Booking> bookings = FXCollections.observableArrayList();
+    private final ObservableList<Map<String,Object>> rows = FXCollections.observableArrayList();
 
-    @FXML
-    private void initialize() {
-        colGuest.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getGuestName()));
-        colRoom.setCellValueFactory(d -> new SimpleStringProperty(
-            d.getValue().getRoomNumber()==null ? "" : d.getValue().getRoomNumber()
-        ));
-        colCheckin.setCellValueFactory(d -> new SimpleStringProperty(
-            d.getValue().getCheckInDate()==null ? "" : d.getValue().getCheckInDate().toString()
-        ));
-        colCheckout.setCellValueFactory(d -> new SimpleStringProperty(
-            d.getValue().getCheckOutDate()==null ? "" : d.getValue().getCheckOutDate().toString()
-        ));
-        colPrice.setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().getPrice())));
+    @FXML private void initialize() {
+        cbCapacity.setItems(FXCollections.observableArrayList("1","2","3","4"));
+        cbType.setItems(FXCollections.observableArrayList("Standard","VIP","Suite"));
 
-        tblBookings.setItems(bookings);
-        refresh();
+        colRoomNum.setCellValueFactory(d -> new SimpleStringProperty(s(d.getValue().get("room_num"))));
+        colCapacity.setCellValueFactory(d -> new SimpleStringProperty(s(d.getValue().get("capacity"))));
+        colType.setCellValueFactory(d -> new SimpleStringProperty(s(d.getValue().get("type"))));
+        colNearestIn.setCellValueFactory(d -> new SimpleStringProperty(s(d.getValue().get("near_in"))));
+        colNearestOut.setCellValueFactory(d -> new SimpleStringProperty(s(d.getValue().get("near_out"))));
+        colPrice.setCellValueFactory(d -> new SimpleStringProperty(s(d.getValue().get("price"))));
+        colAvail.setCellValueFactory(d -> new SimpleStringProperty(s(d.getValue().get("availability"))));
+
+        tblRooms.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        tblRooms.setItems(rows);
+        onFilter();
     }
 
-    @FXML
-    private void onSave() {
-        String guest = safe(txtGuestName.getText());
-        String room  = safe(txtRoomNumber.getText()); // cho phép rỗng
+    @FXML private void onFilter() {
+        Integer cap = cbCapacity.getValue()==null ? null : Integer.valueOf(cbCapacity.getValue());
+        String type = cbType.getValue();
         LocalDate ci = dpCheckin.getValue();
         LocalDate co = dpCheckout.getValue();
+        rows.setAll(RoomRepository.searchRooms(cap, type, ci, co));
+    }
 
-        if (guest.isEmpty() || ci == null || co == null) {
-            alert("Please fill in required fields.");
-            return;
-        }
-        if (co.isBefore(ci)) {
-            alert("Check-out date cannot be before Check-in date.");
-            return;
-        }
-
-        // kiểm tra trùng lịch nếu có nhập phòng
-        if (!room.isEmpty() && BookingRepository.hasConflict(room, ci, co)) {
-            alert("Room is not available for the selected dates.");
-            return;
+    /** Mở BookingForm và truyền username/roleText từ hệ login bên ngoài */
+    @FXML private void onBook() throws Exception {
+        List<Map<String,Object>> sel = tblRooms.getSelectionModel().getSelectedItems();
+        if (sel==null || sel.isEmpty()) { alert("Select room(s)."); return; }
+        if (dpCheckin.getValue()==null || dpCheckout.getValue()==null || !dpCheckout.getValue().isAfter(dpCheckin.getValue())) {
+            alert("Invalid dates."); return;
         }
 
-        // nights chỉ để hiển thị tạm thời; giá thực tế tính ở getAll()
-        long nights = Math.max(1, ChronoUnit.DAYS.between(ci, co));
-        Booking b = new Booking(guest, room, ci, co, null);
-        b.setPrice(0.0); // sẽ được tính lại từ DB khi refresh
+        // TODO: lấy từ module Account
+        String currentUsername = "lee";
+        String roleText = "Manager";
 
-        BookingRepository.save(b);
-        refresh();
-        clearForm();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/HotelApp/BookingForm.fxml"));
+        Parent root = loader.load();
+        BookingFormController ctrl = loader.getController();
+        ctrl.setContext(sel, dpCheckin.getValue(), dpCheckout.getValue(), currentUsername, roleText);
+
+        Stage stage = new Stage();
+        stage.setTitle("Booking form");
+        stage.setScene(new Scene(root));
+        stage.initOwner(tblRooms.getScene().getWindow());
+        stage.initModality(Modality.WINDOW_MODAL);
+        stage.showAndWait();
+
+        onFilter();
     }
 
-    private void refresh() {
-        bookings.setAll(BookingRepository.getAll());
-        tblBookings.refresh();
-        System.out.println("Loaded rows = " + bookings.size());
-    }
-
-    @FXML
-    private void onClear() { clearForm(); }
-
-    private void clearForm() {
-        txtGuestName.clear();
-        txtRoomNumber.clear();
-        dpCheckin.setValue(null);
-        dpCheckout.setValue(null);
-    }
-
-    private static String safe(String s) { return s == null ? "" : s.trim(); }
-
-    private void alert(String msg) {
-        Alert a = new Alert(Alert.AlertType.WARNING);
-        a.setHeaderText(null);
-        a.setContentText(msg);
-        a.showAndWait();
-    }
+    private static String s(Object o){ return o==null? "" : String.valueOf(o); }
+    private void alert(String msg){ var a=new Alert(Alert.AlertType.INFORMATION); a.setHeaderText(null); a.setContentText(msg); a.showAndWait(); }
 }

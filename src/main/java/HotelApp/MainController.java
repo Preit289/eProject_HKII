@@ -3,70 +3,44 @@ package HotelApp;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
-import java.io.IOException;
 
 public class MainController {
 
-    @FXML
-    private Label pageTitle;
-    @FXML
-    private TextField searchField;
-    @FXML
-    private Label statusLabel;
-    @FXML
-    private StackPane contentArea;
+    @FXML private StackPane content;
+    @FXML private Label lblTitle;     // nếu bạn muốn hiển thị title động
+    @FXML private ImageView imgLogo;  // logo placeholder
 
     @FXML
     private void initialize() {
-        showDashboard();
+        // mở Booking mặc định khi khởi động
+        load("HotelApp/Booking.fxml", "Booking");
     }
 
-    @FXML
-    private void onSearch() {
-        statusLabel.setText("Searching: " + searchField.getText());
+   private void load(String absPath, String title) {
+    try {
+        var url = getClass().getResource("/" + absPath); // <- thêm dấu '/'
+        if (url == null) throw new IllegalStateException("Not found: /" + absPath);
+        javafx.scene.Parent view = javafx.fxml.FXMLLoader.load(url);
+        content.getChildren().setAll(view);
+    } catch (Exception e) {
+        e.printStackTrace(); // tạm để thấy lỗi nếu còn sai
     }
+}
 
-    private void loadView(String fxml, String title) {
-        try {
-            Node view = FXMLLoader.load(getClass().getResource(fxml));
-            contentArea.getChildren().setAll(view);
-            pageTitle.setText(title);
-            statusLabel.setText("Viewing: " + title);
-        } catch (IOException e) {
-            e.printStackTrace();
-            statusLabel.setText("Error loading " + title);
-        }
-    }
 
-    @FXML
-    private void showDashboard() {
-        loadView("Dashboard.fxml", "Dashboard");
-    }
+    // Sidebar navigation
+    @FXML private void openBooking()  { load("HotelApp/Booking.fxml",  "Booking"); }
+    @FXML private void openCheckin()  { load("HotelApp/Checkin.fxml",  "Check in"); }
+    @FXML private void openCheckout() { load("HotelApp/Checkout.fxml", "Check out"); }
+    @FXML private void openCancel()   { load("HotelApp/Cancel.fxml",   "Cancel booking"); }
+    @FXML private void openService()  { load("HotelApp/Services.fxml", "Service"); }
+    @FXML private void openRoom()     { load("HotelApp/RoomMgmt.fxml", "Room"); }
 
-    @FXML
-    private void showBooking() {
-        loadView("Booking.fxml", "Booking");
-    }
-
-    @FXML
-    private void showCheckin() {
-        loadView("Checkin.fxml", "Check-in");
-    }
-
-    @FXML
-    private void showCheckout() {
-        loadView("Checkout.fxml", "Check-out");
-    }
-
-    @FXML
-    private void showPricing() {
-        loadView("Pricing.fxml", "Pricing");
-    }
-
-    @FXML
-    private void showRoomManagement() {
-        loadView("RoomMgmt.fxml", "Room Management");
+    // Logo + text click → Dashboard
+    @FXML private void openDashboard() {
+        load("HotelApp/Dashboard.fxml", "Dashboard");
     }
 }

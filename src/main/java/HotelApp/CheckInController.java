@@ -42,7 +42,7 @@ public class CheckInController {
         if (selected == null) return;
 
         // 4 = Room received (checked-in). 1 = Occupied cho phòng.
-        BookingRepository.updateStatus(selected.getBookingId(), 4);
+      
         String roomNum = selected.getRoomNumber();
         if (roomNum != null && !roomNum.isBlank()) {
             RoomRepository.updateStatusByRoomNumber(roomNum.trim(), 1);

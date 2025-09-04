@@ -6,30 +6,42 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
+import java.net.URL;
 
 public class App extends Application {
-
     private static Scene scene;
 
     @Override
-    public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("Main"), 1090, 715);
-        stage.setScene(scene);
+    public void start(Stage stage) {
+        Parent root = loadFXML("Main");              
+        scene = new Scene(root, 1100, 680);
         stage.setTitle("Hotel Management System");
+        stage.setScene(scene);
+        stage.setMinWidth(900);
+        stage.setMinHeight(600);
         stage.show();
     }
 
-    static void setRoot(String fxml) throws IOException {
+    
+    public static void setRoot(String fxml) {
         scene.setRoot(loadFXML(fxml));
     }
 
-    private static Parent loadFXML(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
-        return fxmlLoader.load();
+    
+    private static Parent loadFXML(String name) {
+        String path = "/HotelApp/" + name + ".fxml";
+        try {
+            URL url = App.class.getResource(path);
+            if (url == null) {
+                throw new IllegalStateException("FXML not found: " + path);
+            }
+            return FXMLLoader.load(url);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load FXML: " + path, e);
+        }
     }
 
     public static void main(String[] args) {
-        launch();
+        launch(args);
     }
 }
