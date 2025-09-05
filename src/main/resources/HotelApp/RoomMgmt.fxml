@@ -14,10 +14,10 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
-
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 <VBox alignment="TOP_LEFT" prefHeight="607.0" prefWidth="828.0" spacing="15" styleClass="view-pane"
-    xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1"
-    fx:controller="HotelApp.RoomMgmtController">
+      xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="HotelApp.RoomMgmtController">
 
     <Label styleClass="section-title" text="Room Management" />
 
@@ -31,7 +31,7 @@
         <children>
             <Label text="Room Number:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
             <TextField fx:id="txtRoomNumber" promptText="e.g. 101" GridPane.columnIndex="1"
-                GridPane.rowIndex="0" />
+                       GridPane.rowIndex="0" />
 
             <Label text="Category:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
             <ChoiceBox fx:id="cbCategory" GridPane.columnIndex="1" GridPane.rowIndex="1">
@@ -58,7 +58,7 @@
 
             <Label text="Price (VND):" GridPane.columnIndex="0" GridPane.rowIndex="3" />
             <TextField fx:id="txtPrice" promptText="Enter price" GridPane.columnIndex="1"
-                GridPane.rowIndex="3" />
+                       GridPane.rowIndex="3" />
 
             <Label text="Status:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
             <ChoiceBox fx:id="cbStatus" GridPane.columnIndex="1" GridPane.rowIndex="4">
@@ -70,14 +70,6 @@
                     </FXCollections>
                 </items>
             </ChoiceBox>
-
-            <Label text="Amenities:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
-            <TextField fx:id="txtAmenities" promptText="Room amenities" GridPane.columnIndex="1"
-                GridPane.rowIndex="5" />
-
-            <Label text="Capacity:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
-            <TextField fx:id="txtCapacity" promptText="Room capacity" GridPane.columnIndex="1"
-                GridPane.rowIndex="6" />
         </children>
         <padding>
             <Insets bottom="10" top="10" />
@@ -88,18 +80,41 @@
             <RowConstraints />
             <RowConstraints />
             <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
         </rowConstraints>
     </GridPane>
 
     <!-- Buttons -->
-    <HBox spacing="10">
-        <Button onAction="#onAddRoom" text="Add Room" />
-        <Button onAction="#onUpdateRoom" text="Update" />
-        <Button onAction="#onDeleteRoom" text="Delete" />
-        <Button onAction="#onClear" text="Clear" />
-    </HBox>
+    <VBox spacing="10">
+        <HBox spacing="10">
+            <Button onAction="#onAddRoom" text="Add Room">
+                <graphic>
+                    <FontIcon iconLiteral="fa-plus-circle" />
+                </graphic>
+            </Button>
+            <Button onAction="#onUpdateRoom" text="Update">
+                <graphic>
+                    <FontIcon iconLiteral="fa-edit" />
+                </graphic>
+            </Button>
+            <Button onAction="#onDeleteRoom" text="Delete" >
+                <graphic>
+                    <FontIcon iconLiteral="fa-trash" />
+                </graphic>
+            </Button>
+            <Button onAction="#onClear" text="Clear">
+                <graphic>
+                    <FontIcon iconLiteral="fa-eraser" />
+                </graphic>
+            </Button>
+        </HBox>
+
+        <Button onAction="#onManageAmenities" styleClass="secondary-button"
+                text="Manage Room Types &amp; Amenities">
+            <graphic>
+                <FontIcon iconLiteral="fa-list-ul" />
+            </graphic>
+        </Button>
+    </VBox>
 
     <!-- Table danh sách phòng -->
     <TableView fx:id="tblRooms" VBox.vgrow="ALWAYS">

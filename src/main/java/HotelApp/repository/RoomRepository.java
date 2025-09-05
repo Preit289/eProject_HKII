@@ -1,11 +1,14 @@
 package HotelApp.repository;
 
-import HotelApp.db.DButil;
-import HotelApp.model.Room;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import HotelApp.db.DButil;
+import HotelApp.model.Room;
 
 public class RoomRepository {
 
@@ -133,5 +136,26 @@ public class RoomRepository {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static RoomTypeInfo getRoomTypeInfo(String category, String quality) {
+        String sql = "SELECT Room_amenity, Room_capacity FROM RoomType_Amenity WHERE Room_category = ? AND Room_quality = ?";
+
+        try (Connection conn = DButil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, category);
+            ps.setString(2, quality);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String amenities = rs.getString("Room_amenity");
+                    int capacity = rs.getInt("Room_capacity");
+                    return new RoomTypeInfo(amenities, capacity);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

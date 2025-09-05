@@ -1,12 +1,23 @@
 package HotelApp;
 
+import java.io.IOException;
+
 import HotelApp.model.Room;
 import HotelApp.repository.RoomRepository;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class RoomMgmtController {
 
@@ -39,10 +50,6 @@ public class RoomMgmtController {
     private TextField txtPrice;
     @FXML
     private ChoiceBox<String> cbStatus;
-    @FXML
-    private TextField txtAmenities;
-    @FXML
-    private TextField txtCapacity;
 
     private final ObservableList<Room> rooms = FXCollections.observableArrayList();
     private Room selectedRoom;
@@ -102,14 +109,22 @@ public class RoomMgmtController {
         cbQuality.setValue(room.getQuality());
         txtPrice.setText(String.valueOf(room.getPrice()));
         cbStatus.setValue(room.getStatus());
-        txtAmenities.setText(room.getAmenities());
-        txtCapacity.setText(String.valueOf(room.getCapacity()));
     }
 
     @FXML
     private void onAddRoom() {
         try {
             validateInput();
+            // Lấy amenities và capacity từ RoomType_Amenity
+            var roomTypeInfo = RoomRepository.getRoomTypeInfo(
+                    cbCategory.getValue(),
+                    cbQuality.getValue()
+            );
+            if (roomTypeInfo == null) {
+                showAlert(Alert.AlertType.ERROR, "Error", "Room type configuration not found");
+                return;
+            }
+
             Room newRoom = new Room(
                     RoomRepository.generateNextRoomId(),
                     txtRoomNumber.getText(),
@@ -117,8 +132,8 @@ public class RoomMgmtController {
                     cbQuality.getValue(),
                     Integer.parseInt(txtPrice.getText()),
                     cbStatus.getValue(),
-                    txtAmenities.getText(),
-                    Integer.parseInt(txtCapacity.getText())
+                    roomTypeInfo.amenities(),
+                    roomTypeInfo.capacity()
             );
 
             if (RoomRepository.addRoom(newRoom)) {
@@ -142,6 +157,16 @@ public class RoomMgmtController {
 
         try {
             validateInput();
+            // Lấy amenities và capacity từ RoomType_Amenity
+            var roomTypeInfo = RoomRepository.getRoomTypeInfo(
+                    cbCategory.getValue(),
+                    cbQuality.getValue()
+            );
+            if (roomTypeInfo == null) {
+                showAlert(Alert.AlertType.ERROR, "Error", "Room type configuration not found");
+                return;
+            }
+
             Room updatedRoom = new Room(
                     selectedRoom.getRoomId(),
                     txtRoomNumber.getText(),
@@ -149,8 +174,8 @@ public class RoomMgmtController {
                     cbQuality.getValue(),
                     Integer.parseInt(txtPrice.getText()),
                     cbStatus.getValue(),
-                    txtAmenities.getText(),
-                    Integer.parseInt(txtCapacity.getText())
+                    roomTypeInfo.amenities(),
+                    roomTypeInfo.capacity()
             );
 
             if (RoomRepository.updateRoom(updatedRoom)) {
@@ -194,8 +219,6 @@ public class RoomMgmtController {
         cbQuality.setValue(null);
         txtPrice.clear();
         cbStatus.setValue(null);
-        txtAmenities.clear();
-        txtCapacity.clear();
         selectedRoom = null;
         tblRooms.getSelectionModel().clearSelection();
     }
@@ -221,14 +244,6 @@ public class RoomMgmtController {
         if (cbStatus.getValue() == null) {
             throw new Exception("Status is required");
         }
-        if (txtCapacity.getText().trim().isEmpty()) {
-            throw new Exception("Capacity is required");
-        }
-        try {
-            Integer.parseInt(txtCapacity.getText());
-        } catch (NumberFormatException e) {
-            throw new Exception("Capacity must be a number");
-        }
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
@@ -237,5 +252,25 @@ public class RoomMgmtController {
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void onManageAmenities() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("RoomTypeAmenities.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Room Types & Amenities Management");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+            // Refresh room list after managing amenities
+            loadRooms();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not open Room Types & Amenities window");
+        }
     }
 }
