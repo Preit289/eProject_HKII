@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox spacing="10" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/24.0.1" fx:controller="HotelApp.CustomerController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <GridPane hgap="10" vgap="10">
+        <Label text="Customer Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <TextField fx:id="customerNameField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+        <Label text="Date of Birth:" GridPane.columnIndex="2" />
+        <DatePicker fx:id="dobPicker" prefHeight="26.0" prefWidth="162.0" GridPane.columnIndex="3" />
+
+        <Label text="Identity Number:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <TextField fx:id="identityNumberField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+        <Label text="Phone Number:" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+        <TextField fx:id="phoneNumberField" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+
+        <HBox spacing="20" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="4">
+            <CheckBox fx:id="foreignerCheckBox" text="Is Foreigner" />
+            <CheckBox fx:id="genderCheckBox" text="Male" />
+            <CheckBox fx:id="childCheckBox" text="Is Child" />
+        </HBox>
+
+        <HBox spacing="10" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5">
+            <Button onAction="#handleAddCustomer" styleClass="button-primary" text="Add" >
+                <graphic>
+                    <FontIcon iconLiteral="fa-plus-circle" styleClass="btn-icon" />
+                </graphic>
+            </Button>
+            <Button onAction="#handleUpdateCustomer" styleClass="button-primary" text="Update" >
+                <graphic>
+                    <FontIcon iconLiteral="fa-edit" styleClass="btn-icon" />
+                </graphic>
+            </Button>
+            <Button onAction="#handleDeleteCustomer" styleClass="button-primary" text="Delete" >
+                <graphic>
+                    <FontIcon iconLiteral="fa-trash" styleClass="btn-icon" />
+                </graphic>
+            </Button>
+            <Button onAction="#handleClear" styleClass="button-primary" text="Clear" >
+                <graphic>
+                    <FontIcon iconLiteral="fa-eraser" styleClass="btn-icon" />
+                </graphic>
+            </Button>
+        </HBox>
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT" />
+            <ColumnConstraints />
+            <ColumnConstraints halignment="RIGHT" />
+            <ColumnConstraints prefWidth="150.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+        </rowConstraints>
+    </GridPane>
+
+    <TableView fx:id="customerTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="idColumn" text="ID" />
+            <TableColumn fx:id="nameColumn" text="Name" />
+            <TableColumn fx:id="dobColumn" text="Date of Birth" />
+            <TableColumn fx:id="identityColumn" text="Identity Number" />
+            <TableColumn fx:id="foreignerColumn" text="Foreigner" />
+            <TableColumn fx:id="genderColumn" text="Gender" />
+            <TableColumn fx:id="childColumn" text="Child" />
+            <TableColumn fx:id="phoneColumn" text="Phone" />
+        </columns>
+    </TableView>
+</VBox>
