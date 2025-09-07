@@ -12,7 +12,8 @@
     <!-- Search Bar Section -->
     <HBox spacing="10" alignment="CENTER_LEFT">
         <Label text="Search:"/>
-        <TextField fx:id="txtSearch" promptText="Enter guest name or phone number" prefWidth="250"/>
+        <!--<TextField fx:id="txtSearch" promptText="Enter guest name or phone number" prefWidth="250"/>-->
+        <TextField fx:id="txtSearchPhone" promptText="Enter phone number..." prefWidth="250"/>
         <Button fx:id="btnSearch" text="Search" onAction="#onSearch"/>
         <Button fx:id="btnBooking" text="Check in" onAction="#onCheckIn"/>
     </HBox>

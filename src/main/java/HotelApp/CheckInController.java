@@ -24,6 +24,8 @@ public class CheckInController {
     private TableColumn<Checkin, String> colCheckIn;
     @FXML
     private TableColumn<Checkin, String> colCheckOut;
+    @FXML
+    private TextField txtSearchPhone;
 
     @FXML
     private void initialize() {
@@ -49,12 +51,25 @@ public class CheckInController {
         alert.showAndWait();
     }
 
+//    @FXML
+//    private void onSearch(ActionEvent event) {
+//        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+//        alert.setTitle("Search Result");
+//        alert.setHeaderText("Search Completed");
+//        alert.setContentText("Search button clicked! Display results here.");
+//        alert.showAndWait();
+//    }
+
     @FXML
     private void onSearch(ActionEvent event) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Search Result");
-        alert.setHeaderText("Search Completed");
-        alert.setContentText("Search button clicked! Display results here.");
-        alert.showAndWait();
+        String phone = txtSearchPhone.getText().trim();
+
+        if (phone.isEmpty()) {
+            // Reload all bookings if no search input
+            tblBookings.setItems(CheckinRepository.getAllBookings());
+        } else {
+            // Filter by phone
+            tblBookings.setItems(CheckinRepository.searchBookingsByPhone(phone));
+        }
     }
 }
