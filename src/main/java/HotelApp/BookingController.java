@@ -1,105 +1,90 @@
 package HotelApp;
 
-import HotelApp.repository.ServicesRepository;
-import HotelApp.repository.RoomRepository;
 import HotelApp.repository.BookingRepository;
-import HotelApp.model.Room;
-import HotelApp.model.Booking;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class BookingController {
 
-    @FXML
-    private TextField txtGuestName;
-    @FXML
-    private TextField txtRoomNumber;
-    @FXML
-    private DatePicker dpCheckin;
-    @FXML
-    private DatePicker dpCheckout;
+    @FXML private TextField txtSearch;
+    @FXML private TableView<BookingVM> tblBooking;
+    @FXML private TableColumn<BookingVM,String> colId, colBooker, colPhone, colPay;
+    @FXML private TableColumn<BookingVM,Number>  colDeposit, colRooms;
 
-    @FXML
-    private TableView<Booking> tblBookings;
-    @FXML
-    private TableColumn<Booking, String> colGuest;
-    @FXML
-    private TableColumn<Booking, String> colRoom;
-    @FXML
-    private TableColumn<Booking, LocalDate> colCheckin;
-    @FXML
-    private TableColumn<Booking, LocalDate> colCheckout;
-    @FXML
-    private TableColumn<Booking, Double> colPrice;
-
-    private final ObservableList<Booking> bookings = FXCollections.observableArrayList();
+    private final BookingRepository repo = new BookingRepository();
 
     @FXML
     private void initialize() {
-        colGuest.setCellValueFactory(data -> data.getValue().guestNameProperty());
-        colRoom.setCellValueFactory(data -> data.getValue().roomNumberProperty());
-        colCheckin.setCellValueFactory(data -> data.getValue().checkInDateProperty());
-        colCheckout.setCellValueFactory(data -> data.getValue().checkOutDateProperty());
-        colPrice.setCellValueFactory(data -> data.getValue().priceProperty().asObject());
+        colId.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().id()));
+        colBooker.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().booker()));
+        colPhone.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().phone()));
+        colPay.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().payment()));
+        colDeposit.setCellValueFactory(c -> new SimpleIntegerProperty(c.getValue().deposit()));
+        colRooms.setCellValueFactory(c -> new SimpleIntegerProperty(c.getValue().rooms()));
 
-        tblBookings.setItems(bookings);
+        // Gắn nút More ở cuối mỗi dòng trong cột Rooms
+        colRooms.setCellFactory(col -> new TableCell<>() {
+            private final Label lbl = new Label();
+            private final Pane spacer = new Pane();
+            private final Button more = new Button("More");
+            private final HBox box = new HBox(8, lbl, spacer, more);
+            {
+                HBox.setHgrow(spacer, Priority.ALWAYS);
+                more.setOnAction(e -> {
+                    var vm = getTableView().getItems().get(getIndex());
+                    openDetail(FormMode.UPDATE, vm.id());
+                });
+            }
+            @Override protected void updateItem(Number value, boolean empty) {
+                super.updateItem(value, empty);
+                if (empty) { setGraphic(null); setText(null); }
+                else { lbl.setText(value == null ? "0" : String.valueOf(value.intValue())); setGraphic(box); setText(null); }
+            }
+        });
+
+        load("");
     }
 
-    @FXML
-    private void onSave() {
-        String guest = txtGuestName.getText();
-        String roomNumber = txtRoomNumber.getText();
-        LocalDate checkin = dpCheckin.getValue();
-        LocalDate checkout = dpCheckout.getValue();
+    @FXML private void onSearch(ActionEvent e){ load(txtSearch.getText().trim()); }
+    @FXML private void onCreate(ActionEvent e){ openDetail(FormMode.CREATE, null); }
 
-        if (guest.isBlank() || roomNumber.isBlank() || checkin == null || checkout == null) {
-            showAlert("Please fill in all fields.");
-            return;
+    private void load(String keyword){
+        try {
+            var rows = FXCollections.observableArrayList(repo.searchVM(keyword));
+            tblBooking.setItems(rows);
+            if (rows.isEmpty()) System.out.println("Booking: 0 rows");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Load booking failed:\n"+ex.getMessage()).showAndWait();
         }
-        if (checkout.isBefore(checkin)) {
-            showAlert("Check-out date cannot be before Check-in date.");
-            return;
-        }
-
-//        // Find the room by room number (assumes RoomRepository exists)
-//        Room room = RoomRepository.findByRoomNumber(roomNumber);
-//        if (room == null) {
-//            showAlert("Room not found.");
-//            return;
-//        }
-//
-//        // Calculate price based on room type and duration
-//        double pricePerNight = ServicesRepository.getPriceForRoomType(room.getType());
-//        long nights = ChronoUnit.DAYS.between(checkin, checkout);
-//        double totalPrice = pricePerNight * nights;
-//
-//        Booking newBooking = new Booking(guest, roomNumber, checkin, checkout, room);
-//        newBooking.setPrice(totalPrice);
-//        bookings.add(newBooking);
-//        BookingRepository.save(newBooking); // Save to repository
-//        clearForm();
     }
 
-    @FXML
-    private void onClear() {
-        clearForm();
+    private void openDetail(FormMode mode, String bookingId){
+        try{
+            FXMLLoader f = new FXMLLoader(getClass().getResource("/HotelApp/BookingForm.fxml"));
+            Parent root = f.load();
+            BookingFormController c = f.getController();
+            c.init(mode, bookingId); // CREATE=null, UPDATE=bookingId
+            Stage s = new Stage();
+            s.initModality(Modality.APPLICATION_MODAL);
+            s.setTitle(mode==FormMode.CREATE? "New Booking" : "Update Booking");
+            s.setScene(new Scene(root));
+            s.showAndWait();
+            load(txtSearch.getText().trim());
+        }catch(Exception ex){ ex.printStackTrace(); }
     }
 
-    private void clearForm() {
-        txtGuestName.clear();
-        txtRoomNumber.clear();
-        dpCheckin.setValue(null);
-        dpCheckout.setValue(null);
-    }
-
-    private void showAlert(String msg) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setHeaderText(null);
-        alert.setContentText(msg);
-        alert.showAndWait();
-    }
+    public enum FormMode { CREATE, UPDATE }
+    public record BookingVM(String id, String booker, String phone, int deposit, String payment, int rooms) {}
 }

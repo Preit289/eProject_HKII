@@ -34,11 +34,11 @@ public class CheckInController {
         colCheckOut.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCheckOutDate().toString()));
 
         // Load only bookings with status = "Booked"
-        bookings = FXCollections.observableArrayList(
+      /*  bookings = FXCollections.observableArrayList(
                 BookingRepository.getAll().stream()
                         .filter(b -> b.getStatus().equals("Booked"))
                         .toList()
-        );
+        );*/
         tblBookings.setItems(bookings);
     }
 
