@@ -19,7 +19,6 @@
         <Insets bottom="20" left="20" right="20" top="20" />
     </padding>
     <children>
-        <Label styleClass="section-title" stylesheets="@styles.css" text="Services Management" />
 
         <!-- Input Form -->
         <GridPane hgap="10" vgap="10">
