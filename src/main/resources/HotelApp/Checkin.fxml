@@ -8,17 +8,25 @@
       spacing="15" alignment="TOP_LEFT" styleClass="view-pane">
 
     <Label text="Check-in Management" styleClass="section-title"/>
-
+    
+    <!-- Search Bar Section -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Search:"/>
+        <TextField fx:id="txtSearch" promptText="Enter guest name or phone number" prefWidth="250"/>
+        <Button fx:id="btnSearch" text="Search" onAction="#onSearch"/>
+        <Button fx:id="btnBooking" text="Check in" onAction="#onCheckIn"/>
+    </HBox>
+    
     <TableView fx:id="tblBookings" VBox.vgrow="ALWAYS">
         <columns>
-            <TableColumn fx:id="colGuest" text="Guest Name" prefWidth="200"/>
-            <TableColumn fx:id="colRoom" text="Room" prefWidth="100"/>
-            <TableColumn fx:id="colCheckIn" text="Check-in Date" prefWidth="150"/>
-            <TableColumn fx:id="colCheckOut" text="Check-out Date" prefWidth="150"/>
+            <TableColumn fx:id="colGuestName" text="Customer Name" prefWidth="180"/>
+            <TableColumn fx:id="colGuestPhone" text="Phone Number" prefWidth="150"/>
+            <TableColumn fx:id="colRoomNumbers" text="Room Numbers" prefWidth="150"/>
+            <TableColumn fx:id="colRoomCategory" text="Room Category" prefWidth="120"/>
+            <TableColumn fx:id="colRoomType" text="Room Type" prefWidth="120"/>
+            <TableColumn fx:id="colCheckIn" text="Planned Check-in" prefWidth="150"/>
+            <TableColumn fx:id="colCheckOut" text="Planned Check-out" prefWidth="150"/>
         </columns>
     </TableView>
 
-    <HBox spacing="10">
-        <Button fx:id="btnCheckIn" text="Check-in" onAction="#onCheckIn"/>
-    </HBox>
 </VBox>

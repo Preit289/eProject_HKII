@@ -1,66 +1,60 @@
 package HotelApp;
 
-import HotelApp.db.DButil;
-import HotelApp.repository.BookingRepository;
-import HotelApp.model.Room;
-import HotelApp.model.Booking;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import HotelApp.repository.CheckinRepository;
+import HotelApp.model.Checkin;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.event.ActionEvent;
 
 public class CheckInController {
 
     @FXML
-    private TableView<Booking> tblBookings;
+    private TableView<Checkin> tblBookings;
     @FXML
-    private TableColumn<Booking, String> colGuest;
+    private TableColumn<Checkin, String> colGuestName;
     @FXML
-    private TableColumn<Booking, String> colRoom;
+    private TableColumn<Checkin, String> colGuestPhone;
     @FXML
-    private TableColumn<Booking, String> colCheckIn;
+    private TableColumn<Checkin, String> colRoomNumbers;
     @FXML
-    private TableColumn<Booking, String> colCheckOut;
+    private TableColumn<Checkin, String> colRoomCategory;
     @FXML
-    private Button btnCheckIn;
-
-    private ObservableList<Booking> bookings;
+    private TableColumn<Checkin, String> colRoomType;
+    @FXML
+    private TableColumn<Checkin, String> colCheckIn;
+    @FXML
+    private TableColumn<Checkin, String> colCheckOut;
 
     @FXML
     private void initialize() {
-//        colGuest.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getGuestName()));
-//        colRoom.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getRoomNumber()));
-//        colCheckIn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCheckInDate().toString()));
-//        colCheckOut.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCheckOutDate().toString()));
-// Link columns to Booking model properties
-        colGuest.setCellValueFactory(new PropertyValueFactory<>("guestName"));
-        colRoom.setCellValueFactory(new PropertyValueFactory<>("room"));
-        colCheckIn.setCellValueFactory(new PropertyValueFactory<>("checkinDate"));
-        colCheckOut.setCellValueFactory(new PropertyValueFactory<>("checkoutDate"));
-        
-        
+        // Bind columns to StringProperty from Checkin model
+        colGuestName.setCellValueFactory(cellData -> cellData.getValue().guestNameProperty());
+        colGuestPhone.setCellValueFactory(cellData -> cellData.getValue().guestPhoneProperty());
+        colRoomNumbers.setCellValueFactory(cellData -> cellData.getValue().roomNumbersProperty());
+        colRoomCategory.setCellValueFactory(cellData -> cellData.getValue().roomCategoryProperty());
+        colRoomType.setCellValueFactory(cellData -> cellData.getValue().roomTypeProperty());
+        colCheckIn.setCellValueFactory(cellData -> cellData.getValue().plannedCheckInProperty());
+        colCheckOut.setCellValueFactory(cellData -> cellData.getValue().plannedCheckOutProperty());
 
-        // Load only bookings with status = "Booked"
-//        bookings = FXCollections.observableArrayList(
-//                BookingRepository.getAll().stream()
-//                        .filter(b -> b.getStatus().equals("Booked"))
-//                        .toList()
-//        );
-//        tblBookings.setItems(bookings);
+        // Load data from repository
+        tblBookings.setItems(CheckinRepository.getAllBookings());
     }
 
     @FXML
     private void onCheckIn() {
-        Booking selected = tblBookings.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            selected.setStatus("Checked-in");
-            Room room = selected.getRoom();
-//            if (room != null) {
-//                room.setStatus("Occupied");
-//            }
-            tblBookings.getItems().remove(selected); // Remove from list
-        }
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Check-in Result");
+        alert.setHeaderText("Check-in Completed");
+        alert.setContentText("Check-in button clicked! Display results here.");
+        alert.showAndWait();
+    }
+
+    @FXML
+    private void onSearch(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Search Result");
+        alert.setHeaderText("Search Completed");
+        alert.setContentText("Search button clicked! Display results here.");
+        alert.showAndWait();
     }
 }
