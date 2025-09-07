@@ -1,5 +1,6 @@
 package HotelApp;
 
+import HotelApp.db.DButil;
 import HotelApp.repository.BookingRepository;
 import HotelApp.model.Room;
 import HotelApp.model.Booking;
@@ -8,6 +9,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 
 public class CheckInController {
 
@@ -28,18 +30,25 @@ public class CheckInController {
 
     @FXML
     private void initialize() {
-        colGuest.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getGuestName()));
-        colRoom.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getRoomNumber()));
-        colCheckIn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCheckInDate().toString()));
-        colCheckOut.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCheckOutDate().toString()));
+//        colGuest.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getGuestName()));
+//        colRoom.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getRoomNumber()));
+//        colCheckIn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCheckInDate().toString()));
+//        colCheckOut.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCheckOutDate().toString()));
+// Link columns to Booking model properties
+        colGuest.setCellValueFactory(new PropertyValueFactory<>("guestName"));
+        colRoom.setCellValueFactory(new PropertyValueFactory<>("room"));
+        colCheckIn.setCellValueFactory(new PropertyValueFactory<>("checkinDate"));
+        colCheckOut.setCellValueFactory(new PropertyValueFactory<>("checkoutDate"));
+        
+        
 
         // Load only bookings with status = "Booked"
-        bookings = FXCollections.observableArrayList(
-                BookingRepository.getAll().stream()
-                        .filter(b -> b.getStatus().equals("Booked"))
-                        .toList()
-        );
-        tblBookings.setItems(bookings);
+//        bookings = FXCollections.observableArrayList(
+//                BookingRepository.getAll().stream()
+//                        .filter(b -> b.getStatus().equals("Booked"))
+//                        .toList()
+//        );
+//        tblBookings.setItems(bookings);
     }
 
     @FXML
