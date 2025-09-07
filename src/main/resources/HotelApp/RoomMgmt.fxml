@@ -1,102 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.geometry.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="HotelApp.RoomMgmtController" prefWidth="980" prefHeight="640" styleClass="panel">
+<VBox xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="HotelApp.RoomMgmtController"
+      spacing="15" alignment="TOP_LEFT" styleClass="view-pane">
 
-    <!-- Header + cards -->
-    <top>
-        <VBox spacing="12">
-            <HBox spacing="8" styleClass="panelHeader" alignment="CENTER_LEFT">
-                <Label text="Room Management" styleClass="panelTitle"/>
-                <Pane HBox.hgrow="ALWAYS"/>
-                <Label fx:id="lblDate" text="24th August 2025" styleClass="panelDate"/>
-                <Label text="Lee | Manager" styleClass="panelDate" style="-fx-padding:0 0 0 16;"/>
-            </HBox>
+    <Label text="Room Management" styleClass="section-title"/>
 
-            <HBox spacing="12" alignment="CENTER_LEFT" style="-fx-padding:0 16;">
-                <VBox spacing="4" styleClass="card">
-                    <Label text="Booking (today)" styleClass="cardTitle"/>
-                    <Label fx:id="lblBookingToday" styleClass="cardValue" text="0"/>
-                </VBox>
-                <VBox spacing="4" styleClass="card">
-                    <Label text="Check-in (today)" styleClass="cardTitle"/>
-                    <Label fx:id="lblCheckinToday" styleClass="cardValue" text="0"/>
-                </VBox>
-                <VBox spacing="4" styleClass="card">
-                    <Label text="Check-out (today)" styleClass="cardTitle"/>
-                    <Label fx:id="lblCheckoutToday" styleClass="cardValue" text="0"/>
-                </VBox>
-                <VBox spacing="4" styleClass="card">
-                    <Label text="Available (today)" styleClass="cardTitle"/>
-                    <Label fx:id="lblAvailableToday" styleClass="cardValue" text="0"/>
-                </VBox>
-            </HBox>
-        </VBox>
-    </top>
+    <!-- Form nhập thông tin phòng -->
+    <GridPane hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT" minWidth="120"/>
+            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS"/>
+        </columnConstraints>
 
-    <!-- Content -->
-    <center>
-        <GridPane hgap="12" vgap="12" style="-fx-padding:16;">
-            <columnConstraints>
-                <ColumnConstraints percentWidth="65"/>
-                <ColumnConstraints percentWidth="35"/>
-            </columnConstraints>
+        <children>
+            <Label text="Room Number:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtRoomNumber" promptText="e.g. 101" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-            <!-- Table + search -->
-            <VBox spacing="10" GridPane.columnIndex="0">
-                <HBox spacing="8" alignment="CENTER_LEFT">
-                    <Label text="Search"/>
-                    <TextField fx:id="txtSearch" promptText="Room or customer name or phone number" HBox.hgrow="ALWAYS"/>
-                    <Button text="Filter" onAction="#onFilter" styleClass="button,primary"/>
-                    <Button text="Search" onAction="#onSearch" styleClass="button,ghost"/>
-                </HBox>
+            <Label text="Type:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <ChoiceBox fx:id="cbType" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Single"/>
+                        <String fx:value="Double"/>
+                        <String fx:value="Suite"/>
+                    </FXCollections>
+                </items>
+            </ChoiceBox>
 
-                <TableView fx:id="tbl" VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn fx:id="colRoom"   text="Room"       prefWidth="100"/>
-                        <TableColumn fx:id="colType"   text="Type"       prefWidth="130"/>
-                        <TableColumn fx:id="colAvail"  text="Availability" prefWidth="120"/>
-                        <TableColumn fx:id="colRate"   text="Rate"       prefWidth="120"/>
-                        <TableColumn fx:id="colIn"     text="Check-in"   prefWidth="130"/>
-                        <TableColumn fx:id="colOut"    text="Check-out"  prefWidth="130"/>
-                        <TableColumn fx:id="colAction" text="Action"     prefWidth="100"/>
-                    </columns>
-                </TableView>
-            </VBox>
+            <Label text="Status:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <ChoiceBox fx:id="cbStatus" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Available"/>
+                        <String fx:value="Occupied"/>
+                    </FXCollections>
+                </items>
+            </ChoiceBox>
+        </children>
+        <padding>
+            <Insets top="10" bottom="10"/>
+        </padding>
+    </GridPane>
 
-            <!-- Form chi tiết -->
-            <VBox spacing="10" GridPane.columnIndex="1" styleClass="panel">
-                <Label text="Room detail" style="-fx-font-weight:bold; -fx-font-size:14;"/>
-                <GridPane hgap="10" vgap="10">
-                    <columnConstraints>
-                        <ColumnConstraints percentWidth="30"/>
-                        <ColumnConstraints percentWidth="70"/>
-                    </columnConstraints>
+    <!-- Buttons -->
+    <HBox spacing="10">
+        <Button text="Add Room" onAction="#onAddRoom"/>
+        <Button text="Clear" onAction="#onClear"/>
+    </HBox>
 
-                    <Label text="Room" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                    <TextField fx:id="txtRoom" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+    <!-- Table danh sách phòng -->
+    <TableView fx:id="tblRooms" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colRoom" text="Room Number" prefWidth="120"/>
+            <TableColumn fx:id="colType" text="Type" prefWidth="150"/>
+            <TableColumn fx:id="colStatus" text="Status" prefWidth="150"/>
+        </columns>
+    </TableView>
 
-                    <Label text="Rate" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                    <TextField fx:id="txtRate" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-
-                    <Label text="Status" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                    <ChoiceBox fx:id="cbStatus" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-
-                    <Label text="Type" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                    <ChoiceBox fx:id="cbType" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-
-                    <Label text="Facilities" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.valignment="TOP"/>
-                    <TextArea fx:id="txFacilities" prefRowCount="4" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-                </GridPane>
-
-                <HBox spacing="8" alignment="CENTER_RIGHT">
-                    <Button text="Reset" onAction="#onReset"/>
-                    <Button text="Process" onAction="#onProcess" styleClass="button,primary"/>
-                </HBox>
-            </VBox>
-        </GridPane>
-    </center>
-</BorderPane>
+</VBox>
