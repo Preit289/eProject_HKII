@@ -9,7 +9,7 @@
 
     <Label text="Check-in Management" styleClass="section-title"/>
     
-    <!-- Search Bar Section -->
+<!--    Search Bar Section -->
     <HBox spacing="10" alignment="CENTER_LEFT">
         <Label text="Search:"/>
         <!--<TextField fx:id="txtSearch" promptText="Enter guest name or phone number" prefWidth="250"/>-->

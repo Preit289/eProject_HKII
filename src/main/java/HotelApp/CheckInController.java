@@ -2,9 +2,15 @@ package HotelApp;
 
 import HotelApp.repository.CheckinRepository;
 import HotelApp.model.Checkin;
+import java.io.IOException;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.event.ActionEvent;
+import javafx.stage.Modality;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 public class CheckInController {
 
@@ -44,21 +50,22 @@ public class CheckInController {
 
     @FXML
     private void onCheckIn() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Check-in Result");
-        alert.setHeaderText("Check-in Completed");
-        alert.setContentText("Check-in button clicked! Display results here.");
-        alert.showAndWait();
-    }
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/HotelApp/CheckInForm.fxml"));
+            Parent formRoot = loader.load();
 
-//    @FXML
-//    private void onSearch(ActionEvent event) {
-//        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-//        alert.setTitle("Search Result");
-//        alert.setHeaderText("Search Completed");
-//        alert.setContentText("Search button clicked! Display results here.");
-//        alert.showAndWait();
-//    }
+            Stage stage = new Stage();
+            stage.setTitle("Check-in Form");
+            stage.setScene(new Scene(formRoot));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open check-in form.");
+            alert.showAndWait();
+        }
+    }
 
     @FXML
     private void onSearch(ActionEvent event) {
