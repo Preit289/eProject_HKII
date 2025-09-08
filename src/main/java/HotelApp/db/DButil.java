@@ -1,8 +1,6 @@
 package HotelApp.db;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class DButil {
 
@@ -11,7 +9,6 @@ public class DButil {
     private static final String PASS = "YourPassword";
 
     public static Connection getConnection() throws SQLException {
-//        return DriverManager.getConnection(URL, USER, PASS);
-        return DriverManager.getConnection(URL);
+        return DriverManager.getConnection(URL, USER, PASS);
     }
 }
