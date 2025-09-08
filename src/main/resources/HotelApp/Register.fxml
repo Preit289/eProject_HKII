@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane prefHeight="400" prefWidth="250" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HotelApp.RegisterController">
+    <center>
+        <VBox alignment="CENTER" spacing="16">
+            <children>
+                <Label text="Register Account" style="-fx-font-size:18; -fx-font-weight:bold;"/>
+                <TextField fx:id="usernameField" promptText="Username"/>
+                <PasswordField fx:id="passwordField" promptText="Password"/>
+                <PasswordField fx:id="confirmPasswordField" promptText="Confirm Password"/>
+                <CheckBox fx:id="adminCheckBox" text="Register as Admin"/>
+                <Button text="Register" onAction="#handleRegister"/>
+                <Label fx:id="errorLabel" text="" style="-fx-text-fill:red;"/>
+                <Hyperlink text="Back to Login" onAction="#onBackToLogin"/>
+            </children>
+            <padding>
+                <Insets top="40" left="60" right="60" bottom="40"/>
+            </padding>
+        </VBox>
+    </center>
+</BorderPane>
