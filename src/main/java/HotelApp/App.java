@@ -14,7 +14,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("Main"), 1090, 715);
+        scene = new Scene(loadFXML("Login"), 1090, 715);
         stage.setScene(scene);
         stage.setTitle("Hotel Management System");
         stage.show();
@@ -32,4 +32,11 @@ public class App extends Application {
     public static void main(String[] args) {
         launch();
     }
+
+    //login role//////////////////////////
+    public static void logout() {
+        try { setRoot("Login"); } 
+        catch (Exception e) { e.printStackTrace(); } 
+    }
+
 }
