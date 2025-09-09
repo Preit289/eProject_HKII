@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+    spacing="15" alignment="CENTER"
+    fx:controller="HotelApp.AdminDashboardController">
+
+    <Label text="Admin - Account Management" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+    <!-- Form account -->
+    <GridPane hgap="10" vgap="10">
+        <children>
+            <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtUsername" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <Label text="Password:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <PasswordField fx:id="txtPassword" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+            <Label text="Role:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <ChoiceBox fx:id="cbRole" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        </children>
+    </GridPane>
+
+    <!-- Button -->
+    <HBox spacing="10">
+        <Button text="Add" onAction="#onAdd"/>
+        <Button text="Update" onAction="#onUpdate"/>
+        <Button text="Delete" onAction="#onDelete"/>
+        <Button text="Clear" onAction="#onClear"/>
+        <Button text="Back to Login" onAction="#onBackToLogin"/>
+    </HBox>
+
+    <!-- Table account list -->
+    <TableView fx:id="accountTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colUsername" text="Username" prefWidth="200"/>
+            <TableColumn fx:id="colPassword" text="Password" prefWidth="200"/>
+            <TableColumn fx:id="colIsAdmin" text="Role" prefWidth="100"/>
+        </columns>
+    </TableView>
+</VBox>
