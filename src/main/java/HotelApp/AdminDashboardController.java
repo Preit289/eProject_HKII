@@ -17,7 +17,7 @@ public class AdminDashboardController {
     @FXML private TableColumn<Account, String> colIsAdmin;
 
     @FXML private TextField txtUsername;
-    @FXML private PasswordField txtPassword;
+    @FXML private TextField txtPassword;
     @FXML private ChoiceBox<String> cbRole;
 
     private ObservableList<Account> accounts;

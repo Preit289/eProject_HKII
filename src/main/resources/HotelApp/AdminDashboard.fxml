@@ -17,7 +17,7 @@
             <TextField fx:id="txtUsername" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
             <Label text="Password:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-            <PasswordField fx:id="txtPassword" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <TextField fx:id="txtPassword" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
             <Label text="Role:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
             <ChoiceBox fx:id="cbRole" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
