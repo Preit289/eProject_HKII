@@ -15,26 +15,26 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-<VBox alignment="TOP_LEFT" prefHeight="607.0" prefWidth="828.0" spacing="15" styleClass="view-pane"
-      xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="HotelApp.RoomMgmtController">
 
-    <Label styleClass="section-title" text="Room Management" />
+<VBox alignment="TOP_LEFT" prefHeight="607.0" prefWidth="828.0" spacing="15" styleClass="view-pane" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HotelApp.RoomMgmtController">
 
     <!-- Form nhập thông tin phòng -->
-    <GridPane hgap="10" vgap="10">
+    <GridPane hgap="10" vgap="5.0">
         <columnConstraints>
-            <ColumnConstraints halignment="RIGHT" minWidth="120" />
-            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" />
+            <ColumnConstraints halignment="RIGHT" minWidth="120.0" />
+            <ColumnConstraints minWidth="100.0" />
+            <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" minWidth="80.0" />
+            <ColumnConstraints hgrow="ALWAYS" minWidth="120.0" />
+            <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" minWidth="50.0" />
+            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" maxWidth="506.8000793457031" minWidth="10.0" prefWidth="480.00004882812505" />
         </columnConstraints>
 
         <children>
             <Label text="Room Number:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-            <TextField fx:id="txtRoomNumber" promptText="e.g. 101" GridPane.columnIndex="1"
-                       GridPane.rowIndex="0" />
+            <TextField fx:id="txtRoomNumber" promptText="e.g. 101" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-            <Label text="Category:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-            <ChoiceBox fx:id="cbCategory" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <Label text="Category:" GridPane.columnIndex="2" />
+            <ChoiceBox fx:id="cbCategory" prefHeight="26.0" prefWidth="123.0" GridPane.columnIndex="3">
                 <items>
                     <FXCollections fx:factory="observableArrayList">
                         <String fx:value="Single" />
@@ -44,8 +44,8 @@
                 </items>
             </ChoiceBox>
 
-            <Label text="Quality:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-            <ChoiceBox fx:id="cbQuality" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <Label text="Quality:" GridPane.rowIndex="2" />
+            <ChoiceBox fx:id="cbQuality" prefHeight="26.0" prefWidth="103.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                 <items>
                     <FXCollections fx:factory="observableArrayList">
                         <String fx:value="Standard" />
@@ -56,12 +56,11 @@
                 </items>
             </ChoiceBox>
 
-            <Label text="Price (VND):" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-            <TextField fx:id="txtPrice" promptText="Enter price" GridPane.columnIndex="1"
-                       GridPane.rowIndex="3" />
+            <Label text="Price (VND):" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <TextField fx:id="txtPrice" promptText="Enter price" GridPane.columnIndex="3" GridPane.rowIndex="2" />
 
-            <Label text="Status:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-            <ChoiceBox fx:id="cbStatus" GridPane.columnIndex="1" GridPane.rowIndex="4">
+            <Label text="Status:" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+            <ChoiceBox fx:id="cbStatus" prefHeight="26.0" prefWidth="120.0" GridPane.columnIndex="5" GridPane.rowIndex="2">
                 <items>
                     <FXCollections fx:factory="observableArrayList">
                         <String fx:value="Available" />
@@ -72,7 +71,7 @@
             </ChoiceBox>
         </children>
         <padding>
-            <Insets bottom="10" top="10" />
+            <Insets top="10.0" />
         </padding>
         <rowConstraints>
             <RowConstraints />
@@ -86,32 +85,31 @@
     <!-- Buttons -->
     <VBox spacing="10">
         <HBox spacing="10">
-            <Button onAction="#onAddRoom" text="Add Room">
+            <Button onAction="#onAddRoom" styleClass="button-primary" stylesheets="@styles.css" text="Add Room">
                 <graphic>
-                    <FontIcon iconLiteral="fa-plus-circle" />
+                    <FontIcon iconLiteral="fa-plus-circle" styleClass="btn-icon" />
                 </graphic>
             </Button>
-            <Button onAction="#onUpdateRoom" text="Update">
+            <Button onAction="#onUpdateRoom" styleClass="button-primary" stylesheets="@styles.css" text="Update">
                 <graphic>
-                    <FontIcon iconLiteral="fa-edit" />
+                    <FontIcon iconLiteral="fa-edit" styleClass="btn-icon" />
                 </graphic>
             </Button>
-            <Button onAction="#onDeleteRoom" text="Delete" >
+            <Button onAction="#onDeleteRoom" styleClass="button-primary" stylesheets="@styles.css" text="Delete">
                 <graphic>
-                    <FontIcon iconLiteral="fa-trash" />
+                    <FontIcon iconLiteral="fa-trash" styleClass="btn-icon" />
                 </graphic>
             </Button>
-            <Button onAction="#onClear" text="Clear">
+            <Button onAction="#onClear" styleClass="button-primary" stylesheets="@styles.css" text="Clear">
                 <graphic>
-                    <FontIcon iconLiteral="fa-eraser" />
+                    <FontIcon iconLiteral="fa-eraser" styleClass="btn-icon" />
                 </graphic>
             </Button>
         </HBox>
 
-        <Button onAction="#onManageAmenities" styleClass="secondary-button"
-                text="Manage Room Types &amp; Amenities">
+        <Button onAction="#onManageAmenities" styleClass="button-secondary" stylesheets="@styles.css" text="Manage Room Types &amp; Amenities">
             <graphic>
-                <FontIcon iconLiteral="fa-list-ul" />
+                <FontIcon iconLiteral="fa-list-ul" styleClass="btn-icon" />
             </graphic>
         </Button>
     </VBox>
@@ -119,14 +117,14 @@
     <!-- Table danh sách phòng -->
     <TableView fx:id="tblRooms" VBox.vgrow="ALWAYS">
         <columns>
-            <TableColumn fx:id="colRoomId" text="Room ID" prefWidth="100" />
-            <TableColumn fx:id="colRoomNum" text="Room No." prefWidth="100" />
-            <TableColumn fx:id="colCategory" text="Category" prefWidth="100" />
-            <TableColumn fx:id="colQuality" text="Quality" prefWidth="100" />
-            <TableColumn fx:id="colPrice" text="Price (VND)" prefWidth="100" />
-            <TableColumn fx:id="colStatus" text="Status" prefWidth="80" />
-            <TableColumn fx:id="colAmenities" text="Amenities" prefWidth="150" />
-            <TableColumn fx:id="colCapacity" text="Capacity" prefWidth="80" />
+            <TableColumn fx:id="colRoomId" prefWidth="100" text="Room ID" />
+            <TableColumn fx:id="colRoomNum" prefWidth="100" text="Room No." />
+            <TableColumn fx:id="colCategory" prefWidth="100" text="Category" />
+            <TableColumn fx:id="colQuality" prefWidth="100" text="Quality" />
+            <TableColumn fx:id="colPrice" prefWidth="100" text="Price (VND)" />
+            <TableColumn fx:id="colStatus" prefWidth="80" text="Status" />
+            <TableColumn fx:id="colAmenities" prefWidth="150" text="Amenities" />
+            <TableColumn fx:id="colCapacity" prefWidth="80" text="Capacity" />
         </columns>
         <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

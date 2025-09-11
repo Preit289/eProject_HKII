@@ -49,7 +49,7 @@ public class MainController {
 
     @FXML
     private void showBooking() {
-        loadView("Booking.fxml", "Booking");
+        loadView("/HotelApp/Booking.fxml", "Booking");
     }
 
     @FXML
@@ -58,13 +58,13 @@ public class MainController {
     }
 
     @FXML
-    private void showCheckout() {
-        loadView("Checkout.fxml", "Check-out");
+    private void showCustomers() {
+        loadView("Customer.fxml", "Customers Management");
     }
 
     @FXML
     private void showServices() {
-        loadView("Services.fxml", "Services");
+        loadView("Services.fxml", "Services Management");
     }
 
     @FXML

@@ -8,9 +8,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<BorderPane id="AnchorPane" prefHeight="1200" prefWidth="750" styleClass="mainFxmlClass"
-    xmlns:fx="http://javafx.com/fxml/1" fx:controller="HotelApp.MainController"
-    stylesheets="@styles.css">
+<BorderPane id="AnchorPane" prefHeight="1100" prefWidth="680" styleClass="mainFxmlClass"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="HotelApp.MainController"
+            stylesheets="@styles.css">
     <!-- Sidebar -->
     <left>
         <VBox styleClass="sidebar" spacing="10">
@@ -18,9 +18,9 @@
                 <Label text="Hotel Manager" styleClass="brand" />
                 <Button text="Dashboard" onAction="#showDashboard" styleClass="nav-btn" />
                 <Button text="Booking" onAction="#showBooking" styleClass="nav-btn" />
-                <Button text="Check-in" onAction="#showCheckin" styleClass="nav-btn" />
-                <Button text="Check-out" onAction="#showCheckout" styleClass="nav-btn" />
-                <Button text="Services" onAction="#showServices" styleClass="nav-btn" />
+                <Button text="Check-in/Check-out" onAction="#showCheckin" styleClass="nav-btn" />
+                <Button text="Customers Management" onAction="#showCustomers" styleClass="nav-btn" />
+                <Button text="Services Management" onAction="#showServices" styleClass="nav-btn" />
                 <Button text="Room Management" onAction="#showRoomManagement" styleClass="nav-btn" />
             </children>
             <padding>

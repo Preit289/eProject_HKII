@@ -11,6 +11,8 @@ module hotelmanagementsystemfxml {
     requires org.kordamp.ikonli.coreui;
 
     opens HotelApp to javafx.fxml;
-    exports HotelApp;
+    opens HotelApp.model to javafx.base;
     exports HotelApp.db;
+    exports HotelApp;
+
 }

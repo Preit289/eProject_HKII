@@ -35,9 +35,9 @@ public class CheckOutController {
 
         // Load only bookings with status = "Checked-in"
         bookings = FXCollections.observableArrayList(
-                BookingRepository.getAll().stream()
+              /*  BookingRepository.getAll().stream()
                         .filter(b -> b.getStatus().equals("Checked-in"))
-                        .toList()
+                        .toList()*/
         );
         tblBookings.setItems(bookings);
     }
