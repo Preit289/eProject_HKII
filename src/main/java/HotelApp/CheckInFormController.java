@@ -1,124 +1,78 @@
-//package HotelApp;
-//
-//import javafx.fxml.FXML;
-//import javafx.scene.control.*;
-//
-//public class CheckInFormController {
-//
-//    // Table
-//    @FXML
-//    private TableView<?> tblCheckIn;
-//    @FXML
-//    private TableColumn<?, ?> colGuestNames;
-//    @FXML
-//    private TableColumn<?, ?> colRoomNumber;
-//    @FXML
-//    private TableColumn<?, ?> colCapacity;
-//    @FXML
-//    private TableColumn<?, ?> colCheckInDate;
-//    @FXML
-//    private TableColumn<?, ?> colCheckoutDate;
-//
-//    // Guest info fields
-//    @FXML
-//    private TextField txtCustomerName;
-//    @FXML
-//    private DatePicker dpDOB;
-//    @FXML
-//    private TextField txtCitizenId;
-//    @FXML
-//    private TextField txtPhone;
-//    @FXML
-//    private ChoiceBox<String> cbGender;
-//    @FXML
-//    private ChoiceBox<String> cbNationality;
-//    @FXML
-//    private CheckBox chkIsChild;
-//
-//    // Buttons
-//    @FXML
-//    private Button btnSave;
-//    @FXML
-//    private Button btnCancel;
-//
-//    @FXML
-//    private void initialize() {
-//    }
-//
-//    @FXML
-//    private void onSave() {
-//        // TODO: Save guest info to DB (Customer_Management)
-//        System.out.println("Saving check-in...");
-//    }
-//
-//    @FXML
-//    private void onCancel() {
-//        btnCancel.getScene().getWindow().hide();
-//    }
-//}
-
 package HotelApp;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
+import javafx.beans.property.*;
+import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
+import javafx.stage.Stage;
 
 public class CheckInFormController {
 
-    @FXML
-    private TableView tblGuests;
+    @FXML private BorderPane rootPane;
+    @FXML private Label lblTitle;
+    @FXML private TextField txtBooker;
+    @FXML private TextField txtPhone;
+    @FXML private ComboBox<String> cbPayment;
+    @FXML private TextField txtDeposit;
+    @FXML private Button btnAddRoom;
+    @FXML private Button btnRemoveRoom;
+    @FXML private TableView<RoomVM> tblRooms;
+    @FXML private TableColumn<RoomVM, String> colRoomNum;
+    @FXML private TableColumn<RoomVM, String> colCategory;
+    @FXML private TableColumn<RoomVM, String> colQuality;
+    @FXML private TableColumn<RoomVM, Number> colPrice;
+    @FXML private Button btnDelete;
+    @FXML private Button btnSave;
+    @FXML private Button btnClose;
+
+    // Simple record for room view model
+    public record RoomVM(String roomNumber, String category, String quality, double price) {}
 
     @FXML
-    private TableColumn colGuestName;
+    private void initialize() {
+        // Set up ComboBox with payment options
+        cbPayment.setItems(FXCollections.observableArrayList("Cash", "Credit Card", "Debit Card"));
+
+        // Configure table columns
+        colRoomNum.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().roomNumber()));
+        colCategory.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().category()));
+        colQuality.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().quality()));
+        colPrice.setCellValueFactory(c -> new SimpleDoubleProperty(c.getValue().price()));
+
+        // Initialize table with empty data
+        tblRooms.setItems(FXCollections.observableArrayList());
+    }
 
     @FXML
-    private TableColumn colRoomNumber;
+    private void onAddRoom(ActionEvent event) {
+        // TODO: Implement logic to add a room
+        System.out.println("Add Room clicked");
+    }
 
     @FXML
-    private TableColumn colCapacity;
+    private void onRemoveRoom(ActionEvent event) {
+        // TODO: Implement logic to remove selected room
+        System.out.println("Remove Room clicked");
+    }
 
     @FXML
-    private TableColumn colType;
+    private void onDelete(ActionEvent event) {
+        // TODO: Implement logic to delete booking
+        System.out.println("Delete clicked");
+    }
 
     @FXML
-    private TableColumn colCheckIn;
+    private void onSave(ActionEvent event) {
+        // TODO: Implement logic to save booking
+        System.out.println("Save clicked");
+    }
 
     @FXML
-    private TableColumn colCheckOut;
-
-    @FXML
-    private TextField txtCustomerName;
-
-    @FXML
-    private RadioButton rbChildYes;
-
-    @FXML
-    private RadioButton rbChildNo;
-
-    @FXML
-    private TextField txtDateOfBirth;
-
-    @FXML
-    private RadioButton rbForeignerYes;
-
-    @FXML
-    private RadioButton rbForeignerNo;
-
-    @FXML
-    private TextField txtCitizenId;
-
-    @FXML
-    private RadioButton rbMale;
-
-    @FXML
-    private RadioButton rbFemale;
-
-    @FXML
-    private TextField txtPhoneNumber;
-
-    @FXML
-    private Button btnSave;
-
-    @FXML
-    private Button btnCheckIn;
-
+    private void onClose(ActionEvent event) {
+        // Close the window
+        Stage stage = (Stage) btnClose.getScene().getWindow();
+        stage.close();
+    }
 }

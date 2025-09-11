@@ -3,73 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<!--<?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.geometry.Insets?>-->
-
-<!--<BorderPane xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="HotelApp.CheckInFormController">
-
-     Table Section 
-    <VBox spacing="10" BorderPane.alignment="TOP_CENTER" styleClass="view-pane">
-        <Label text="Check-In Table" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-        
-        <TableView fx:id="tblCheckIn" VBox.vgrow="ALWAYS">
-            <columns>
-                <TableColumn fx:id="colGuestNames" text="Guest Names" prefWidth="180"/>
-                <TableColumn fx:id="colRoomNumber" text="Room Number" prefWidth="120"/>
-                <TableColumn fx:id="colCapacity" text="Capacity" prefWidth="80"/>
-                <TableColumn fx:id="colCheckInDate" text="Check-In Date" prefWidth="120"/>
-                <TableColumn fx:id="colCheckoutDate" text="Planned Checkout" prefWidth="120"/>
-            </columns>
-        </TableView>
-    </VBox>
-
-     Guest Info Form 
-    <VBox spacing="10" BorderPane.alignment="CENTER">
-        <Label text="Guest Information" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-
-        <GridPane hgap="10" vgap="10">
-            <columnConstraints>
-                <ColumnConstraints halignment="RIGHT" minWidth="120"/>
-                <ColumnConstraints hgrow="ALWAYS" minWidth="200"/>
-            </columnConstraints>
-
-            <Label text="Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-            <TextField fx:id="txtCustomerName" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-
-            <Label text="Date of Birth:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-            <DatePicker fx:id="dpDOB" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-
-            <Label text="Citizen ID:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-            <TextField fx:id="txtCitizenId" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-
-            <Label text="Phone Number:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-            <TextField fx:id="txtPhone" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-
-            <Label text="Gender:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-            <ChoiceBox fx:id="cbGender" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-
-            <Label text="Nationality:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-            <ChoiceBox fx:id="cbNationality" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
-
-            <Label text="Child:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-            <CheckBox fx:id="chkIsChild" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
-        </GridPane>
-    </VBox>
-
-     Bottom Buttons 
-    <HBox spacing="15" alignment="CENTER" BorderPane.alignment="BOTTOM_CENTER">
-        <Button fx:id="btnSave" text="Save Check-In" style="-fx-font-weight: bold;"/>
-        <Button fx:id="btnCancel" text="Cancel"/>
-    </HBox>
-</BorderPane>-->
-
-
-
-<VBox xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1"
+<!--<VBox xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="HotelApp.CheckInFormController"
       spacing="20" alignment="TOP_LEFT" styleClass="view-pane">
     <padding>
@@ -124,4 +59,49 @@
 
     <HBox spacing="10" alignment="CENTER_RIGHT">
     </HBox>
-</VBox>
+</VBox>-->
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="HotelApp.BookingFormController" stylesheets="@HotelApp/styles.css"
+            prefWidth="800" prefHeight="520">
+
+    <top><Label fx:id="lblTitle" styleClass="page-title" text="Booking"/></top>
+
+    <center>
+        <GridPane hgap="8" vgap="8" styleClass="view-pane">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="20"/><ColumnConstraints percentWidth="30"/>
+                <ColumnConstraints percentWidth="20"/><ColumnConstraints percentWidth="30"/>
+            </columnConstraints>
+
+            <Label text="Booker"/><TextField fx:id="txtBooker" GridPane.columnIndex="1"/>
+            <Label text="Phone" GridPane.columnIndex="2"/><TextField fx:id="txtPhone" GridPane.columnIndex="3"/>
+
+            <Label text="Payment" GridPane.rowIndex="1"/><ComboBox fx:id="cbPayment" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <Label text="Deposit"  GridPane.columnIndex="2" GridPane.rowIndex="1"/><TextField fx:id="txtDeposit" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+
+            <Label text="Rooms" styleClass="section-title" GridPane.rowIndex="2"/>
+            <HBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                <Button text="Add room"    onAction="#onAddRoom"    styleClass="button-secondary"/>
+                <Button text="Remove room" onAction="#onRemoveRoom" styleClass="button-secondary"/>
+            </HBox>
+
+            <TableView fx:id="tblRooms" GridPane.rowIndex="3" GridPane.columnSpan="4" prefHeight="320" styleClass="table-view">
+                <columns>
+                    <TableColumn fx:id="colRoomNum" text="Room No" prefWidth="120"/>
+                    <TableColumn fx:id="colCategory" text="Category" prefWidth="140"/>
+                    <TableColumn fx:id="colQuality"  text="Quality"  prefWidth="140"/>
+                    <TableColumn fx:id="colPrice"    text="Price"    prefWidth="120"/>
+                </columns>
+            </TableView>
+        </GridPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="8" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button text="Delete" onAction="#onDelete" fx:id="btnDelete" styleClass="button-secondary"/>
+            <Button text="Save"   onAction="#onSave"   fx:id="btnSave"   styleClass="button-primary"/>
+            <Button text="Close"  onAction="#onClose"  styleClass="button-secondary"/>
+        </HBox>
+    </bottom>
+</BorderPane>
