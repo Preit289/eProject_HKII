@@ -37,7 +37,8 @@
                     <TableColumn fx:id="colPrice"    text="Price"    prefWidth="80"/>
                     <TableColumn fx:id="colCustomer" text="Customer" prefWidth="120"/>
                     <TableColumn fx:id="colServices" text="Services" prefWidth="120"/>
-                    <TableColumn fx:id="colAssign"   text="Assign"   prefWidth="100"/>
+                    <TableColumn fx:id="colAssign"   text="Assign Customer" prefWidth="100"/>
+                    <TableColumn fx:id="colAssignService" text="Assign Service" prefWidth="100"/>
                 </columns>
             </TableView>
         </GridPane>

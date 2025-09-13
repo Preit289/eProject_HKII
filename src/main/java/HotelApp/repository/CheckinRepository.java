@@ -5,6 +5,8 @@ import HotelApp.model.Checkin;
 import java.sql.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CheckinRepository {
 
@@ -182,18 +184,24 @@ public class CheckinRepository {
             updateBookingStmt.setString(1, bookingId);
             updateBookingStmt.executeUpdate();
 
-            // Copy rooms from Booking_Room to Staying_Room_Customer
+            // Copy rooms from Booking_Room to Staying_Room_Customer (only if not already assigned)
             String insertRoomsSql = """
                 INSERT INTO Staying_Room_Customer (Staying_id, Room_id, Customer_id)
                 SELECT ?, br.Room_id, cm.Customer_id
                 FROM Booking_Room br
                 JOIN Customer_Management cm ON cm.Phone_num = ?
                 WHERE br.Booking_id = ?
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM Staying_Room_Customer src
+                    WHERE src.Staying_id = ? AND src.Room_id = br.Room_id AND src.Customer_id = cm.Customer_id
+                )
             """;
             PreparedStatement insertRoomsStmt = conn.prepareStatement(insertRoomsSql);
             insertRoomsStmt.setString(1, stayingId);
             insertRoomsStmt.setString(2, booking.getGuestPhone());
             insertRoomsStmt.setString(3, bookingId);
+            insertRoomsStmt.setString(4, stayingId);
             insertRoomsStmt.executeUpdate();
 
             // Commit transaction
@@ -207,7 +215,28 @@ public class CheckinRepository {
         return stayingId;
     }
 
-    public static String assignCustomerToRoom(String stayingId, String roomNumber, String phone) throws SQLException {
+    public static Map<String, String> getAllCustomers() {
+        Map<String, String> customerMap = new HashMap<>();
+        String sql = """
+            SELECT Customer_id, Customer_name
+            FROM Customer_Management
+            ORDER BY Customer_name
+        """;
+
+        try (Connection conn = DButil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                customerMap.put(rs.getString("Customer_name"), rs.getString("Customer_id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return customerMap;
+    }
+
+    public static void assignCustomerToRoom(String stayingId, String roomNumber, String customerId) throws SQLException {
         try (Connection conn = DButil.getConnection()) {
             conn.setAutoCommit(false);
 
@@ -225,35 +254,6 @@ public class CheckinRepository {
             }
             String roomId = roomRs.getString("Room_id");
 
-            // Check if customer exists by phone number
-            String findCustomerSql = """
-                SELECT Customer_id, Customer_name
-                FROM Customer_Management
-                WHERE Phone_num = ?
-            """;
-            PreparedStatement findCustomerStmt = conn.prepareStatement(findCustomerSql);
-            findCustomerStmt.setString(1, phone);
-            ResultSet customerRs = findCustomerStmt.executeQuery();
-            String customerId;
-
-            if (customerRs.next()) {
-                customerId = customerRs.getString("Customer_id");
-            } else {
-                // Create a new customer
-                customerId = generateNewCustomerId(conn);
-                String insertCustomerSql = """
-                    INSERT INTO Customer_Management (
-                        Customer_id, Customer_name, Phone_num, Is_foreigner, Gender, Is_child
-                    )
-                    VALUES (?, ?, ?, 0, 1, 0)
-                """;
-                PreparedStatement insertCustomerStmt = conn.prepareStatement(insertCustomerSql);
-                insertCustomerStmt.setString(1, customerId);
-                insertCustomerStmt.setString(2, "Customer_" + phone); // Placeholder name
-                insertCustomerStmt.setString(3, phone);
-                insertCustomerStmt.executeUpdate();
-            }
-
             // Check if the customer is already assigned to the room
             String checkAssignmentSql = """
                 SELECT 1
@@ -267,7 +267,7 @@ public class CheckinRepository {
             ResultSet checkRs = checkAssignmentStmt.executeQuery();
             if (checkRs.next()) {
                 conn.commit();
-                return customerId; // Already assigned
+                return; // Already assigned
             }
 
             // Assign customer to room
@@ -283,7 +283,6 @@ public class CheckinRepository {
 
             // Commit transaction
             conn.commit();
-            return customerId;
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -291,14 +290,78 @@ public class CheckinRepository {
         }
     }
 
-    private static String generateNewCustomerId(Connection conn) throws SQLException {
-        String sql = "SELECT dbo.fn_GenerateNextCustomerID() AS Customer_id";
-        try (PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) {
-                return rs.getString("Customer_id");
+    public static Map<String, String> getAllServices() {
+        Map<String, String> serviceMap = new HashMap<>();
+        String sql = """
+            SELECT Service_id, Service_name
+            FROM Service_Management
+            ORDER BY Service_name
+        """;
+
+        try (Connection conn = DButil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                serviceMap.put(rs.getString("Service_name"), rs.getString("Service_id"));
             }
-            throw new SQLException("Failed to generate new Customer_id");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return serviceMap;
+    }
+
+    public static void assignServiceToRoom(String stayingId, String roomNumber, String serviceId) throws SQLException {
+        try (Connection conn = DButil.getConnection()) {
+            conn.setAutoCommit(false);
+
+            // Find Room_id by Room_num
+            String findRoomIdSql = """
+                SELECT Room_id
+                FROM Room_Management
+                WHERE Room_num = ?
+            """;
+            PreparedStatement findRoomStmt = conn.prepareStatement(findRoomIdSql);
+            findRoomStmt.setString(1, roomNumber);
+            ResultSet roomRs = findRoomStmt.executeQuery();
+            if (!roomRs.next()) {
+                throw new SQLException("Room not found: " + roomNumber);
+            }
+            String roomId = roomRs.getString("Room_id");
+
+            // Check if the service is already assigned to the room
+            String checkAssignmentSql = """
+                SELECT 1
+                FROM Staying_Room_Service
+                WHERE Staying_id = ? AND Room_id = ? AND Service_id = ?
+            """;
+            PreparedStatement checkAssignmentStmt = conn.prepareStatement(checkAssignmentSql);
+            checkAssignmentStmt.setString(1, stayingId);
+            checkAssignmentStmt.setString(2, roomId);
+            checkAssignmentStmt.setString(3, serviceId);
+            ResultSet checkRs = checkAssignmentStmt.executeQuery();
+            if (checkRs.next()) {
+                conn.commit();
+                return; // Already assigned
+            }
+
+            // Assign service to room
+            String assignSql = """
+                INSERT INTO Staying_Room_Service (Staying_id, Room_id, Service_id)
+                VALUES (?, ?, ?)
+            """;
+            PreparedStatement assignStmt = conn.prepareStatement(assignSql);
+            assignStmt.setString(1, stayingId);
+            assignStmt.setString(2, roomId);
+            assignStmt.setString(3, serviceId);
+            assignStmt.executeUpdate();
+
+            // Commit transaction
+            conn.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
         }
     }
 }

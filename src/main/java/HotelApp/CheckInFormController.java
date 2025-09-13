@@ -4,6 +4,7 @@ import HotelApp.model.Checkin;
 import HotelApp.repository.CheckinRepository;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -13,6 +14,8 @@ import javafx.stage.Stage;
 import java.sql.*;
 import HotelApp.db.DButil;
 import javafx.scene.layout.VBox;
+import javafx.scene.control.SelectionMode;
+import java.util.Map;
 
 public class CheckInFormController {
 
@@ -32,6 +35,7 @@ public class CheckInFormController {
     @FXML private TableColumn<RoomVM, String> colCustomer;
     @FXML private TableColumn<RoomVM, String> colServices;
     @FXML private TableColumn<RoomVM, Void> colAssign;
+    @FXML private TableColumn<RoomVM, Void> colAssignService;
     @FXML private Button btnDelete;
     @FXML private Button btnSave;
     @FXML private Button btnClose;
@@ -56,9 +60,9 @@ public class CheckInFormController {
         colCustomer.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().customer()));
         colServices.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().services()));
 
-        // Set up Assign button column
+        // Set up Assign Customer button column
         colAssign.setCellFactory(param -> new TableCell<RoomVM, Void>() {
-            private final Button assignButton = new Button("Assign");
+            private final Button assignButton = new Button("Assign Customer");
 
             @Override
             protected void updateItem(Void item, boolean empty) {
@@ -71,6 +75,26 @@ public class CheckInFormController {
                         onAssignCustomer(room);
                     });
                     setGraphic(assignButton);
+                    setText(null);
+                }
+            }
+        });
+
+        // Set up Assign Service button column
+        colAssignService.setCellFactory(param -> new TableCell<RoomVM, Void>() {
+            private final Button assignServiceButton = new Button("Assign Service");
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    assignServiceButton.setOnAction(event -> {
+                        RoomVM room = getTableView().getItems().get(getIndex());
+                        onAssignService(room);
+                    });
+                    setGraphic(assignServiceButton);
                     setText(null);
                 }
             }
@@ -140,7 +164,7 @@ public class CheckInFormController {
                 rm.Room_category,
                 rm.Room_quality,
                 rm.Room_price,
-                cm.Customer_name,
+                STRING_AGG(cm.Customer_name, ', ') AS Customer_names,
                 STRING_AGG(sm.Service_name, ', ') AS Services
             FROM Booking_Management bm
             JOIN Booking_Room br ON bm.Booking_id = br.Booking_id
@@ -150,7 +174,7 @@ public class CheckInFormController {
             LEFT JOIN Staying_Room_Service srs ON rm.Room_id = srs.Room_id AND srs.Staying_id = ?
             LEFT JOIN Service_Management sm ON srs.Service_id = sm.Service_id
             WHERE bm.Book_contact = ?
-            GROUP BY rm.Room_num, rm.Room_category, rm.Room_quality, rm.Room_price, cm.Customer_name
+            GROUP BY rm.Room_num, rm.Room_category, rm.Room_quality, rm.Room_price
         """;
 
         try (Connection conn = DButil.getConnection();
@@ -166,7 +190,7 @@ public class CheckInFormController {
                     rs.getString("Room_category"),
                     rs.getString("Room_quality"),
                     rs.getDouble("Room_price"),
-                    rs.getString("Customer_name") != null ? rs.getString("Customer_name") : "",
+                    rs.getString("Customer_names") != null ? rs.getString("Customer_names") : "",
                     rs.getString("Services") != null ? rs.getString("Services") : ""
                 ));
             }
@@ -178,52 +202,132 @@ public class CheckInFormController {
     }
 
     private void onAssignCustomer(RoomVM room) {
-        // Create a dialog to input customer phone number
-        Dialog<String> dialog = new Dialog<>();
-        dialog.setTitle("Assign Customer to Room " + room.roomNumber());
-        dialog.setHeaderText("Enter customer phone number to assign to room " + room.roomNumber());
+        // Create a dialog to select customers
+        Dialog<ObservableList<String>> dialog = new Dialog<>();
+        dialog.setTitle("Assign Customers to Room " + room.roomNumber());
+        dialog.setHeaderText("Select customers to assign to room " + room.roomNumber());
 
         // Set the button types
         ButtonType assignButtonType = new ButtonType("Assign", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(assignButtonType, ButtonType.CANCEL);
 
-        // Create input fields
-        TextField phoneField = new TextField();
-        phoneField.setPromptText("Phone Number");
+        // Create ListView for customer selection
+        ListView<String> customerListView = new ListView<>();
+        customerListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        customerListView.setPrefHeight(200);
+        Map<String, String> customerMap = CheckinRepository.getAllCustomers();
+        customerListView.setItems(FXCollections.observableArrayList(customerMap.keySet()));
+
         VBox content = new VBox(10);
-        content.getChildren().addAll(new Label("Phone Number:"), phoneField);
+        content.getChildren().addAll(new Label("Customers:"), customerListView);
         dialog.getDialogPane().setContent(content);
 
-        // Enable the Assign button only if phone is entered
+        // Enable the Assign button only if at least one customer is selected
         dialog.getDialogPane().lookupButton(assignButtonType).setDisable(true);
-        phoneField.textProperty().addListener((observable, oldValue, newValue) ->
-            dialog.getDialogPane().lookupButton(assignButtonType).setDisable(newValue.trim().isEmpty())
+        customerListView.getSelectionModel().getSelectedItems().addListener((javafx.beans.Observable observable) ->
+            dialog.getDialogPane().lookupButton(assignButtonType).setDisable(
+                customerListView.getSelectionModel().getSelectedItems().isEmpty()
+            )
         );
 
         // Handle the result
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == assignButtonType) {
-                return phoneField.getText();
+                return customerListView.getSelectionModel().getSelectedItems();
             }
             return null;
         });
 
-        dialog.showAndWait().ifPresent(phone -> {
+        dialog.showAndWait().ifPresent(selectedCustomers -> {
             try {
-                // Assign customer to room in the database
-                String customerId = CheckinRepository.assignCustomerToRoom(stayingId, room.roomNumber(), phone);
-                if (customerId != null) {
-                    // Refresh the table to show updated customer
-                    populateRoomTable(currentBooking);
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Customer assigned successfully.");
+                boolean success = true;
+                for (String customerName : selectedCustomers) {
+                    String customerId = customerMap.get(customerName);
+                    if (customerId != null) {
+                        // Assign customer to room
+                        CheckinRepository.assignCustomerToRoom(stayingId, room.roomNumber(), customerId);
+                    } else {
+                        success = false;
+                    }
+                }
+                // Refresh the table to show updated customers
+                populateRoomTable(currentBooking);
+                if (success) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Customers assigned successfully.");
                     alert.showAndWait();
                 } else {
-                    Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to assign customer. Customer not found.");
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to assign one or more customers.");
                     alert.showAndWait();
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to assign customer: " + e.getMessage());
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to assign customers: " + e.getMessage());
+                alert.showAndWait();
+            }
+        });
+    }
+
+    private void onAssignService(RoomVM room) {
+        // Create a dialog to select services
+        Dialog<ObservableList<String>> dialog = new Dialog<>();
+        dialog.setTitle("Assign Services to Room " + room.roomNumber());
+        dialog.setHeaderText("Select services to assign to room " + room.roomNumber());
+
+        // Set the button types
+        ButtonType assignButtonType = new ButtonType("Assign", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(assignButtonType, ButtonType.CANCEL);
+
+        // Create ListView for service selection
+        ListView<String> serviceListView = new ListView<>();
+        serviceListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        serviceListView.setPrefHeight(200);
+        Map<String, String> serviceMap = CheckinRepository.getAllServices();
+        serviceListView.setItems(FXCollections.observableArrayList(serviceMap.keySet()));
+
+        VBox content = new VBox(10);
+        content.getChildren().addAll(new Label("Services:"), serviceListView);
+        dialog.getDialogPane().setContent(content);
+
+        // Enable the Assign button only if at least one service is selected
+        dialog.getDialogPane().lookupButton(assignButtonType).setDisable(true);
+        serviceListView.getSelectionModel().getSelectedItems().addListener((javafx.beans.Observable observable) ->
+            dialog.getDialogPane().lookupButton(assignButtonType).setDisable(
+                serviceListView.getSelectionModel().getSelectedItems().isEmpty()
+            )
+        );
+
+        // Handle the result
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == assignButtonType) {
+                return serviceListView.getSelectionModel().getSelectedItems();
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(selectedServices -> {
+            try {
+                boolean success = true;
+                for (String serviceName : selectedServices) {
+                    String serviceId = serviceMap.get(serviceName);
+                    if (serviceId != null) {
+                        // Assign service to room
+                        CheckinRepository.assignServiceToRoom(stayingId, room.roomNumber(), serviceId);
+                    } else {
+                        success = false;
+                    }
+                }
+                // Refresh the table to show updated services
+                populateRoomTable(currentBooking);
+                if (success) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Services assigned successfully.");
+                    alert.showAndWait();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to assign one or more services.");
+                    alert.showAndWait();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to assign services: " + e.getMessage());
                 alert.showAndWait();
             }
         });
