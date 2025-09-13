@@ -4,7 +4,6 @@ import HotelApp.model.Checkin;
 import HotelApp.repository.CheckinRepository;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -353,8 +352,60 @@ public class CheckInFormController {
 
     @FXML
     private void onSave(ActionEvent event) {
-        // TODO: Implement logic to save booking
-        System.out.println("Save clicked");
+        // Validate inputs
+        String paymentMethod = cbPayment.getValue();
+        String depositText = txtDeposit.getText();
+        String booker = txtBooker.getText();
+        String phone = txtPhone.getText();
+
+        if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Payment method is required.");
+            alert.showAndWait();
+            return;
+        }
+
+        int depositAmount;
+        try {
+            depositAmount = depositText.isEmpty() ? 0 : Integer.parseInt(depositText);
+            if (depositAmount < 0) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Deposit amount cannot be negative.");
+                alert.showAndWait();
+                return;
+            }
+        } catch (NumberFormatException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid deposit amount format.");
+            alert.showAndWait();
+            return;
+        }
+
+        if (booker.trim().isEmpty() || phone.trim().isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Booker name and phone are required.");
+            alert.showAndWait();
+            return;
+        }
+
+        try {
+            // Update Booking_Management and Staying_Management
+            CheckinRepository.updateBookingAndStay(
+                currentBooking.getGuestPhone(),
+                currentBooking.getGuestName(),
+                stayingId,
+                paymentMethod,
+                depositAmount
+            );
+
+            // Show success message
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Booking and stay updated successfully.");
+            alert.showAndWait();
+
+            // Refresh the table
+            populateRoomTable(currentBooking);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to save changes: " + e.getMessage());
+            alert.showAndWait();
+        }
     }
 
     @FXML

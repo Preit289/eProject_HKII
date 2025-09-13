@@ -364,4 +364,74 @@ public class CheckinRepository {
             throw e;
         }
     }
+
+    public static void updateBookingAndStay(String guestPhone, String guestName, String stayingId, 
+                                          String paymentMethod, int depositAmount) throws SQLException {
+        try (Connection conn = DButil.getConnection()) {
+            conn.setAutoCommit(false);
+
+            // Get Booking_id based on guest phone and name
+            String findBookingIdSql = """
+                SELECT Booking_id
+                FROM Booking_Management
+                WHERE Book_contact = ? AND Book_by = ?
+            """;
+            PreparedStatement findStmt = conn.prepareStatement(findBookingIdSql);
+            findStmt.setString(1, guestPhone);
+            findStmt.setString(2, guestName);
+            ResultSet rs = findStmt.executeQuery();
+            if (!rs.next()) {
+                throw new SQLException("Booking not found for phone: " + guestPhone + " and name: " + guestName);
+            }
+            String bookingId = rs.getString("Booking_id");
+
+            // Calculate total amount (room prices + service prices)
+            String totalAmountSql = """
+                SELECT 
+                    COALESCE(SUM(rm.Room_price), 0) + COALESCE(SUM(sm.Service_price), 0) AS Total
+                FROM Booking_Room br
+                JOIN Room_Management rm ON br.Room_id = rm.Room_id
+                LEFT JOIN Staying_Room_Service srs ON br.Room_id = srs.Room_id AND srs.Staying_id = ?
+                LEFT JOIN Service_Management sm ON srs.Service_id = sm.Service_id
+                WHERE br.Booking_id = ?
+                GROUP BY br.Booking_id
+            """;
+            PreparedStatement totalStmt = conn.prepareStatement(totalAmountSql);
+            totalStmt.setString(1, stayingId);
+            totalStmt.setString(2, bookingId);
+            ResultSet totalRs = totalStmt.executeQuery();
+            int totalAmount = totalRs.next() ? totalRs.getInt("Total") : 0;
+
+            // Update Booking_Management
+            String updateBookingSql = """
+                UPDATE Booking_Management
+                SET Payment_method = ?, Deposit_amount = ?, Updated_at = GETDATE()
+                WHERE Booking_id = ?
+            """;
+            PreparedStatement updateBookingStmt = conn.prepareStatement(updateBookingSql);
+            updateBookingStmt.setString(1, paymentMethod);
+            updateBookingStmt.setInt(2, depositAmount);
+            updateBookingStmt.setString(3, bookingId);
+            updateBookingStmt.executeUpdate();
+
+            // Update Staying_Management
+            String updateStayingSql = """
+                UPDATE Staying_Management
+                SET Payment_method = ?, Total_amount = ?, Updated_at = GETDATE()
+                WHERE Staying_id = ?
+            """;
+            PreparedStatement updateStayingStmt = conn.prepareStatement(updateStayingSql);
+            updateStayingStmt.setString(1, paymentMethod);
+            updateStayingStmt.setInt(2, totalAmount);
+            updateStayingStmt.setString(3, stayingId);
+            updateStayingStmt.executeUpdate();
+
+            // Commit transaction
+            conn.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 }
