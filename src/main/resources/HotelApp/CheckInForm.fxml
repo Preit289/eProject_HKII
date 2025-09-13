@@ -4,51 +4,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<!--<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="HotelApp.BookingFormController" stylesheets="@HotelApp/styles.css"
-            prefWidth="800" prefHeight="520">
-
-    <top><Label fx:id="lblTitle" styleClass="page-title" text="Booking"/></top>
-
-    <center>
-        <GridPane hgap="8" vgap="8" styleClass="view-pane">
-            <columnConstraints>
-                <ColumnConstraints percentWidth="20"/><ColumnConstraints percentWidth="30"/>
-                <ColumnConstraints percentWidth="20"/><ColumnConstraints percentWidth="30"/>
-            </columnConstraints>
-
-            <Label text="Booker"/><TextField fx:id="txtBooker" GridPane.columnIndex="1"/>
-            <Label text="Phone" GridPane.columnIndex="2"/><TextField fx:id="txtPhone" GridPane.columnIndex="3"/>
-
-            <Label text="Payment" GridPane.rowIndex="1"/><ComboBox fx:id="cbPayment" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-            <Label text="Deposit"  GridPane.columnIndex="2" GridPane.rowIndex="1"/><TextField fx:id="txtDeposit" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
-
-            <Label text="Rooms" styleClass="section-title" GridPane.rowIndex="2"/>
-            <HBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                <Button text="Add room"    onAction="#onAddRoom"    styleClass="button-secondary"/>
-                <Button text="Remove room" onAction="#onRemoveRoom" styleClass="button-secondary"/>
-            </HBox>
-
-            <TableView fx:id="tblRooms" GridPane.rowIndex="3" GridPane.columnSpan="4" prefHeight="320" styleClass="table-view">
-                <columns>
-                    <TableColumn fx:id="colRoomNum" text="Room No" prefWidth="120"/>
-                    <TableColumn fx:id="colCategory" text="Category" prefWidth="140"/>
-                    <TableColumn fx:id="colQuality"  text="Quality"  prefWidth="140"/>
-                    <TableColumn fx:id="colPrice"    text="Price"    prefWidth="120"/>
-                </columns>
-            </TableView>
-        </GridPane>
-    </center>
-
-    <bottom>
-        <HBox spacing="8" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-            <Button text="Delete" onAction="#onDelete" fx:id="btnDelete" styleClass="button-secondary"/>
-            <Button text="Save"   onAction="#onSave"   fx:id="btnSave"   styleClass="button-primary"/>
-            <Button text="Close"  onAction="#onClose"  styleClass="button-secondary"/>
-        </HBox>
-    </bottom>
-</BorderPane>-->
-
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
             fx:controller="HotelApp.CheckInFormController" stylesheets="@HotelApp/styles.css"
             prefWidth="800" prefHeight="520">
