@@ -8,7 +8,7 @@
             fx:controller="HotelApp.CheckInFormController" stylesheets="@HotelApp/styles.css"
             prefWidth="800" prefHeight="520">
 
-    <top><Label fx:id="lblTitle" styleClass="page-title" text="Booking"/></top>
+    <top><Label fx:id="lblTitle" styleClass="page-title" text="Check-in"/></top>
 
     <center>
         <GridPane hgap="8" vgap="8" styleClass="view-pane">
@@ -21,7 +21,7 @@
             <Label text="Phone" GridPane.columnIndex="2"/><TextField fx:id="txtPhone" GridPane.columnIndex="3"/>
 
             <Label text="Payment" GridPane.rowIndex="1"/><ComboBox fx:id="cbPayment" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-            <Label text="Deposit"  GridPane.columnIndex="2" GridPane.rowIndex="1"/><TextField fx:id="txtDeposit" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+            <Label text="Deposit" GridPane.columnIndex="2" GridPane.rowIndex="1"/><TextField fx:id="txtDeposit" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
 
             <Label text="Rooms" styleClass="section-title" GridPane.rowIndex="2"/>
             <HBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="2">
@@ -31,12 +31,13 @@
 
             <TableView fx:id="tblRooms" GridPane.rowIndex="3" GridPane.columnSpan="4" prefHeight="320" styleClass="table-view">
                 <columns>
-                    <TableColumn fx:id="colRoomNum" text="Room No" prefWidth="100"/>
-                    <TableColumn fx:id="colCategory" text="Category" prefWidth="120"/>
-                    <TableColumn fx:id="colQuality"  text="Quality"  prefWidth="120"/>
-                    <TableColumn fx:id="colPrice"    text="Price"    prefWidth="100"/>
-                    <TableColumn fx:id="colCustomer" text="Customer" prefWidth="140"/>
-                    <TableColumn fx:id="colServices" text="Services" prefWidth="140"/>
+                    <TableColumn fx:id="colRoomNum" text="Room No" prefWidth="80"/>
+                    <TableColumn fx:id="colCategory" text="Category" prefWidth="100"/>
+                    <TableColumn fx:id="colQuality"  text="Quality"  prefWidth="100"/>
+                    <TableColumn fx:id="colPrice"    text="Price"    prefWidth="80"/>
+                    <TableColumn fx:id="colCustomer" text="Customer" prefWidth="120"/>
+                    <TableColumn fx:id="colServices" text="Services" prefWidth="120"/>
+                    <TableColumn fx:id="colAssign"   text="Assign"   prefWidth="100"/>
                 </columns>
             </TableView>
         </GridPane>

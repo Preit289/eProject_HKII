@@ -1,166 +1,3 @@
-////package HotelApp;
-////
-////import javafx.fxml.FXML;
-////import javafx.scene.control.*;
-////import javafx.scene.layout.BorderPane;
-////import javafx.beans.property.*;
-////import javafx.collections.FXCollections;
-////import javafx.event.ActionEvent;
-////import javafx.stage.Stage;
-////
-////public class CheckInFormController {
-////
-////    @FXML private BorderPane rootPane;
-////    @FXML private Label lblTitle;
-////    @FXML private TextField txtBooker;
-////    @FXML private TextField txtPhone;
-////    @FXML private ComboBox<String> cbPayment;
-////    @FXML private TextField txtDeposit;
-////    @FXML private Button btnAddRoom;
-////    @FXML private Button btnRemoveRoom;
-////    @FXML private TableView<RoomVM> tblRooms;
-////    @FXML private TableColumn<RoomVM, String> colRoomNum;
-////    @FXML private TableColumn<RoomVM, String> colCategory;
-////    @FXML private TableColumn<RoomVM, String> colQuality;
-////    @FXML private TableColumn<RoomVM, Number> colPrice;
-////    @FXML private Button btnDelete;
-////    @FXML private Button btnSave;
-////    @FXML private Button btnClose;
-////
-////    // Simple record for room view model
-////    public record RoomVM(String roomNumber, String category, String quality, double price) {}
-////
-////    @FXML
-////    private void initialize() {
-////        // Set up ComboBox with payment options
-////        cbPayment.setItems(FXCollections.observableArrayList("Cash", "Credit Card", "Debit Card"));
-////
-////        // Configure table columns
-////        colRoomNum.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().roomNumber()));
-////        colCategory.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().category()));
-////        colQuality.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().quality()));
-////        colPrice.setCellValueFactory(c -> new SimpleDoubleProperty(c.getValue().price()));
-////
-////        // Initialize table with empty data
-////        tblRooms.setItems(FXCollections.observableArrayList());
-////    }
-////
-////    @FXML
-////    private void onAddRoom(ActionEvent event) {
-////        // TODO: Implement logic to add a room
-////        System.out.println("Add Room clicked");
-////    }
-////
-////    @FXML
-////    private void onRemoveRoom(ActionEvent event) {
-////        // TODO: Implement logic to remove selected room
-////        System.out.println("Remove Room clicked");
-////    }
-////
-////    @FXML
-////    private void onDelete(ActionEvent event) {
-////        // TODO: Implement logic to delete booking
-////        System.out.println("Delete clicked");
-////    }
-////
-////    @FXML
-////    private void onSave(ActionEvent event) {
-////        // TODO: Implement logic to save booking
-////        System.out.println("Save clicked");
-////    }
-////
-////    @FXML
-////    private void onClose(ActionEvent event) {
-////        // Close the window
-////        Stage stage = (Stage) btnClose.getScene().getWindow();
-////        stage.close();
-////    }
-////}
-//
-//package HotelApp;
-//
-//import javafx.fxml.FXML;
-//import javafx.scene.control.*;
-//import javafx.scene.layout.BorderPane;
-//import javafx.beans.property.*;
-//import javafx.collections.FXCollections;
-//import javafx.event.ActionEvent;
-//import javafx.stage.Stage;
-//
-//public class CheckInFormController {
-//
-//    @FXML private BorderPane rootPane;
-//    @FXML private Label lblTitle;
-//    @FXML private TextField txtBooker;
-//    @FXML private TextField txtPhone;
-//    @FXML private ComboBox<String> cbPayment;
-//    @FXML private TextField txtDeposit;
-//    @FXML private Button btnAddRoom;
-//    @FXML private Button btnRemoveRoom;
-//    @FXML private TableView<RoomVM> tblRooms;
-//    @FXML private TableColumn<RoomVM, String> colRoomNum;
-//    @FXML private TableColumn<RoomVM, String> colCategory;
-//    @FXML private TableColumn<RoomVM, String> colQuality;
-//    @FXML private TableColumn<RoomVM, Number> colPrice;
-//    @FXML private TableColumn<RoomVM, String> colCustomer;
-//    @FXML private TableColumn<RoomVM, String> colServices;
-//    @FXML private Button btnDelete;
-//    @FXML private Button btnSave;
-//    @FXML private Button btnClose;
-//
-//    // Updated record for room view model with customer and services
-//    public record RoomVM(String roomNumber, String category, String quality, double price, 
-//                        String customer, String services) {}
-//
-//    @FXML
-//    private void initialize() {
-//        // Set up ComboBox with payment options
-//        cbPayment.setItems(FXCollections.observableArrayList("Cash", "Credit Card", "Debit Card"));
-//
-//        // Configure table columns
-//        colRoomNum.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().roomNumber()));
-//        colCategory.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().category()));
-//        colQuality.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().quality()));
-//        colPrice.setCellValueFactory(c -> new SimpleDoubleProperty(c.getValue().price()));
-//        colCustomer.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().customer()));
-//        colServices.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().services()));
-//
-//        // Initialize table with empty data
-//        tblRooms.setItems(FXCollections.observableArrayList());
-//    }
-//
-//    @FXML
-//    private void onAddRoom(ActionEvent event) {
-//        // TODO: Implement logic to add a room
-//        System.out.println("Add Room clicked");
-//    }
-//
-//    @FXML
-//    private void onRemoveRoom(ActionEvent event) {
-//        // TODO: Implement logic to remove selected room
-//        System.out.println("Remove Room clicked");
-//    }
-//
-//    @FXML
-//    private void onDelete(ActionEvent event) {
-//        // TODO: Implement logic to delete booking
-//        System.out.println("Delete clicked");
-//    }
-//
-//    @FXML
-//    private void onSave(ActionEvent event) {
-//        // TODO: Implement logic to save booking
-//        System.out.println("Save clicked");
-//    }
-//
-//    @FXML
-//    private void onClose(ActionEvent event) {
-//        // Close the window
-//        Stage stage = (Stage) btnClose.getScene().getWindow();
-//        stage.close();
-//    }
-//}
-
 package HotelApp;
 
 import HotelApp.model.Checkin;
@@ -170,11 +7,12 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.stage.Stage;
 import java.sql.*;
 import HotelApp.db.DButil;
-import javafx.collections.ObservableList;
+import javafx.scene.layout.VBox;
 
 public class CheckInFormController {
 
@@ -193,11 +31,13 @@ public class CheckInFormController {
     @FXML private TableColumn<RoomVM, Number> colPrice;
     @FXML private TableColumn<RoomVM, String> colCustomer;
     @FXML private TableColumn<RoomVM, String> colServices;
+    @FXML private TableColumn<RoomVM, Void> colAssign;
     @FXML private Button btnDelete;
     @FXML private Button btnSave;
     @FXML private Button btnClose;
 
     private String stayingId;
+    private Checkin currentBooking;
 
     // Updated record for room view model with customer and services
     public record RoomVM(String roomNumber, String category, String quality, double price, 
@@ -216,12 +56,33 @@ public class CheckInFormController {
         colCustomer.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().customer()));
         colServices.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().services()));
 
+        // Set up Assign button column
+        colAssign.setCellFactory(param -> new TableCell<RoomVM, Void>() {
+            private final Button assignButton = new Button("Assign");
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    assignButton.setOnAction(event -> {
+                        RoomVM room = getTableView().getItems().get(getIndex());
+                        onAssignCustomer(room);
+                    });
+                    setGraphic(assignButton);
+                    setText(null);
+                }
+            }
+        });
+
         // Initialize table with empty data
         tblRooms.setItems(FXCollections.observableArrayList());
     }
 
     public void setBookingData(Checkin booking, String stayingId) {
         this.stayingId = stayingId;
+        this.currentBooking = booking;
 
         // Populate form fields
         txtBooker.setText(booking.getGuestName());
@@ -284,7 +145,7 @@ public class CheckInFormController {
             FROM Booking_Management bm
             JOIN Booking_Room br ON bm.Booking_id = br.Booking_id
             JOIN Room_Management rm ON br.Room_id = rm.Room_id
-            LEFT JOIN Staying_Room_Customer src ON rm.Room_id = src.Room_id
+            LEFT JOIN Staying_Room_Customer src ON rm.Room_id = src.Room_id AND src.Staying_id = ?
             LEFT JOIN Customer_Management cm ON src.Customer_id = cm.Customer_id
             LEFT JOIN Staying_Room_Service srs ON rm.Room_id = srs.Room_id AND srs.Staying_id = ?
             LEFT JOIN Service_Management sm ON srs.Service_id = sm.Service_id
@@ -295,7 +156,8 @@ public class CheckInFormController {
         try (Connection conn = DButil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
-            pstmt.setString(2, booking.getGuestPhone());
+            pstmt.setString(2, stayingId);
+            pstmt.setString(3, booking.getGuestPhone());
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
@@ -313,6 +175,58 @@ public class CheckInFormController {
         }
 
         tblRooms.setItems(rooms);
+    }
+
+    private void onAssignCustomer(RoomVM room) {
+        // Create a dialog to input customer phone number
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Assign Customer to Room " + room.roomNumber());
+        dialog.setHeaderText("Enter customer phone number to assign to room " + room.roomNumber());
+
+        // Set the button types
+        ButtonType assignButtonType = new ButtonType("Assign", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(assignButtonType, ButtonType.CANCEL);
+
+        // Create input fields
+        TextField phoneField = new TextField();
+        phoneField.setPromptText("Phone Number");
+        VBox content = new VBox(10);
+        content.getChildren().addAll(new Label("Phone Number:"), phoneField);
+        dialog.getDialogPane().setContent(content);
+
+        // Enable the Assign button only if phone is entered
+        dialog.getDialogPane().lookupButton(assignButtonType).setDisable(true);
+        phoneField.textProperty().addListener((observable, oldValue, newValue) ->
+            dialog.getDialogPane().lookupButton(assignButtonType).setDisable(newValue.trim().isEmpty())
+        );
+
+        // Handle the result
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == assignButtonType) {
+                return phoneField.getText();
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(phone -> {
+            try {
+                // Assign customer to room in the database
+                String customerId = CheckinRepository.assignCustomerToRoom(stayingId, room.roomNumber(), phone);
+                if (customerId != null) {
+                    // Refresh the table to show updated customer
+                    populateRoomTable(currentBooking);
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Customer assigned successfully.");
+                    alert.showAndWait();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to assign customer. Customer not found.");
+                    alert.showAndWait();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to assign customer: " + e.getMessage());
+                alert.showAndWait();
+            }
+        });
     }
 
     @FXML

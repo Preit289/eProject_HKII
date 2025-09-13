@@ -201,9 +201,104 @@ public class CheckinRepository {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            throw e; // Re-throw to be handled by the caller
+            throw e;
         }
 
         return stayingId;
+    }
+
+    public static String assignCustomerToRoom(String stayingId, String roomNumber, String phone) throws SQLException {
+        try (Connection conn = DButil.getConnection()) {
+            conn.setAutoCommit(false);
+
+            // Find Room_id by Room_num
+            String findRoomIdSql = """
+                SELECT Room_id
+                FROM Room_Management
+                WHERE Room_num = ?
+            """;
+            PreparedStatement findRoomStmt = conn.prepareStatement(findRoomIdSql);
+            findRoomStmt.setString(1, roomNumber);
+            ResultSet roomRs = findRoomStmt.executeQuery();
+            if (!roomRs.next()) {
+                throw new SQLException("Room not found: " + roomNumber);
+            }
+            String roomId = roomRs.getString("Room_id");
+
+            // Check if customer exists by phone number
+            String findCustomerSql = """
+                SELECT Customer_id, Customer_name
+                FROM Customer_Management
+                WHERE Phone_num = ?
+            """;
+            PreparedStatement findCustomerStmt = conn.prepareStatement(findCustomerSql);
+            findCustomerStmt.setString(1, phone);
+            ResultSet customerRs = findCustomerStmt.executeQuery();
+            String customerId;
+
+            if (customerRs.next()) {
+                customerId = customerRs.getString("Customer_id");
+            } else {
+                // Create a new customer
+                customerId = generateNewCustomerId(conn);
+                String insertCustomerSql = """
+                    INSERT INTO Customer_Management (
+                        Customer_id, Customer_name, Phone_num, Is_foreigner, Gender, Is_child
+                    )
+                    VALUES (?, ?, ?, 0, 1, 0)
+                """;
+                PreparedStatement insertCustomerStmt = conn.prepareStatement(insertCustomerSql);
+                insertCustomerStmt.setString(1, customerId);
+                insertCustomerStmt.setString(2, "Customer_" + phone); // Placeholder name
+                insertCustomerStmt.setString(3, phone);
+                insertCustomerStmt.executeUpdate();
+            }
+
+            // Check if the customer is already assigned to the room
+            String checkAssignmentSql = """
+                SELECT 1
+                FROM Staying_Room_Customer
+                WHERE Staying_id = ? AND Room_id = ? AND Customer_id = ?
+            """;
+            PreparedStatement checkAssignmentStmt = conn.prepareStatement(checkAssignmentSql);
+            checkAssignmentStmt.setString(1, stayingId);
+            checkAssignmentStmt.setString(2, roomId);
+            checkAssignmentStmt.setString(3, customerId);
+            ResultSet checkRs = checkAssignmentStmt.executeQuery();
+            if (checkRs.next()) {
+                conn.commit();
+                return customerId; // Already assigned
+            }
+
+            // Assign customer to room
+            String assignSql = """
+                INSERT INTO Staying_Room_Customer (Staying_id, Room_id, Customer_id)
+                VALUES (?, ?, ?)
+            """;
+            PreparedStatement assignStmt = conn.prepareStatement(assignSql);
+            assignStmt.setString(1, stayingId);
+            assignStmt.setString(2, roomId);
+            assignStmt.setString(3, customerId);
+            assignStmt.executeUpdate();
+
+            // Commit transaction
+            conn.commit();
+            return customerId;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    private static String generateNewCustomerId(Connection conn) throws SQLException {
+        String sql = "SELECT dbo.fn_GenerateNextCustomerID() AS Customer_id";
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getString("Customer_id");
+            }
+            throw new SQLException("Failed to generate new Customer_id");
+        }
     }
 }
