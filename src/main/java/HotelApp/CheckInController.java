@@ -1,8 +1,7 @@
 package HotelApp;
 
-import HotelApp.repository.CheckinRepository;
 import HotelApp.model.Checkin;
-import java.io.IOException;
+import HotelApp.repository.CheckinRepository;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.event.ActionEvent;
@@ -11,7 +10,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.io.IOException;
 import java.sql.SQLException;
+import javafx.scene.layout.VBox;
 
 public class CheckInController {
 
@@ -25,7 +26,8 @@ public class CheckInController {
     @FXML private TableColumn<Checkin, String> colCheckOut;
     @FXML private TextField txtSearchPhone;
     @FXML private Button btnSearch;
-    @FXML private Button btnBooking;
+    @FXML private Button btnCheckin;
+    @FXML private Button btnUpdate;
 
     @FXML
     private void initialize() {
@@ -44,21 +46,24 @@ public class CheckInController {
         // Set single selection mode
         tblBookings.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
-        // Disable "Check In" button when no row is selected
-        btnBooking.disableProperty().bind(
+        // Disable buttons when no row is selected
+        btnCheckin.disableProperty().bind(
+            tblBookings.getSelectionModel().selectedItemProperty().isNull()
+        );
+        btnUpdate.disableProperty().bind(
             tblBookings.getSelectionModel().selectedItemProperty().isNull()
         );
 
         // Add double-click handler to open check-in form
         tblBookings.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2 && !tblBookings.getSelectionModel().isEmpty()) {
-                onCheckIn();
+                onUpdate();
             }
         });
     }
 
     @FXML
-    private void onCheckIn() {
+    private void onCheckin() {
         Checkin selectedBooking = tblBookings.getSelectionModel().getSelectedItem();
         if (selectedBooking == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING, "Please select a booking to check in.");
@@ -70,11 +75,108 @@ public class CheckInController {
             // Create a new Staying_Management record or get existing Staying_id
             String stayingId = CheckinRepository.createStayingFromBooking(selectedBooking);
 
-            // Load the BookingForm
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/HotelApp/BookingForm.fxml"));
+            // Get current Checkin_date
+            String currentCheckinDate = CheckinRepository.getCheckinDate(stayingId);
+            String displayDate = currentCheckinDate.isEmpty() ? "Not set" : currentCheckinDate;
+
+            // Show confirmation dialog
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Confirm Check-in");
+            dialog.setHeaderText("Confirm check-in for " + selectedBooking.getGuestName());
+            dialog.getDialogPane().setContent(
+                new VBox(10, new Label("Current Check-in Date: " + displayDate),
+                        new Label("New Check-in Date: " + java.time.LocalDateTime.now().toString()))
+            );
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+            dialog.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    try {
+                        // Perform check-in
+                        CheckinRepository.performCheckin(stayingId);
+
+                        // Show success message
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION, 
+                            "Check-in performed successfully for " + selectedBooking.getGuestName());
+                        alert.showAndWait();
+
+                        // Refresh the table
+                        tblBookings.setItems(CheckinRepository.getAllBookings());
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        Alert alert = new Alert(Alert.AlertType.ERROR, 
+                            "Failed to perform check-in: " + e.getMessage());
+                        alert.showAndWait();
+                    }
+                }
+            });
+
+        } catch (SQLException e) {
+            if (e.getMessage().contains("A stay has already been created")) {
+                // Extract Staying_id from the error message
+                String stayingId = e.getMessage().split("Staying_id: ")[1].split("\\)")[0];
+
+                // Get current Checkin_date
+                String currentCheckinDate = CheckinRepository.getCheckinDate(stayingId);
+                String displayDate = currentCheckinDate.isEmpty() ? "Not set" : currentCheckinDate;
+
+                // Show confirmation dialog
+                Dialog<ButtonType> dialog = new Dialog<>();
+                dialog.setTitle("Confirm Check-in");
+                dialog.setHeaderText("Confirm check-in for " + selectedBooking.getGuestName());
+                dialog.getDialogPane().setContent(
+                    new VBox(10, new Label("Current Check-in Date: " + displayDate),
+                            new Label("New Check-in Date: " + java.time.LocalDateTime.now().toString()))
+                );
+                dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+                dialog.showAndWait().ifPresent(response -> {
+                    if (response == ButtonType.OK) {
+                        try {
+                            // Perform check-in
+                            CheckinRepository.performCheckin(stayingId);
+
+                            // Show success message
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION, 
+                                "Check-in performed successfully for " + selectedBooking.getGuestName());
+                            alert.showAndWait();
+
+                            // Refresh the table
+                            tblBookings.setItems(CheckinRepository.getAllBookings());
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                            Alert alert = new Alert(Alert.AlertType.ERROR, 
+                                "Failed to perform check-in: " + ex.getMessage());
+                            alert.showAndWait();
+                        }
+                    }
+                });
+            } else {
+                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to create stay: " + e.getMessage());
+                alert.showAndWait();
+            }
+        }
+    }
+
+    @FXML
+    private void onUpdate() {
+        Checkin selectedBooking = tblBookings.getSelectionModel().getSelectedItem();
+        if (selectedBooking == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Please select a booking to update.");
+            alert.showAndWait();
+            return;
+        }
+
+        try {
+            // Create a new Staying_Management record or get existing Staying_id
+            String stayingId = CheckinRepository.createStayingFromBooking(selectedBooking);
+
+            // Load the CheckInForm
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/HotelApp/CheckInForm.fxml"));
             Parent formRoot = loader.load();
 
-            // Pass data to BookingFormController
+            // Pass data to CheckInFormController
             CheckInFormController controller = loader.getController();
             controller.setBookingData(selectedBooking, stayingId);
 
@@ -84,16 +186,16 @@ public class CheckInController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
 
-            // Refresh the table after check-in
+            // Refresh the table after update
             tblBookings.setItems(CheckinRepository.getAllBookings());
 
         } catch (SQLException e) {
             if (e.getMessage().contains("A stay has already been created")) {
-                // Extract Staying_id from the error message (if needed) or query it
+                // Extract Staying_id from the error message
                 String stayingId = e.getMessage().split("Staying_id: ")[1].split("\\)")[0];
                 
                 try {
-                    // Load the BookingForm with existing Staying_id
+                    // Load the CheckInForm with existing Staying_id
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/HotelApp/CheckInForm.fxml"));
                     Parent formRoot = loader.load();
                     CheckInFormController controller = loader.getController();

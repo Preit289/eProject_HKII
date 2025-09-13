@@ -9,12 +9,12 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.sql.*;
 import HotelApp.db.DButil;
-import javafx.scene.layout.VBox;
-import javafx.scene.control.SelectionMode;
 import java.util.Map;
+import javafx.scene.text.Text;
 
 public class CheckInFormController {
 
@@ -24,6 +24,8 @@ public class CheckInFormController {
     @FXML private TextField txtPhone;
     @FXML private ComboBox<String> cbPayment;
     @FXML private TextField txtDeposit;
+    @FXML private TextField txtCheckinDate;
+    @FXML private TextField txtCheckoutDate;
     @FXML private Button btnAddRoom;
     @FXML private Button btnRemoveRoom;
     @FXML private TableView<RoomVM> tblRooms;
@@ -36,13 +38,13 @@ public class CheckInFormController {
     @FXML private TableColumn<RoomVM, Void> colAssign;
     @FXML private TableColumn<RoomVM, Void> colAssignService;
     @FXML private Button btnDelete;
-    @FXML private Button btnSave;
+    @FXML private Button btnUpdate;
     @FXML private Button btnClose;
 
     private String stayingId;
     private Checkin currentBooking;
 
-    // Updated record for room view model with customer and services
+    // Record for room view model with customer and services
     public record RoomVM(String roomNumber, String category, String quality, double price, 
                          String customer, String services) {}
 
@@ -56,8 +58,44 @@ public class CheckInFormController {
         colCategory.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().category()));
         colQuality.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().quality()));
         colPrice.setCellValueFactory(c -> new SimpleDoubleProperty(c.getValue().price()));
+
+        // Custom CellFactory for multi-line Customer column
         colCustomer.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().customer()));
+        colCustomer.setCellFactory(column -> new TableCell<RoomVM, String>() {
+            private final Text text = new Text();
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    text.setText(item);
+                    text.setWrappingWidth(colCustomer.getWidth() - 10); // Adjust for padding
+                    setGraphic(text);
+                    setPrefHeight(text.getBoundsInLocal().getHeight() + 10); // Adjust cell height dynamically
+                }
+            }
+        });
+
+        // Custom CellFactory for multi-line Services column
         colServices.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().services()));
+        colServices.setCellFactory(column -> new TableCell<RoomVM, String>() {
+            private final Text text = new Text();
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    text.setText(item);
+                    text.setWrappingWidth(colServices.getWidth() - 10); // Adjust for padding
+                    setGraphic(text);
+                    setPrefHeight(text.getBoundsInLocal().getHeight() + 10); // Adjust cell height dynamically
+                }
+            }
+        });
 
         // Set up Assign Customer button column
         colAssign.setCellFactory(param -> new TableCell<RoomVM, Void>() {
@@ -112,6 +150,8 @@ public class CheckInFormController {
         txtPhone.setText(booking.getGuestPhone());
         cbPayment.setValue(getPaymentMethod(booking.getGuestPhone()));
         txtDeposit.setText(getDepositAmount(booking.getGuestPhone()));
+        txtCheckinDate.setText(getCheckinDate(stayingId));
+        txtCheckoutDate.setText(getCheckoutDate(stayingId));
 
         // Populate table with room data
         populateRoomTable(booking);
@@ -155,6 +195,44 @@ public class CheckInFormController {
         return "";
     }
 
+    private String getCheckinDate(String stayingId) {
+        String sql = """
+            SELECT Checkin_date
+            FROM Staying_Management
+            WHERE Staying_id = ?
+        """;
+        try (Connection conn = DButil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, stayingId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next() && rs.getTimestamp("Checkin_date") != null) {
+                return rs.getTimestamp("Checkin_date").toString();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    private String getCheckoutDate(String stayingId) {
+        String sql = """
+            SELECT Checkout_date
+            FROM Staying_Management
+            WHERE Staying_id = ?
+        """;
+        try (Connection conn = DButil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, stayingId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next() && rs.getTimestamp("Checkout_date") != null) {
+                return rs.getTimestamp("Checkout_date").toString();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
     private void populateRoomTable(Checkin booking) {
         ObservableList<RoomVM> rooms = FXCollections.observableArrayList();
         String sql = """
@@ -163,8 +241,8 @@ public class CheckInFormController {
                 rm.Room_category,
                 rm.Room_quality,
                 rm.Room_price,
-                STRING_AGG(cm.Customer_name, ', ') AS Customer_names,
-                STRING_AGG(sm.Service_name, ', ') AS Services
+                STRING_AGG(cm.Customer_name, '\n') AS Customer_names,
+                STRING_AGG(sm.Service_name, '\n') AS Services
             FROM Booking_Management bm
             JOIN Booking_Room br ON bm.Booking_id = br.Booking_id
             JOIN Room_Management rm ON br.Room_id = rm.Room_id
@@ -201,16 +279,13 @@ public class CheckInFormController {
     }
 
     private void onAssignCustomer(RoomVM room) {
-        // Create a dialog to select customers
         Dialog<ObservableList<String>> dialog = new Dialog<>();
         dialog.setTitle("Assign Customers to Room " + room.roomNumber());
         dialog.setHeaderText("Select customers to assign to room " + room.roomNumber());
 
-        // Set the button types
         ButtonType assignButtonType = new ButtonType("Assign", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(assignButtonType, ButtonType.CANCEL);
 
-        // Create ListView for customer selection
         ListView<String> customerListView = new ListView<>();
         customerListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         customerListView.setPrefHeight(200);
@@ -221,7 +296,6 @@ public class CheckInFormController {
         content.getChildren().addAll(new Label("Customers:"), customerListView);
         dialog.getDialogPane().setContent(content);
 
-        // Enable the Assign button only if at least one customer is selected
         dialog.getDialogPane().lookupButton(assignButtonType).setDisable(true);
         customerListView.getSelectionModel().getSelectedItems().addListener((javafx.beans.Observable observable) ->
             dialog.getDialogPane().lookupButton(assignButtonType).setDisable(
@@ -229,7 +303,6 @@ public class CheckInFormController {
             )
         );
 
-        // Handle the result
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == assignButtonType) {
                 return customerListView.getSelectionModel().getSelectedItems();
@@ -243,13 +316,11 @@ public class CheckInFormController {
                 for (String customerName : selectedCustomers) {
                     String customerId = customerMap.get(customerName);
                     if (customerId != null) {
-                        // Assign customer to room
                         CheckinRepository.assignCustomerToRoom(stayingId, room.roomNumber(), customerId);
                     } else {
                         success = false;
                     }
                 }
-                // Refresh the table to show updated customers
                 populateRoomTable(currentBooking);
                 if (success) {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, "Customers assigned successfully.");
@@ -267,16 +338,13 @@ public class CheckInFormController {
     }
 
     private void onAssignService(RoomVM room) {
-        // Create a dialog to select services
         Dialog<ObservableList<String>> dialog = new Dialog<>();
         dialog.setTitle("Assign Services to Room " + room.roomNumber());
         dialog.setHeaderText("Select services to assign to room " + room.roomNumber());
 
-        // Set the button types
         ButtonType assignButtonType = new ButtonType("Assign", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(assignButtonType, ButtonType.CANCEL);
 
-        // Create ListView for service selection
         ListView<String> serviceListView = new ListView<>();
         serviceListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         serviceListView.setPrefHeight(200);
@@ -287,7 +355,6 @@ public class CheckInFormController {
         content.getChildren().addAll(new Label("Services:"), serviceListView);
         dialog.getDialogPane().setContent(content);
 
-        // Enable the Assign button only if at least one service is selected
         dialog.getDialogPane().lookupButton(assignButtonType).setDisable(true);
         serviceListView.getSelectionModel().getSelectedItems().addListener((javafx.beans.Observable observable) ->
             dialog.getDialogPane().lookupButton(assignButtonType).setDisable(
@@ -295,7 +362,6 @@ public class CheckInFormController {
             )
         );
 
-        // Handle the result
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == assignButtonType) {
                 return serviceListView.getSelectionModel().getSelectedItems();
@@ -309,13 +375,11 @@ public class CheckInFormController {
                 for (String serviceName : selectedServices) {
                     String serviceId = serviceMap.get(serviceName);
                     if (serviceId != null) {
-                        // Assign service to room
                         CheckinRepository.assignServiceToRoom(stayingId, room.roomNumber(), serviceId);
                     } else {
                         success = false;
                     }
                 }
-                // Refresh the table to show updated services
                 populateRoomTable(currentBooking);
                 if (success) {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, "Services assigned successfully.");
@@ -351,7 +415,7 @@ public class CheckInFormController {
     }
 
     @FXML
-    private void onSave(ActionEvent event) {
+    private void onUpdate(ActionEvent event) {
         // Validate inputs
         String paymentMethod = cbPayment.getValue();
         String depositText = txtDeposit.getText();

@@ -156,22 +156,21 @@ public class CheckinRepository {
                 stayingId = stayingIdRs.getString("Staying_id");
             }
 
-            // Insert into Staying_Management
+            // Insert into Staying_Management with null Checkin_date
             String insertStayingSql = """
                 INSERT INTO Staying_Management (
                     Staying_id, Booking_id, Checkin_date, Checkout_date, 
                     Payment_method, Staying_status, Total_amount, 
                     Created_at, Updated_at, By_role
                 )
-                VALUES (?, ?, ?, ?, ?, 0, ?, GETDATE(), GETDATE(), 'admin')
+                VALUES (?, ?, NULL, ?, ?, 0, ?, GETDATE(), GETDATE(), 'admin')
             """;
             PreparedStatement insertStayingStmt = conn.prepareStatement(insertStayingSql);
             insertStayingStmt.setString(1, stayingId);
             insertStayingStmt.setString(2, bookingId);
-            insertStayingStmt.setTimestamp(3, Timestamp.valueOf(booking.getPlannedCheckIn()));
-            insertStayingStmt.setTimestamp(4, Timestamp.valueOf(booking.getPlannedCheckOut()));
-            insertStayingStmt.setString(5, paymentMethod);
-            insertStayingStmt.setInt(6, totalAmount);
+            insertStayingStmt.setTimestamp(3, Timestamp.valueOf(booking.getPlannedCheckOut()));
+            insertStayingStmt.setString(4, paymentMethod);
+            insertStayingStmt.setInt(5, totalAmount);
             insertStayingStmt.executeUpdate();
 
             // Update Booking_status to 4 (Room received)
@@ -365,6 +364,25 @@ public class CheckinRepository {
         }
     }
 
+    public static String getCheckinDate(String stayingId) {
+        String sql = """
+            SELECT Checkin_date
+            FROM Staying_Management
+            WHERE Staying_id = ?
+        """;
+        try (Connection conn = DButil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, stayingId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next() && rs.getTimestamp("Checkin_date") != null) {
+                return rs.getTimestamp("Checkin_date").toString();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
     public static void updateBookingAndStay(String guestPhone, String guestName, String stayingId, 
                                           String paymentMethod, int depositAmount) throws SQLException {
         try (Connection conn = DButil.getConnection()) {
@@ -425,6 +443,42 @@ public class CheckinRepository {
             updateStayingStmt.setInt(2, totalAmount);
             updateStayingStmt.setString(3, stayingId);
             updateStayingStmt.executeUpdate();
+
+            // Commit transaction
+            conn.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public static void performCheckin(String stayingId) throws SQLException {
+        try (Connection conn = DButil.getConnection()) {
+            conn.setAutoCommit(false);
+
+            // Check if the stay exists
+            String checkStayingSql = """
+                SELECT Staying_id
+                FROM Staying_Management
+                WHERE Staying_id = ?
+            """;
+            PreparedStatement checkStmt = conn.prepareStatement(checkStayingSql);
+            checkStmt.setString(1, stayingId);
+            ResultSet rs = checkStmt.executeQuery();
+            if (!rs.next()) {
+                throw new SQLException("Stay not found: " + stayingId);
+            }
+
+            // Update Staying_Management with current timestamp and status
+            String updateStayingSql = """
+                UPDATE Staying_Management
+                SET Checkin_date = GETDATE(), Staying_status = 1, Updated_at = GETDATE()
+                WHERE Staying_id = ?
+            """;
+            PreparedStatement updateStmt = conn.prepareStatement(updateStayingSql);
+            updateStmt.setString(1, stayingId);
+            updateStmt.executeUpdate();
 
             // Commit transaction
             conn.commit();
