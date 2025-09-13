@@ -11,27 +11,21 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.sql.SQLException;
 
 public class CheckInController {
 
-    @FXML
-    private TableView<Checkin> tblBookings;
-    @FXML
-    private TableColumn<Checkin, String> colGuestName;
-    @FXML
-    private TableColumn<Checkin, String> colGuestPhone;
-    @FXML
-    private TableColumn<Checkin, String> colRoomNumbers;
-    @FXML
-    private TableColumn<Checkin, String> colRoomCategory;
-    @FXML
-    private TableColumn<Checkin, String> colRoomType;
-    @FXML
-    private TableColumn<Checkin, String> colCheckIn;
-    @FXML
-    private TableColumn<Checkin, String> colCheckOut;
-    @FXML
-    private TextField txtSearchPhone;
+    @FXML private TableView<Checkin> tblBookings;
+    @FXML private TableColumn<Checkin, String> colGuestName;
+    @FXML private TableColumn<Checkin, String> colGuestPhone;
+    @FXML private TableColumn<Checkin, String> colRoomNumbers;
+    @FXML private TableColumn<Checkin, String> colRoomCategory;
+    @FXML private TableColumn<Checkin, String> colRoomType;
+    @FXML private TableColumn<Checkin, String> colCheckIn;
+    @FXML private TableColumn<Checkin, String> colCheckOut;
+    @FXML private TextField txtSearchPhone;
+    @FXML private Button btnSearch;
+    @FXML private Button btnBooking;
 
     @FXML
     private void initialize() {
@@ -46,13 +40,43 @@ public class CheckInController {
 
         // Load data from repository
         tblBookings.setItems(CheckinRepository.getAllBookings());
+
+        // Set single selection mode
+        tblBookings.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+        // Disable "Check In" button when no row is selected
+        btnBooking.disableProperty().bind(
+            tblBookings.getSelectionModel().selectedItemProperty().isNull()
+        );
+
+        // Add double-click handler to open check-in form
+        tblBookings.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && !tblBookings.getSelectionModel().isEmpty()) {
+                onCheckIn();
+            }
+        });
     }
 
     @FXML
     private void onCheckIn() {
+        Checkin selectedBooking = tblBookings.getSelectionModel().getSelectedItem();
+        if (selectedBooking == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Please select a booking to check in.");
+            alert.showAndWait();
+            return;
+        }
+
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/HotelApp/CheckInForm.fxml"));
+            // Create a new Staying_Management record or get existing Staying_id
+            String stayingId = CheckinRepository.createStayingFromBooking(selectedBooking);
+
+            // Load the BookingForm
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/HotelApp/BookingForm.fxml"));
             Parent formRoot = loader.load();
+
+            // Pass data to BookingFormController
+            CheckInFormController controller = loader.getController();
+            controller.setBookingData(selectedBooking, stayingId);
 
             Stage stage = new Stage();
             stage.setTitle("Check-in Form");
@@ -60,9 +84,42 @@ public class CheckInController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
 
+            // Refresh the table after check-in
+            tblBookings.setItems(CheckinRepository.getAllBookings());
+
+        } catch (SQLException e) {
+            if (e.getMessage().contains("A stay has already been created")) {
+                // Extract Staying_id from the error message (if needed) or query it
+                String stayingId = e.getMessage().split("Staying_id: ")[1].split("\\)")[0];
+                
+                try {
+                    // Load the BookingForm with existing Staying_id
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/HotelApp/CheckInForm.fxml"));
+                    Parent formRoot = loader.load();
+                    CheckInFormController controller = loader.getController();
+                    controller.setBookingData(selectedBooking, stayingId);
+
+                    Stage stage = new Stage();
+                    stage.setTitle("Check-in Form (Existing Stay)");
+                    stage.setScene(new Scene(formRoot));
+                    stage.initModality(Modality.APPLICATION_MODAL);
+                    stage.showAndWait();
+
+                    // Refresh the table
+                    tblBookings.setItems(CheckinRepository.getAllBookings());
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open check-in form: " + ex.getMessage());
+                    alert.showAndWait();
+                }
+            } else {
+                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to create stay: " + e.getMessage());
+                alert.showAndWait();
+            }
         } catch (IOException e) {
             e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open check-in form.");
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open check-in form: " + e.getMessage());
             alert.showAndWait();
         }
     }

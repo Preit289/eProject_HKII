@@ -50,7 +50,7 @@
 </BorderPane>-->
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="HotelApp.BookingFormController" stylesheets="@HotelApp/styles.css"
+            fx:controller="HotelApp.CheckInFormController" stylesheets="@HotelApp/styles.css"
             prefWidth="800" prefHeight="520">
 
     <top><Label fx:id="lblTitle" styleClass="page-title" text="Booking"/></top>
