@@ -4,64 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<!--<VBox xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="HotelApp.CheckInFormController"
-      spacing="20" alignment="TOP_LEFT" styleClass="view-pane">
-    <padding>
-        <Insets top="10" right="10" bottom="10" left="10"/>
-    </padding>
-
-    <fx:define>
-        <ToggleGroup fx:id="childGroup"/>
-        <ToggleGroup fx:id="foreignerGroup"/>
-        <ToggleGroup fx:id="genderGroup"/>
-    </fx:define>
-
-    <TableView fx:id="tblGuests" VBox.vgrow="ALWAYS">
-        <columns>
-            <TableColumn fx:id="colGuestName" text="Guest name" prefWidth="150"/>
-            <TableColumn fx:id="colRoomNumber" text="Room number" prefWidth="100"/>
-            <TableColumn fx:id="colCapacity" text="Capacity" prefWidth="80"/>
-            <TableColumn fx:id="colType" text="Type" prefWidth="100"/>
-            <TableColumn fx:id="colCheckIn" text="Check-in (Today)" prefWidth="120"/>
-            <TableColumn fx:id="colCheckOut" text="Planned check-out" prefWidth="120"/>
-        </columns>
-    </TableView>
-
-    <GridPane hgap="10" vgap="10">
-        <Label text="Customer name" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-        <TextField fx:id="txtCustomerName" text="Lê Vân A" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-        <Label text="Is child?" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-        <HBox spacing="10" GridPane.columnIndex="3" GridPane.rowIndex="0">
-            <RadioButton fx:id="rbChildYes" text="Yes" toggleGroup="$childGroup"/>
-            <RadioButton fx:id="rbChildNo" text="No" selected="true" toggleGroup="$childGroup"/>
-        </HBox>
-
-        <Label text="Date of birth" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-        <TextField fx:id="txtDateOfBirth" promptText="DD/MM/YYYY" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-        <Label text="Is foreigner?" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
-        <HBox spacing="10" GridPane.columnIndex="3" GridPane.rowIndex="1">
-            <RadioButton fx:id="rbForeignerYes" text="Yes" toggleGroup="$foreignerGroup"/>
-            <RadioButton fx:id="rbForeignerNo" text="No" selected="true" toggleGroup="$foreignerGroup"/>
-        </HBox>
-
-        <Label text="Citizen identification number" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-        <TextField fx:id="txtCitizenId" promptText="XXXX XXXX XXXX" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-        <Label text="Gender" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-        <HBox spacing="10" GridPane.columnIndex="3" GridPane.rowIndex="2">
-            <RadioButton fx:id="rbMale" text="Male" selected="true" toggleGroup="$genderGroup"/>
-            <RadioButton fx:id="rbFemale" text="Female" toggleGroup="$genderGroup"/>
-        </HBox>
-
-        <Label text="Phone number" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-        <TextField fx:id="txtPhoneNumber" promptText="Enter phone number" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-    </GridPane>
-
-    <HBox spacing="10" alignment="CENTER_RIGHT">
-    </HBox>
-</VBox>-->
-
-<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
+<!--<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
             fx:controller="HotelApp.BookingFormController" stylesheets="@HotelApp/styles.css"
             prefWidth="800" prefHeight="520">
 
@@ -92,6 +35,53 @@
                     <TableColumn fx:id="colCategory" text="Category" prefWidth="140"/>
                     <TableColumn fx:id="colQuality"  text="Quality"  prefWidth="140"/>
                     <TableColumn fx:id="colPrice"    text="Price"    prefWidth="120"/>
+                </columns>
+            </TableView>
+        </GridPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="8" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
+            <Button text="Delete" onAction="#onDelete" fx:id="btnDelete" styleClass="button-secondary"/>
+            <Button text="Save"   onAction="#onSave"   fx:id="btnSave"   styleClass="button-primary"/>
+            <Button text="Close"  onAction="#onClose"  styleClass="button-secondary"/>
+        </HBox>
+    </bottom>
+</BorderPane>-->
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="HotelApp.BookingFormController" stylesheets="@HotelApp/styles.css"
+            prefWidth="800" prefHeight="520">
+
+    <top><Label fx:id="lblTitle" styleClass="page-title" text="Booking"/></top>
+
+    <center>
+        <GridPane hgap="8" vgap="8" styleClass="view-pane">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="20"/><ColumnConstraints percentWidth="30"/>
+                <ColumnConstraints percentWidth="20"/><ColumnConstraints percentWidth="30"/>
+            </columnConstraints>
+
+            <Label text="Booker"/><TextField fx:id="txtBooker" GridPane.columnIndex="1"/>
+            <Label text="Phone" GridPane.columnIndex="2"/><TextField fx:id="txtPhone" GridPane.columnIndex="3"/>
+
+            <Label text="Payment" GridPane.rowIndex="1"/><ComboBox fx:id="cbPayment" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <Label text="Deposit"  GridPane.columnIndex="2" GridPane.rowIndex="1"/><TextField fx:id="txtDeposit" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+
+            <Label text="Rooms" styleClass="section-title" GridPane.rowIndex="2"/>
+            <HBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                <Button text="Add room"    onAction="#onAddRoom"    styleClass="button-secondary"/>
+                <Button text="Remove room" onAction="#onRemoveRoom" styleClass="button-secondary"/>
+            </HBox>
+
+            <TableView fx:id="tblRooms" GridPane.rowIndex="3" GridPane.columnSpan="4" prefHeight="320" styleClass="table-view">
+                <columns>
+                    <TableColumn fx:id="colRoomNum" text="Room No" prefWidth="100"/>
+                    <TableColumn fx:id="colCategory" text="Category" prefWidth="120"/>
+                    <TableColumn fx:id="colQuality"  text="Quality"  prefWidth="120"/>
+                    <TableColumn fx:id="colPrice"    text="Price"    prefWidth="100"/>
+                    <TableColumn fx:id="colCustomer" text="Customer" prefWidth="140"/>
+                    <TableColumn fx:id="colServices" text="Services" prefWidth="140"/>
                 </columns>
             </TableView>
         </GridPane>
