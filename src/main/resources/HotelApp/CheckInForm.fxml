@@ -6,7 +6,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
             fx:controller="HotelApp.CheckInFormController" stylesheets="@HotelApp/styles.css"
-            prefWidth="800" prefHeight="560">
+            prefWidth="900" prefHeight="560">
 
     <top><Label fx:id="lblTitle" styleClass="page-title" text="Check-in Details"/></top>
 
@@ -42,6 +42,9 @@
                     <TableColumn fx:id="colServices" text="Services" prefWidth="120"/>
                     <TableColumn fx:id="colAssign"   text="Assign Customer" prefWidth="100"/>
                     <TableColumn fx:id="colAssignService" text="Assign Service" prefWidth="100"/>
+                    <TableColumn fx:id="colRemoveCustomer" text="Remove Customer" prefWidth="100"/>
+                    <TableColumn fx:id="colRemoveService" text="Remove Service" prefWidth="100"/>
+                    <TableColumn fx:id="colEditServiceQty" text="Edit Service Qty" prefWidth="100"/>
                 </columns>
             </TableView>
         </GridPane>

@@ -37,6 +37,9 @@ public class CheckInFormController {
     @FXML private TableColumn<RoomVM, String> colServices;
     @FXML private TableColumn<RoomVM, Void> colAssign;
     @FXML private TableColumn<RoomVM, Void> colAssignService;
+    @FXML private TableColumn<RoomVM, Void> colRemoveCustomer;
+    @FXML private TableColumn<RoomVM, Void> colRemoveService;
+    @FXML private TableColumn<RoomVM, Void> colEditServiceQty;
     @FXML private Button btnDelete;
     @FXML private Button btnUpdate;
     @FXML private Button btnClose;
@@ -71,9 +74,9 @@ public class CheckInFormController {
                     setGraphic(null);
                 } else {
                     text.setText(item);
-                    text.setWrappingWidth(colCustomer.getWidth() - 10); // Adjust for padding
+                    text.setWrappingWidth(colCustomer.getWidth() - 10);
                     setGraphic(text);
-                    setPrefHeight(text.getBoundsInLocal().getHeight() + 10); // Adjust cell height dynamically
+                    setPrefHeight(text.getBoundsInLocal().getHeight() + 10);
                 }
             }
         });
@@ -90,9 +93,9 @@ public class CheckInFormController {
                     setGraphic(null);
                 } else {
                     text.setText(item);
-                    text.setWrappingWidth(colServices.getWidth() - 10); // Adjust for padding
+                    text.setWrappingWidth(colServices.getWidth() - 10);
                     setGraphic(text);
-                    setPrefHeight(text.getBoundsInLocal().getHeight() + 10); // Adjust cell height dynamically
+                    setPrefHeight(text.getBoundsInLocal().getHeight() + 10);
                 }
             }
         });
@@ -137,6 +140,66 @@ public class CheckInFormController {
             }
         });
 
+        // Set up Remove Customer button column
+        colRemoveCustomer.setCellFactory(param -> new TableCell<RoomVM, Void>() {
+            private final Button removeButton = new Button("Remove Customer");
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    removeButton.setOnAction(event -> {
+                        RoomVM room = getTableView().getItems().get(getIndex());
+                        onRemoveCustomer(room);
+                    });
+                    setGraphic(removeButton);
+                    setText(null);
+                }
+            }
+        });
+
+        // Set up Remove Service button column
+        colRemoveService.setCellFactory(param -> new TableCell<RoomVM, Void>() {
+            private final Button removeServiceButton = new Button("Remove Service");
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    removeServiceButton.setOnAction(event -> {
+                        RoomVM room = getTableView().getItems().get(getIndex());
+                        onRemoveService(room);
+                    });
+                    setGraphic(removeServiceButton);
+                    setText(null);
+                }
+            }
+        });
+
+        // Set up Edit Service Quantity button column
+        colEditServiceQty.setCellFactory(param -> new TableCell<RoomVM, Void>() {
+            private final Button editQtyButton = new Button("Edit Qty");
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    editQtyButton.setOnAction(event -> {
+                        RoomVM room = getTableView().getItems().get(getIndex());
+                        onEditServiceQuantity(room);
+                    });
+                    setGraphic(editQtyButton);
+                    setText(null);
+                }
+            }
+        });
+
         // Initialize table with empty data
         tblRooms.setItems(FXCollections.observableArrayList());
     }
@@ -145,7 +208,6 @@ public class CheckInFormController {
         this.stayingId = stayingId;
         this.currentBooking = booking;
 
-        // Populate form fields
         txtBooker.setText(booking.getGuestName());
         txtPhone.setText(booking.getGuestPhone());
         cbPayment.setValue(getPaymentMethod(booking.getGuestPhone()));
@@ -153,7 +215,6 @@ public class CheckInFormController {
         txtCheckinDate.setText(getCheckinDate(stayingId));
         txtCheckoutDate.setText(getCheckoutDate(stayingId));
 
-        // Populate table with room data
         populateRoomTable(booking);
     }
 
@@ -254,7 +315,7 @@ public class CheckInFormController {
                 GROUP BY src.Room_id
             ) cust_agg ON rm.Room_id = cust_agg.Room_id
             LEFT JOIN (
-                SELECT srs.Room_id, STRING_AGG(sm.Service_name, '\n') AS Services
+                SELECT srs.Room_id, STRING_AGG(sm.Service_name + ' x ' + CAST(srs.Quantity AS NVARCHAR), '\n') AS Services
                 FROM Staying_Room_Service srs
                 JOIN Service_Management sm ON srs.Service_id = sm.Service_id
                 WHERE srs.Staying_id = ?
@@ -346,6 +407,67 @@ public class CheckInFormController {
         });
     }
 
+    private void onRemoveCustomer(RoomVM room) {
+        Dialog<ObservableList<String>> dialog = new Dialog<>();
+        dialog.setTitle("Remove Customers from Room " + room.roomNumber());
+        dialog.setHeaderText("Select customers to remove from room " + room.roomNumber());
+
+        ButtonType removeButtonType = new ButtonType("Remove", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(removeButtonType, ButtonType.CANCEL);
+
+        ListView<String> customerListView = new ListView<>();
+        customerListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        customerListView.setPrefHeight(200);
+
+        // Fetch customers assigned to this room
+        Map<String, String> customerMap = CheckinRepository.getCustomersForRoom(stayingId, room.roomNumber());
+        customerListView.setItems(FXCollections.observableArrayList(customerMap.keySet()));
+
+        VBox content = new VBox(10);
+        content.getChildren().addAll(new Label("Assigned Customers:"), customerListView);
+        dialog.getDialogPane().setContent(content);
+
+        dialog.getDialogPane().lookupButton(removeButtonType).setDisable(true);
+        customerListView.getSelectionModel().getSelectedItems().addListener((javafx.beans.Observable observable) ->
+            dialog.getDialogPane().lookupButton(removeButtonType).setDisable(
+                customerListView.getSelectionModel().getSelectedItems().isEmpty()
+            )
+        );
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == removeButtonType) {
+                return customerListView.getSelectionModel().getSelectedItems();
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(selectedCustomers -> {
+            try {
+                boolean success = true;
+                for (String customerName : selectedCustomers) {
+                    String customerId = customerMap.get(customerName);
+                    if (customerId != null) {
+                        CheckinRepository.removeCustomerFromRoom(stayingId, room.roomNumber(), customerId);
+                    } else {
+                        success = false;
+                    }
+                }
+                populateRoomTable(currentBooking);
+                if (success) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Customers removed successfully.");
+                    alert.showAndWait();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to remove one or more customers.");
+                    alert.showAndWait();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to remove customers: " + e.getMessage());
+                alert.showAndWait();
+            }
+        });
+    }
+
     private void onAssignService(RoomVM room) {
         Dialog<ObservableList<String>> dialog = new Dialog<>();
         dialog.setTitle("Assign Services to Room " + room.roomNumber());
@@ -405,27 +527,149 @@ public class CheckInFormController {
         });
     }
 
+    private void onRemoveService(RoomVM room) {
+        Dialog<ObservableList<String>> dialog = new Dialog<>();
+        dialog.setTitle("Remove Services from Room " + room.roomNumber());
+        dialog.setHeaderText("Select services to remove from room " + room.roomNumber());
+
+        ButtonType removeButtonType = new ButtonType("Remove", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(removeButtonType, ButtonType.CANCEL);
+
+        ListView<String> serviceListView = new ListView<>();
+        serviceListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        serviceListView.setPrefHeight(200);
+
+        Map<String, String> serviceMap = CheckinRepository.getServicesForRoom(stayingId, room.roomNumber());
+        serviceListView.setItems(FXCollections.observableArrayList(serviceMap.keySet()));
+
+        VBox content = new VBox(10);
+        content.getChildren().addAll(new Label("Assigned Services:"), serviceListView);
+        dialog.getDialogPane().setContent(content);
+
+        dialog.getDialogPane().lookupButton(removeButtonType).setDisable(true);
+        serviceListView.getSelectionModel().getSelectedItems().addListener((javafx.beans.Observable observable) ->
+            dialog.getDialogPane().lookupButton(removeButtonType).setDisable(
+                serviceListView.getSelectionModel().getSelectedItems().isEmpty()
+            )
+        );
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == removeButtonType) {
+                return serviceListView.getSelectionModel().getSelectedItems();
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(selectedServices -> {
+            try {
+                boolean success = true;
+                for (String serviceName : selectedServices) {
+                    String serviceId = serviceMap.get(serviceName);
+                    if (serviceId != null) {
+                        CheckinRepository.removeServiceFromRoom(stayingId, room.roomNumber(), serviceId);
+                    } else {
+                        success = false;
+                    }
+                }
+                populateRoomTable(currentBooking);
+                if (success) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Services removed successfully.");
+                    alert.showAndWait();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to remove one or more services.");
+                    alert.showAndWait();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to remove services: " + e.getMessage());
+                alert.showAndWait();
+            }
+        });
+    }
+
+    private void onEditServiceQuantity(RoomVM room) {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Edit Service Quantity for Room " + room.roomNumber());
+        dialog.setHeaderText("Select a service and update its quantity for room " + room.roomNumber());
+
+        ButtonType updateButtonType = new ButtonType("Update", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
+
+        ComboBox<String> serviceComboBox = new ComboBox<>();
+        TextField txtQuantity = new TextField();
+        txtQuantity.setPromptText("Enter quantity (1 or more)");
+        Map<String, String> serviceMap = CheckinRepository.getServicesForRoom(stayingId, room.roomNumber());
+        serviceComboBox.setItems(FXCollections.observableArrayList(serviceMap.keySet()));
+
+        VBox content = new VBox(10);
+        content.getChildren().addAll(
+            new Label("Select Service:"), serviceComboBox,
+            new Label("Quantity:"), txtQuantity
+        );
+        dialog.getDialogPane().setContent(content);
+
+        dialog.getDialogPane().lookupButton(updateButtonType).setDisable(true);
+        serviceComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) ->
+            dialog.getDialogPane().lookupButton(updateButtonType).setDisable(
+                newVal == null || txtQuantity.getText().trim().isEmpty()
+            )
+        );
+        txtQuantity.textProperty().addListener((obs, oldVal, newVal) ->
+            dialog.getDialogPane().lookupButton(updateButtonType).setDisable(
+                serviceComboBox.getSelectionModel().isEmpty() || newVal.trim().isEmpty()
+            )
+        );
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == updateButtonType) {
+                String serviceName = serviceComboBox.getValue();
+                String quantityText = txtQuantity.getText().trim();
+                try {
+                    int quantity = Integer.parseInt(quantityText);
+                    if (quantity < 1) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Quantity must be at least 1.");
+                        alert.showAndWait();
+                        return null;
+                    }
+                    String serviceId = serviceMap.get(serviceName);
+                    if (serviceId != null) {
+                        CheckinRepository.updateServiceQuantity(stayingId, room.roomNumber(), serviceId, quantity);
+                        populateRoomTable(currentBooking);
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Service quantity updated successfully.");
+                        alert.showAndWait();
+                    }
+                } catch (NumberFormatException e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid quantity format.");
+                    alert.showAndWait();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to update service quantity: " + e.getMessage());
+                    alert.showAndWait();
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
+    }
+
     @FXML
     private void onAddRoom(ActionEvent event) {
-        // TODO: Implement logic to add a room
         System.out.println("Add Room clicked");
     }
 
     @FXML
     private void onRemoveRoom(ActionEvent event) {
-        // TODO: Implement logic to remove selected room
         System.out.println("Remove Room clicked");
     }
 
     @FXML
     private void onDelete(ActionEvent event) {
-        // TODO: Implement logic to delete booking
         System.out.println("Delete clicked");
     }
 
     @FXML
     private void onUpdate(ActionEvent event) {
-        // Validate inputs
         String paymentMethod = cbPayment.getValue();
         String depositText = txtDeposit.getText();
         String booker = txtBooker.getText();
@@ -458,7 +702,6 @@ public class CheckInFormController {
         }
 
         try {
-            // Update Booking_Management and Staying_Management
             CheckinRepository.updateBookingAndStay(
                 currentBooking.getGuestPhone(),
                 currentBooking.getGuestName(),
@@ -467,11 +710,9 @@ public class CheckInFormController {
                 depositAmount
             );
 
-            // Show success message
             Alert alert = new Alert(Alert.AlertType.INFORMATION, "Booking and stay updated successfully.");
             alert.showAndWait();
 
-            // Refresh the table
             populateRoomTable(currentBooking);
 
         } catch (SQLException e) {
@@ -483,7 +724,6 @@ public class CheckInFormController {
 
     @FXML
     private void onClose(ActionEvent event) {
-        // Close the window
         Stage stage = (Stage) btnClose.getScene().getWindow();
         stage.close();
     }

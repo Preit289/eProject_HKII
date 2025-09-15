@@ -99,7 +99,6 @@ public class CheckinRepository {
         try (Connection conn = DButil.getConnection()) {
             conn.setAutoCommit(false);
 
-            // Get Booking_id based on guest phone and other details
             String findBookingIdSql = """
                 SELECT bm.Booking_id, bm.Payment_method, bm.Deposit_amount
                 FROM Booking_Management bm
@@ -121,7 +120,6 @@ public class CheckinRepository {
             String paymentMethod = rs.getString("Payment_method");
             int depositAmount = rs.getInt("Deposit_amount");
 
-            // Check if a Staying_Management record already exists for this Booking_id
             String checkStayingSql = """
                 SELECT Staying_id
                 FROM Staying_Management
@@ -136,7 +134,6 @@ public class CheckinRepository {
                 throw new SQLException("A stay has already been created for this booking (Staying_id: " + stayingId + ").");
             }
 
-            // Calculate total amount based on room prices
             String totalAmountSql = """
                 SELECT SUM(rm.Room_price) AS Total
                 FROM Booking_Room br
@@ -148,7 +145,6 @@ public class CheckinRepository {
             ResultSet totalRs = totalStmt.executeQuery();
             int totalAmount = totalRs.next() ? totalRs.getInt("Total") : 0;
 
-            // Generate new Staying_id
             String stayingIdSql = "SELECT dbo.fn_GenerateNextStayingID() AS Staying_id";
             PreparedStatement stayingIdStmt = conn.prepareStatement(stayingIdSql);
             ResultSet stayingIdRs = stayingIdStmt.executeQuery();
@@ -156,7 +152,6 @@ public class CheckinRepository {
                 stayingId = stayingIdRs.getString("Staying_id");
             }
 
-            // Insert into Staying_Management with null Checkin_date
             String insertStayingSql = """
                 INSERT INTO Staying_Management (
                     Staying_id, Booking_id, Checkin_date, Checkout_date, 
@@ -173,7 +168,6 @@ public class CheckinRepository {
             insertStayingStmt.setInt(5, totalAmount);
             insertStayingStmt.executeUpdate();
 
-            // Update Booking_status to 4 (Room received)
             String updateBookingSql = """
                 UPDATE Booking_Management
                 SET Booking_status = 4
@@ -183,7 +177,6 @@ public class CheckinRepository {
             updateBookingStmt.setString(1, bookingId);
             updateBookingStmt.executeUpdate();
 
-            // Copy rooms from Booking_Room to Staying_Room_Customer (only if not already assigned)
             String insertRoomsSql = """
                 INSERT INTO Staying_Room_Customer (Staying_id, Room_id, Customer_id)
                 SELECT ?, br.Room_id, cm.Customer_id
@@ -203,7 +196,6 @@ public class CheckinRepository {
             insertRoomsStmt.setString(4, stayingId);
             insertRoomsStmt.executeUpdate();
 
-            // Commit transaction
             conn.commit();
 
         } catch (SQLException e) {
@@ -235,11 +227,36 @@ public class CheckinRepository {
         return customerMap;
     }
 
+    public static Map<String, String> getCustomersForRoom(String stayingId, String roomNumber) {
+        Map<String, String> customerMap = new HashMap<>();
+        String sql = """
+            SELECT cm.Customer_id, cm.Customer_name
+            FROM Staying_Room_Customer src
+            JOIN Room_Management rm ON src.Room_id = rm.Room_id
+            JOIN Customer_Management cm ON src.Customer_id = cm.Customer_id
+            WHERE src.Staying_id = ? AND rm.Room_num = ?
+            ORDER BY cm.Customer_name
+        """;
+
+        try (Connection conn = DButil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, stayingId);
+            pstmt.setString(2, roomNumber);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                customerMap.put(rs.getString("Customer_name"), rs.getString("Customer_id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return customerMap;
+    }
+
     public static void assignCustomerToRoom(String stayingId, String roomNumber, String customerId) throws SQLException {
         try (Connection conn = DButil.getConnection()) {
             conn.setAutoCommit(false);
 
-            // Find Room_id by Room_num
             String findRoomIdSql = """
                 SELECT Room_id
                 FROM Room_Management
@@ -253,7 +270,6 @@ public class CheckinRepository {
             }
             String roomId = roomRs.getString("Room_id");
 
-            // Check if the customer is already assigned to the room
             String checkAssignmentSql = """
                 SELECT 1
                 FROM Staying_Room_Customer
@@ -266,10 +282,9 @@ public class CheckinRepository {
             ResultSet checkRs = checkAssignmentStmt.executeQuery();
             if (checkRs.next()) {
                 conn.commit();
-                return; // Already assigned
+                return;
             }
 
-            // Assign customer to room
             String assignSql = """
                 INSERT INTO Staying_Room_Customer (Staying_id, Room_id, Customer_id)
                 VALUES (?, ?, ?)
@@ -280,7 +295,45 @@ public class CheckinRepository {
             assignStmt.setString(3, customerId);
             assignStmt.executeUpdate();
 
-            // Commit transaction
+            conn.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public static void removeCustomerFromRoom(String stayingId, String roomNumber, String customerId) throws SQLException {
+        try (Connection conn = DButil.getConnection()) {
+            conn.setAutoCommit(false);
+
+            String findRoomIdSql = """
+                SELECT Room_id
+                FROM Room_Management
+                WHERE Room_num = ?
+            """;
+            PreparedStatement findRoomStmt = conn.prepareStatement(findRoomIdSql);
+            findRoomStmt.setString(1, roomNumber);
+            ResultSet roomRs = findRoomStmt.executeQuery();
+            if (!roomRs.next()) {
+                throw new SQLException("Room not found: " + roomNumber);
+            }
+            String roomId = roomRs.getString("Room_id");
+
+            String deleteSql = """
+                DELETE FROM Staying_Room_Customer
+                WHERE Staying_id = ? AND Room_id = ? AND Customer_id = ?
+            """;
+            PreparedStatement deleteStmt = conn.prepareStatement(deleteSql);
+            deleteStmt.setString(1, stayingId);
+            deleteStmt.setString(2, roomId);
+            deleteStmt.setString(3, customerId);
+            int rowsAffected = deleteStmt.executeUpdate();
+
+            if (rowsAffected == 0) {
+                throw new SQLException("No customer assignment found to remove.");
+            }
+
             conn.commit();
 
         } catch (SQLException e) {
@@ -310,11 +363,36 @@ public class CheckinRepository {
         return serviceMap;
     }
 
+    public static Map<String, String> getServicesForRoom(String stayingId, String roomNumber) {
+        Map<String, String> serviceMap = new HashMap<>();
+        String sql = """
+            SELECT sm.Service_id, sm.Service_name
+            FROM Staying_Room_Service srs
+            JOIN Room_Management rm ON srs.Room_id = rm.Room_id
+            JOIN Service_Management sm ON srs.Service_id = sm.Service_id
+            WHERE srs.Staying_id = ? AND rm.Room_num = ?
+            ORDER BY sm.Service_name
+        """;
+
+        try (Connection conn = DButil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, stayingId);
+            pstmt.setString(2, roomNumber);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                serviceMap.put(rs.getString("Service_name"), rs.getString("Service_id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return serviceMap;
+    }
+
     public static void assignServiceToRoom(String stayingId, String roomNumber, String serviceId) throws SQLException {
         try (Connection conn = DButil.getConnection()) {
             conn.setAutoCommit(false);
 
-            // Find Room_id by Room_num
             String findRoomIdSql = """
                 SELECT Room_id
                 FROM Room_Management
@@ -328,9 +406,8 @@ public class CheckinRepository {
             }
             String roomId = roomRs.getString("Room_id");
 
-            // Check if the service is already assigned to the room
             String checkAssignmentSql = """
-                SELECT 1
+                SELECT Quantity
                 FROM Staying_Room_Service
                 WHERE Staying_id = ? AND Room_id = ? AND Service_id = ?
             """;
@@ -339,23 +416,112 @@ public class CheckinRepository {
             checkAssignmentStmt.setString(2, roomId);
             checkAssignmentStmt.setString(3, serviceId);
             ResultSet checkRs = checkAssignmentStmt.executeQuery();
+
             if (checkRs.next()) {
-                conn.commit();
-                return; // Already assigned
+                int currentQuantity = checkRs.getInt("Quantity");
+                String updateSql = """
+                    UPDATE Staying_Room_Service
+                    SET Quantity = ?
+                    WHERE Staying_id = ? AND Room_id = ? AND Service_id = ?
+                """;
+                PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+                updateStmt.setInt(1, currentQuantity + 1);
+                updateStmt.setString(2, stayingId);
+                updateStmt.setString(3, roomId);
+                updateStmt.setString(4, serviceId);
+                updateStmt.executeUpdate();
+            } else {
+                String assignSql = """
+                    INSERT INTO Staying_Room_Service (Staying_id, Room_id, Service_id, Quantity)
+                    VALUES (?, ?, ?, 1)
+                """;
+                PreparedStatement assignStmt = conn.prepareStatement(assignSql);
+                assignStmt.setString(1, stayingId);
+                assignStmt.setString(2, roomId);
+                assignStmt.setString(3, serviceId);
+                assignStmt.executeUpdate();
             }
 
-            // Assign service to room
-            String assignSql = """
-                INSERT INTO Staying_Room_Service (Staying_id, Room_id, Service_id)
-                VALUES (?, ?, ?)
-            """;
-            PreparedStatement assignStmt = conn.prepareStatement(assignSql);
-            assignStmt.setString(1, stayingId);
-            assignStmt.setString(2, roomId);
-            assignStmt.setString(3, serviceId);
-            assignStmt.executeUpdate();
+            conn.commit();
 
-            // Commit transaction
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public static void removeServiceFromRoom(String stayingId, String roomNumber, String serviceId) throws SQLException {
+        try (Connection conn = DButil.getConnection()) {
+            conn.setAutoCommit(false);
+
+            String findRoomIdSql = """
+                SELECT Room_id
+                FROM Room_Management
+                WHERE Room_num = ?
+            """;
+            PreparedStatement findRoomStmt = conn.prepareStatement(findRoomIdSql);
+            findRoomStmt.setString(1, roomNumber);
+            ResultSet roomRs = findRoomStmt.executeQuery();
+            if (!roomRs.next()) {
+                throw new SQLException("Room not found: " + roomNumber);
+            }
+            String roomId = roomRs.getString("Room_id");
+
+            String deleteSql = """
+                DELETE FROM Staying_Room_Service
+                WHERE Staying_id = ? AND Room_id = ? AND Service_id = ?
+            """;
+            PreparedStatement deleteStmt = conn.prepareStatement(deleteSql);
+            deleteStmt.setString(1, stayingId);
+            deleteStmt.setString(2, roomId);
+            deleteStmt.setString(3, serviceId);
+            int rowsAffected = deleteStmt.executeUpdate();
+
+            if (rowsAffected == 0) {
+                throw new SQLException("No service assignment found to remove.");
+            }
+
+            conn.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public static void updateServiceQuantity(String stayingId, String roomNumber, String serviceId, int quantity) throws SQLException {
+        try (Connection conn = DButil.getConnection()) {
+            conn.setAutoCommit(false);
+
+            String findRoomIdSql = """
+                SELECT Room_id
+                FROM Room_Management
+                WHERE Room_num = ?
+            """;
+            PreparedStatement findRoomStmt = conn.prepareStatement(findRoomIdSql);
+            findRoomStmt.setString(1, roomNumber);
+            ResultSet roomRs = findRoomStmt.executeQuery();
+            if (!roomRs.next()) {
+                throw new SQLException("Room not found: " + roomNumber);
+            }
+            String roomId = roomRs.getString("Room_id");
+
+            String updateSql = """
+                UPDATE Staying_Room_Service
+                SET Quantity = ?
+                WHERE Staying_id = ? AND Room_id = ? AND Service_id = ?
+            """;
+            PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+            updateStmt.setInt(1, quantity);
+            updateStmt.setString(2, stayingId);
+            updateStmt.setString(3, roomId);
+            updateStmt.setString(4, serviceId);
+            int rowsAffected = updateStmt.executeUpdate();
+
+            if (rowsAffected == 0) {
+                throw new SQLException("No service assignment found to update quantity.");
+            }
+
             conn.commit();
 
         } catch (SQLException e) {
@@ -388,7 +554,6 @@ public class CheckinRepository {
         try (Connection conn = DButil.getConnection()) {
             conn.setAutoCommit(false);
 
-            // Get Booking_id based on guest phone and name
             String findBookingIdSql = """
                 SELECT Booking_id
                 FROM Booking_Management
@@ -403,10 +568,9 @@ public class CheckinRepository {
             }
             String bookingId = rs.getString("Booking_id");
 
-            // Calculate total amount (room prices + service prices)
             String totalAmountSql = """
                 SELECT 
-                    COALESCE(SUM(rm.Room_price), 0) + COALESCE(SUM(sm.Service_price), 0) AS Total
+                    COALESCE(SUM(rm.Room_price), 0) + COALESCE(SUM(sm.Service_price * srs.Quantity), 0) AS Total
                 FROM Booking_Room br
                 JOIN Room_Management rm ON br.Room_id = rm.Room_id
                 LEFT JOIN Staying_Room_Service srs ON br.Room_id = srs.Room_id AND srs.Staying_id = ?
@@ -420,7 +584,6 @@ public class CheckinRepository {
             ResultSet totalRs = totalStmt.executeQuery();
             int totalAmount = totalRs.next() ? totalRs.getInt("Total") : 0;
 
-            // Update Booking_Management
             String updateBookingSql = """
                 UPDATE Booking_Management
                 SET Payment_method = ?, Deposit_amount = ?, Updated_at = GETDATE()
@@ -432,7 +595,6 @@ public class CheckinRepository {
             updateBookingStmt.setString(3, bookingId);
             updateBookingStmt.executeUpdate();
 
-            // Update Staying_Management
             String updateStayingSql = """
                 UPDATE Staying_Management
                 SET Payment_method = ?, Total_amount = ?, Updated_at = GETDATE()
@@ -444,7 +606,6 @@ public class CheckinRepository {
             updateStayingStmt.setString(3, stayingId);
             updateStayingStmt.executeUpdate();
 
-            // Commit transaction
             conn.commit();
 
         } catch (SQLException e) {
@@ -457,7 +618,6 @@ public class CheckinRepository {
         try (Connection conn = DButil.getConnection()) {
             conn.setAutoCommit(false);
 
-            // Check if the stay exists
             String checkStayingSql = """
                 SELECT Staying_id
                 FROM Staying_Management
@@ -470,7 +630,6 @@ public class CheckinRepository {
                 throw new SQLException("Stay not found: " + stayingId);
             }
 
-            // Update Staying_Management with current timestamp and status
             String updateStayingSql = """
                 UPDATE Staying_Management
                 SET Checkin_date = GETDATE(), Staying_status = 1, Updated_at = GETDATE()
@@ -480,7 +639,6 @@ public class CheckinRepository {
             updateStmt.setString(1, stayingId);
             updateStmt.executeUpdate();
 
-            // Commit transaction
             conn.commit();
 
         } catch (SQLException e) {
