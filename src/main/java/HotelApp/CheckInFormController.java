@@ -241,17 +241,26 @@ public class CheckInFormController {
                 rm.Room_category,
                 rm.Room_quality,
                 rm.Room_price,
-                STRING_AGG(cm.Customer_name, '\n') AS Customer_names,
-                STRING_AGG(sm.Service_name, '\n') AS Services
+                COALESCE(cust_agg.Customers, '') AS Customer_names,
+                COALESCE(serv_agg.Services, '') AS Services
             FROM Booking_Management bm
             JOIN Booking_Room br ON bm.Booking_id = br.Booking_id
             JOIN Room_Management rm ON br.Room_id = rm.Room_id
-            LEFT JOIN Staying_Room_Customer src ON rm.Room_id = src.Room_id AND src.Staying_id = ?
-            LEFT JOIN Customer_Management cm ON src.Customer_id = cm.Customer_id
-            LEFT JOIN Staying_Room_Service srs ON rm.Room_id = srs.Room_id AND srs.Staying_id = ?
-            LEFT JOIN Service_Management sm ON srs.Service_id = sm.Service_id
+            LEFT JOIN (
+                SELECT src.Room_id, STRING_AGG(cm.Customer_name, '\n') AS Customers
+                FROM Staying_Room_Customer src
+                JOIN Customer_Management cm ON src.Customer_id = cm.Customer_id
+                WHERE src.Staying_id = ?
+                GROUP BY src.Room_id
+            ) cust_agg ON rm.Room_id = cust_agg.Room_id
+            LEFT JOIN (
+                SELECT srs.Room_id, STRING_AGG(sm.Service_name, '\n') AS Services
+                FROM Staying_Room_Service srs
+                JOIN Service_Management sm ON srs.Service_id = sm.Service_id
+                WHERE srs.Staying_id = ?
+                GROUP BY srs.Room_id
+            ) serv_agg ON rm.Room_id = serv_agg.Room_id
             WHERE bm.Book_contact = ?
-            GROUP BY rm.Room_num, rm.Room_category, rm.Room_quality, rm.Room_price
         """;
 
         try (Connection conn = DButil.getConnection();
@@ -267,8 +276,8 @@ public class CheckInFormController {
                     rs.getString("Room_category"),
                     rs.getString("Room_quality"),
                     rs.getDouble("Room_price"),
-                    rs.getString("Customer_names") != null ? rs.getString("Customer_names") : "",
-                    rs.getString("Services") != null ? rs.getString("Services") : ""
+                    rs.getString("Customer_names"),
+                    rs.getString("Services")
                 ));
             }
         } catch (SQLException e) {
