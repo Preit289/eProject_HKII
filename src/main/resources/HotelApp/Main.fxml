@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.net.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane id="AnchorPane" prefHeight="1100" prefWidth="680" styleClass="mainFxmlClass"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="HotelApp.MainController"
-            stylesheets="@styles.css">
+<BorderPane id="AnchorPane" prefHeight="1200" prefWidth="750" styleClass="mainFxmlClass" stylesheets="@styles.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="HotelApp.MainController">
     <!-- Sidebar -->
     <left>
-        <VBox styleClass="sidebar" spacing="10">
+        <VBox spacing="10" styleClass="sidebar">
             <children>
                 <Label text="Hotel Manager" styleClass="brand" />
                 <Button text="Dashboard" onAction="#showDashboard" styleClass="nav-btn" />
@@ -21,31 +23,33 @@
                 <Button text="Check-in/Check-out" onAction="#showCheckin" styleClass="nav-btn" />
                 <Button text="Customers Management" onAction="#showCustomers" styleClass="nav-btn" />
                 <Button text="Services Management" onAction="#showServices" styleClass="nav-btn" />
-                <Button text="Room Management" onAction="#showRoomManagement" styleClass="nav-btn" />
+                <!-- admin -->
+                <Button fx:id="btnRoomManagement" onAction="#showRoomManagement" styleClass="nav-btn" text="Room Management" />
+                <Button fx:id="btnAdminDashboard" onAction="#showAdminDashboard" styleClass="nav-btn" text="Admin Dashboard" />
             </children>
             <padding>
-                <Insets top="20" left="12" right="12" bottom="20" />
+                <Insets bottom="20" left="12" right="12" top="20" />
             </padding>
         </VBox>
     </left>
 
     <!-- Header -->
     <top>
-        <HBox styleClass="header" spacing="10">
+        <HBox spacing="10" styleClass="header">
             <children>
-                <Label fx:id="pageTitle" text="Dashboard" styleClass="page-title" />
+                <Label fx:id="pageTitle" styleClass="page-title" text="Dashboard" />
                 <Region HBox.hgrow="ALWAYS" />
                 <TextField fx:id="searchField" promptText="Search..." />
-                <Button text="Search" onAction="#onSearch" />
-                <MenuButton text="Admin">
+                <Button onAction="#onSearch" text="Search" />
+                <MenuButton styleClass="account-menu" text="Account">
                     <items>
                         <MenuItem text="Profile" />
-                        <MenuItem text="Logout" />
+                        <MenuItem onAction="#onLogout" text="Logout" />
                     </items>
                 </MenuButton>
             </children>
             <padding>
-                <Insets top="12" bottom="12" left="16" right="16" />
+                <Insets bottom="12" left="16" right="16" top="12" />
             </padding>
         </HBox>
     </top>
@@ -64,7 +68,7 @@
                 <Label text="Hotel Management v1.0" />
             </children>
             <padding>
-                <Insets top="6" bottom="6" left="12" right="12" />
+                <Insets bottom="6" left="12" right="12" top="6" />
             </padding>
         </HBox>
     </bottom>

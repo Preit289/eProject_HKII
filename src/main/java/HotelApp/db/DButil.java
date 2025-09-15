@@ -1,6 +1,7 @@
 package HotelApp.db;
 
 import java.sql.*;
+import java.sql.*;
 
 public class DButil {
 
