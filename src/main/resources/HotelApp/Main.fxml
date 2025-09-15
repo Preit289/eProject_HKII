@@ -23,7 +23,6 @@
                 <Button text="Check-in/Check-out" onAction="#showCheckin" styleClass="nav-btn" />
                 <Button text="Customers Management" onAction="#showCustomers" styleClass="nav-btn" />
                 <Button text="Services Management" onAction="#showServices" styleClass="nav-btn" />
-                <Button text="Room Management" onAction="#showRoomManagement" styleClass="nav-btn" />
                 <!-- admin -->
                 <Button fx:id="btnRoomManagement" onAction="#showRoomManagement" styleClass="nav-btn" text="Room Management" />
                 <Button fx:id="btnAdminDashboard" onAction="#showAdminDashboard" styleClass="nav-btn" text="Admin Dashboard" />
