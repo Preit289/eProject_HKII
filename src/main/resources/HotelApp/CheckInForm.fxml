@@ -3,28 +3,38 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
+<?import javafx.geometry.Insets?>
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
             fx:controller="HotelApp.CheckInFormController" stylesheets="@HotelApp/styles.css"
             prefWidth="900" prefHeight="560">
 
-    <top><Label fx:id="lblTitle" styleClass="page-title" text="Check-in Details"/></top>
+    <top>
+        <Label fx:id="lblTitle" styleClass="page-title" text="Check-in Details"/>
+    </top>
 
     <center>
         <GridPane hgap="8" vgap="8" styleClass="view-pane">
             <columnConstraints>
-                <ColumnConstraints percentWidth="20"/><ColumnConstraints percentWidth="30"/>
-                <ColumnConstraints percentWidth="20"/><ColumnConstraints percentWidth="30"/>
+                <ColumnConstraints percentWidth="20"/>
+                <ColumnConstraints percentWidth="30"/>
+                <ColumnConstraints percentWidth="20"/>
+                <ColumnConstraints percentWidth="30"/>
             </columnConstraints>
 
-            <Label text="Booker"/><TextField fx:id="txtBooker" GridPane.columnIndex="1"/>
-            <Label text="Phone" GridPane.columnIndex="2"/><TextField fx:id="txtPhone" GridPane.columnIndex="3"/>
+            <Label text="Booker"/>
+            <TextField fx:id="txtBooker" GridPane.columnIndex="1"/>
+            <Label text="Phone" GridPane.columnIndex="2"/>
+            <TextField fx:id="txtPhone" GridPane.columnIndex="3"/>
 
-            <Label text="Payment" GridPane.rowIndex="1"/><ComboBox fx:id="cbPayment" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-            <Label text="Deposit" GridPane.columnIndex="2" GridPane.rowIndex="1"/><TextField fx:id="txtDeposit" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+            <Label text="Payment" GridPane.rowIndex="1"/>
+            <ComboBox fx:id="cbPayment" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <Label text="Deposit" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+            <TextField fx:id="txtDeposit" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
 
-            <Label text="Actual Check-in" GridPane.rowIndex="2"/><TextField fx:id="txtCheckinDate" GridPane.columnIndex="1" GridPane.rowIndex="2" editable="false"/>
-            <Label text="Actual Check-out" GridPane.columnIndex="2" GridPane.rowIndex="2"/><TextField fx:id="txtCheckoutDate" GridPane.columnIndex="3" GridPane.rowIndex="2" editable="false"/>
+            <Label text="Actual Check-in" GridPane.rowIndex="2"/>
+            <TextField fx:id="txtCheckinDate" GridPane.columnIndex="1" GridPane.rowIndex="2" editable="false"/>
+            <Label text="Actual Check-out" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+            <TextField fx:id="txtCheckoutDate" GridPane.columnIndex="3" GridPane.rowIndex="2" editable="false"/>
 
             <Label text="Rooms" styleClass="section-title" GridPane.rowIndex="3"/>
             <HBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="3">
@@ -57,4 +67,7 @@
             <Button text="Close"   onAction="#onClose"   styleClass="button-secondary"/>
         </HBox>
     </bottom>
+    <padding>
+        <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+    </padding>
 </BorderPane>

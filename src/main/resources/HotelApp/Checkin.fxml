@@ -8,7 +8,7 @@
       spacing="15" alignment="TOP_LEFT" styleClass="view-pane">
 
     <Label text="Check-in Management" styleClass="section-title"/>
-    
+
     <!-- Search Bar Section -->
     <HBox spacing="10" alignment="CENTER_LEFT">
         <Label text="Search:"/>
@@ -17,7 +17,7 @@
         <Button fx:id="btnCheckin" text="Checkin" onAction="#onCheckin" styleClass="button-primary"/>
         <Button fx:id="btnUpdate" text="Update" onAction="#onUpdate" styleClass="button-primary"/>
     </HBox>
-    
+
     <TableView fx:id="tblBookings" VBox.vgrow="ALWAYS">
         <columns>
             <TableColumn fx:id="colGuestName" text="Customer Name" prefWidth="180"/>
