@@ -11,36 +11,64 @@ import javafx.scene.control.*;
 import java.io.IOException;
 
 public class AdminDashboardController {
-    @FXML private TableView<Account> accountTable;
-    @FXML private TableColumn<Account, String> colUsername;
-    @FXML private TableColumn<Account, String> colPassword;
-    @FXML private TableColumn<Account, String> colIsAdmin;
+    @FXML
+    private TableView<Account> accountTable;
+    @FXML
+    private TableColumn<Account, String> colUsername;
+    @FXML
+    private TableColumn<Account, String> colPassword;
+    @FXML
+    private TableColumn<Account, String> colIsAdmin;
 
-    @FXML private TextField txtUsername;
-    @FXML private TextField txtPassword;
-    @FXML private ChoiceBox<String> cbRole;
+    @FXML
+    private TextField txtUsername;
+    @FXML
+    private TextField txtPassword;
+    @FXML
+    private ChoiceBox<String> cbRole;
 
     private ObservableList<Account> accounts;
 
     @FXML
+    private Button btnAdd, btnUpdate, btnDelete, btnClear, btnBack;
+
+    @FXML
     public void initialize() {
+
+        // Username
         colUsername.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getUsername()));
+
+        // password
         colPassword.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getPassword()));
+
+        // Role
         colIsAdmin.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().isAdmin() ? "Admin" : "Staff"));
 
-        accounts = FXCollections.observableArrayList(AccountRepository.getAllAccounts());
+        // Default role
+        cbRole.setItems(FXCollections.observableArrayList("Admin", "Staff"));
+        cbRole.setValue("Staff");
+
+        // Load
+        try {
+            var list = AccountRepository.getAllAccounts();
+            accounts = FXCollections.observableArrayList(list != null ? list : FXCollections.observableArrayList());
+        } catch (Exception ex) {
+            accounts = FXCollections.observableArrayList();
+            showAlert("Error", "Failed to load accounts.\n" + ex.getMessage());
+        }
         accountTable.setItems(accounts);
 
-        cbRole.setItems(FXCollections.observableArrayList("Admin", "Staff"));
-
-        // Khi chọn 1 account trong bảng -> load vào form
         accountTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             if (newSel != null) {
                 txtUsername.setText(newSel.getUsername());
-                txtPassword.setText(newSel.getUsername());
+                txtPassword.setText(newSel.getPassword());
                 cbRole.setValue(newSel.isAdmin() ? "Admin" : "Staff");
+                txtUsername.setDisable(true);
             }
         });
+
+        btnUpdate.disableProperty().bind(accountTable.getSelectionModel().selectedItemProperty().isNull());
+        btnDelete.disableProperty().bind(accountTable.getSelectionModel().selectedItemProperty().isNull());
     }
 
     @FXML
@@ -53,10 +81,18 @@ public class AdminDashboardController {
             showAlert("Error", "Please fill all fields.");
             return;
         }
+        if (username.length() < 3) {
+            showAlert("Error", "Username must be at least 3 characters.");
+            return;
+        }
+        if (password.length() < 3) {
+            showAlert("Error", "Password must be at least 3 characters.");
+            return;
+        }
 
         Account newAcc = new Account(username, password, "Admin".equals(role));
         if (AccountRepository.addAccount(newAcc)) {
-            accounts.add(newAcc);
+            accounts.add(newAcc); // TableView hiển thị mask
             showAlert("Success", "Account added successfully.");
             onClear();
         } else {
@@ -74,9 +110,18 @@ public class AdminDashboardController {
 
         String password = txtPassword.getText().trim();
         String role = cbRole.getValue();
-        boolean isAdmin = "Admin".equals(role);
+        if (password.isEmpty() || role == null) {
+            showAlert("Error", "Please fill all fields.");
+            return;
+        }
+        if (password.length() < 3) {
+            showAlert("Error", "Password must be at least 3 characters.");
+            return;
+        }
 
+        boolean isAdmin = "Admin".equals(role);
         if (AccountRepository.updateAccount(selected.getUsername(), password, isAdmin)) {
+            selected.setPassword(password);
             selected.setAdmin(isAdmin);
             accountTable.refresh();
             showAlert("Success", "Account updated successfully.");
@@ -90,7 +135,8 @@ public class AdminDashboardController {
     private void onDelete() {
         Account selected = accountTable.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete user: " + selected.getUsername() + "?", ButtonType.OK, ButtonType.CANCEL);
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete user: " + selected.getUsername() + "?",
+                    ButtonType.OK, ButtonType.CANCEL);
             confirm.showAndWait().ifPresent(response -> {
                 if (response == ButtonType.OK) {
                     if (AccountRepository.deleteAccount(selected.getUsername())) {
@@ -108,8 +154,9 @@ public class AdminDashboardController {
     private void onClear() {
         txtUsername.clear();
         txtPassword.clear();
-        cbRole.setValue(null);
+        cbRole.setValue("Staff");
         accountTable.getSelectionModel().clearSelection();
+        txtUsername.setDisable(false);
     }
 
     @FXML

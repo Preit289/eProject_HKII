@@ -25,6 +25,10 @@
                <Label text="Password" />
                   <PasswordField fx:id="passwordField" prefHeight="20.0" prefWidth="200.0" promptText="Password" />
               </children>
+              <Label fx:id="errorLabel"
+                           textFill="red"
+                           wrapText="true"
+                           managed="false" visible="false"/>
             <HBox.margin>
                <Insets left="50.0" right="50.0" />
             </HBox.margin>
