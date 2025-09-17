@@ -1,47 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="HotelApp.BookingFormController" stylesheets="@HotelApp/styles.css"
+            fx:controller="HotelApp.BookingFormController"
             prefWidth="800" prefHeight="520">
-
-    <top><Label fx:id="lblTitle" styleClass="page-title" text="Booking"/></top>
-
+    <top>
+        <Label fx:id="lblTitle" text="Booking" />
+    </top>
     <center>
-        <GridPane hgap="8" vgap="8" styleClass="view-pane">
+        <GridPane hgap="8" vgap="8">
             <columnConstraints>
-                <ColumnConstraints percentWidth="20"/><ColumnConstraints percentWidth="30"/>
-                <ColumnConstraints percentWidth="20"/><ColumnConstraints percentWidth="30"/>
+                <ColumnConstraints percentWidth="20"/>
+                <ColumnConstraints percentWidth="30"/>
+                <ColumnConstraints percentWidth="20"/>
+                <ColumnConstraints percentWidth="30"/>
             </columnConstraints>
 
-            <Label text="Booker"/><TextField fx:id="txtBooker" GridPane.columnIndex="1"/>
-            <Label text="Phone" GridPane.columnIndex="2"/><TextField fx:id="txtPhone" GridPane.columnIndex="3"/>
+            <!-- Row 0 -->
+            <Label text="Booker" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtBooker" promptText="Customer name" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label text="Phone" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+            <TextField fx:id="txtPhone" promptText="Phone number" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
 
-            <Label text="Payment" GridPane.rowIndex="1"/><ComboBox fx:id="cbPayment" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-            <Label text="Deposit"  GridPane.columnIndex="2" GridPane.rowIndex="1"/><TextField fx:id="txtDeposit" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+            <!-- Row 1 -->
+            <Label text="Deposit" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtDeposit" promptText="0" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Label text="Payment" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+            <ComboBox fx:id="cbPayment" promptText="Select" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
 
-            <Label text="Rooms" styleClass="section-title" GridPane.rowIndex="2"/>
-            <HBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                <Button text="Add room"    onAction="#onAddRoom"    styleClass="button-secondary"/>
-                <Button text="Remove room" onAction="#onRemoveRoom" styleClass="button-secondary"/>
+            <!-- Row 2: Dates -->
+            <Label text="Check-in" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <DatePicker fx:id="dpCheckin" promptText="yyyy-MM-dd" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            <Label text="Check-out" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+            <DatePicker fx:id="dpCheckout" promptText="yyyy-MM-dd" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+
+            <!-- Row 3: Room ops -->
+            <HBox spacing="8" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="4">
+                <Button text="Add room" onAction="#onAddRoom"/>
+                <Button text="Remove selected" onAction="#onRemoveRoom"/>
             </HBox>
 
-            <TableView fx:id="tblRooms" GridPane.rowIndex="3" GridPane.columnSpan="4" prefHeight="320" styleClass="table-view">
+            <!-- Row 4: Rooms table -->
+            <TableView fx:id="tblRooms" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="4" prefHeight="320">
                 <columns>
                     <TableColumn fx:id="colRoomNum" text="Room No" prefWidth="120"/>
                     <TableColumn fx:id="colCategory" text="Category" prefWidth="140"/>
-                    <TableColumn fx:id="colQuality"  text="Quality"  prefWidth="140"/>
-                    <TableColumn fx:id="colPrice"    text="Price"    prefWidth="120"/>
+                    <TableColumn fx:id="colQuality" text="Quality" prefWidth="140"/>
+                    <TableColumn fx:id="colPrice" text="Price" prefWidth="120"/>
                 </columns>
             </TableView>
         </GridPane>
     </center>
-
     <bottom>
-        <HBox spacing="8" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-            <Button text="Delete" onAction="#onDelete" fx:id="btnDelete" styleClass="button-secondary"/>
-            <Button text="Save"   onAction="#onSave"   fx:id="btnSave"   styleClass="button-primary"/>
-            <Button text="Close"  onAction="#onClose"  styleClass="button-secondary"/>
+        <HBox spacing="8" alignment="CENTER_RIGHT" BorderPane.alignment="CENTER_RIGHT" style="-fx-padding: 10;">
+            <Button text="Delete" onAction="#onDelete" fx:id="btnDelete"/>
+            <Button text="Save" onAction="#onSave" fx:id="btnSave"/>
+            <Button text="Close" onAction="#onClose"/>
         </HBox>
     </bottom>
 </BorderPane>
