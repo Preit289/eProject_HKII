@@ -28,9 +28,7 @@ public class CheckinRepository {
             GROUP BY bm.Book_by, bm.Book_contact, bm.Planned_checkin_date, bm.Planned_checkout_date
         """;
 
-        try (Connection conn = DButil.getConnection(); 
-             PreparedStatement pstmt = conn.prepareStatement(sql); 
-             ResultSet rs = pstmt.executeQuery()) {
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
                 data.add(new Checkin(
@@ -69,8 +67,7 @@ public class CheckinRepository {
             GROUP BY bm.Book_by, bm.Book_contact, bm.Planned_checkin_date, bm.Planned_checkout_date
         """;
 
-        try (Connection conn = DButil.getConnection(); 
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, "%" + phone + "%");
             ResultSet rs = pstmt.executeQuery();
@@ -153,13 +150,13 @@ public class CheckinRepository {
             }
 
             String insertStayingSql = """
-                INSERT INTO Staying_Management (
-                    Staying_id, Booking_id, Checkin_date, Checkout_date, 
-                    Payment_method, Staying_status, Total_amount, 
-                    Created_at, Updated_at, By_role
-                )
-                VALUES (?, ?, NULL, ?, ?, 0, ?, GETDATE(), GETDATE(), 'admin')
-            """;
+    INSERT INTO Staying_Management (
+        Staying_id, Booking_id, Checkin_date, Checkout_date, 
+        Payment_method, Staying_status, Total_amount, 
+        Created_at, Updated_at, By_role
+    )
+    VALUES (?, ?, GETDATE(), ?, ?, 0, ?, GETDATE(), GETDATE(), 'admin')
+""";
             PreparedStatement insertStayingStmt = conn.prepareStatement(insertStayingSql);
             insertStayingStmt.setString(1, stayingId);
             insertStayingStmt.setString(2, bookingId);
@@ -214,9 +211,7 @@ public class CheckinRepository {
             ORDER BY Customer_name
         """;
 
-        try (Connection conn = DButil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 customerMap.put(rs.getString("Customer_name"), rs.getString("Customer_id"));
             }
@@ -238,8 +233,7 @@ public class CheckinRepository {
             ORDER BY cm.Customer_name
         """;
 
-        try (Connection conn = DButil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
             pstmt.setString(2, roomNumber);
             ResultSet rs = pstmt.executeQuery();
@@ -350,9 +344,7 @@ public class CheckinRepository {
             ORDER BY Service_name
         """;
 
-        try (Connection conn = DButil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 serviceMap.put(rs.getString("Service_name"), rs.getString("Service_id"));
             }
@@ -374,8 +366,7 @@ public class CheckinRepository {
             ORDER BY sm.Service_name
         """;
 
-        try (Connection conn = DButil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
             pstmt.setString(2, roomNumber);
             ResultSet rs = pstmt.executeQuery();
@@ -536,8 +527,7 @@ public class CheckinRepository {
             FROM Staying_Management
             WHERE Staying_id = ?
         """;
-        try (Connection conn = DButil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next() && rs.getTimestamp("Checkin_date") != null) {
@@ -549,8 +539,8 @@ public class CheckinRepository {
         return "";
     }
 
-    public static void updateBookingAndStay(String guestPhone, String guestName, String stayingId, 
-                                          String paymentMethod, int depositAmount) throws SQLException {
+    public static void updateBookingAndStay(String guestPhone, String guestName, String stayingId,
+            String paymentMethod, int depositAmount) throws SQLException {
         try (Connection conn = DButil.getConnection()) {
             conn.setAutoCommit(false);
 
