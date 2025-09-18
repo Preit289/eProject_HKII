@@ -16,18 +16,30 @@ import javafx.scene.layout.VBox;
 
 public class CheckInController {
 
-    @FXML private TableView<Checkin> tblBookings;
-    @FXML private TableColumn<Checkin, String> colGuestName;
-    @FXML private TableColumn<Checkin, String> colGuestPhone;
-    @FXML private TableColumn<Checkin, String> colRoomNumbers;
-    @FXML private TableColumn<Checkin, String> colRoomCategory;
-    @FXML private TableColumn<Checkin, String> colRoomType;
-    @FXML private TableColumn<Checkin, String> colCheckIn;
-    @FXML private TableColumn<Checkin, String> colCheckOut;
-    @FXML private TextField txtSearchPhone;
-    @FXML private Button btnSearch;
-    @FXML private Button btnCheckin;
-    @FXML private Button btnUpdate;
+    @FXML
+    private TableView<Checkin> tblBookings;
+    @FXML
+    private TableColumn<Checkin, String> colGuestName;
+    @FXML
+    private TableColumn<Checkin, String> colGuestPhone;
+    @FXML
+    private TableColumn<Checkin, String> colRoomNumbers;
+    @FXML
+    private TableColumn<Checkin, String> colRoomCategory;
+    @FXML
+    private TableColumn<Checkin, String> colRoomType;
+    @FXML
+    private TableColumn<Checkin, String> colCheckIn;
+    @FXML
+    private TableColumn<Checkin, String> colCheckOut;
+    @FXML
+    private TextField txtSearchPhone;
+    @FXML
+    private Button btnSearch;
+    @FXML
+    private Button btnCheckin;
+    @FXML
+    private Button btnUpdate;
 
     @FXML
     private void initialize() {
@@ -48,10 +60,10 @@ public class CheckInController {
 
         // Disable buttons when no row is selected
         btnCheckin.disableProperty().bind(
-            tblBookings.getSelectionModel().selectedItemProperty().isNull()
+                tblBookings.getSelectionModel().selectedItemProperty().isNull()
         );
         btnUpdate.disableProperty().bind(
-            tblBookings.getSelectionModel().selectedItemProperty().isNull()
+                tblBookings.getSelectionModel().selectedItemProperty().isNull()
         );
 
         // Add double-click handler to open check-in form
@@ -72,7 +84,7 @@ public class CheckInController {
         }
 
         try {
-            // Create a new Staying_Management record or get existing Staying_id
+            // Create or get existing Staying_id
             String stayingId = CheckinRepository.createStayingFromBooking(selectedBooking);
 
             // Get current Checkin_date
@@ -84,8 +96,8 @@ public class CheckInController {
             dialog.setTitle("Confirm Check-in");
             dialog.setHeaderText("Confirm check-in for " + selectedBooking.getGuestName());
             dialog.getDialogPane().setContent(
-                new VBox(10, new Label("Current Check-in Date: " + displayDate),
-                        new Label("New Check-in Date: " + java.time.LocalDateTime.now().toString()))
+                    new VBox(10, new Label("Current Check-in Date: " + displayDate),
+                            new Label("New Check-in Date: " + java.time.LocalDateTime.now().toString()))
             );
             dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
@@ -96,66 +108,25 @@ public class CheckInController {
                         CheckinRepository.performCheckin(stayingId);
 
                         // Show success message
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION, 
-                            "Check-in performed successfully for " + selectedBooking.getGuestName());
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION,
+                                "Check-in performed successfully for " + selectedBooking.getGuestName());
                         alert.showAndWait();
 
                         // Refresh the table
                         tblBookings.setItems(CheckinRepository.getAllBookings());
                     } catch (SQLException e) {
                         e.printStackTrace();
-                        Alert alert = new Alert(Alert.AlertType.ERROR, 
-                            "Failed to perform check-in: " + e.getMessage());
+                        Alert alert = new Alert(Alert.AlertType.ERROR,
+                                "Failed to perform check-in: " + e.getMessage());
                         alert.showAndWait();
                     }
                 }
             });
 
         } catch (SQLException e) {
-            if (e.getMessage().contains("A stay has already been created")) {
-                // Extract Staying_id from the error message
-                String stayingId = e.getMessage().split("Staying_id: ")[1].split("\\)")[0];
-
-                // Get current Checkin_date
-                String currentCheckinDate = CheckinRepository.getCheckinDate(stayingId);
-                String displayDate = currentCheckinDate.isEmpty() ? "Not set" : currentCheckinDate;
-
-                // Show confirmation dialog
-                Dialog<ButtonType> dialog = new Dialog<>();
-                dialog.setTitle("Confirm Check-in");
-                dialog.setHeaderText("Confirm check-in for " + selectedBooking.getGuestName());
-                dialog.getDialogPane().setContent(
-                    new VBox(10, new Label("Current Check-in Date: " + displayDate),
-                            new Label("New Check-in Date: " + java.time.LocalDateTime.now().toString()))
-                );
-                dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-                dialog.showAndWait().ifPresent(response -> {
-                    if (response == ButtonType.OK) {
-                        try {
-                            // Perform check-in
-                            CheckinRepository.performCheckin(stayingId);
-
-                            // Show success message
-                            Alert alert = new Alert(Alert.AlertType.INFORMATION, 
-                                "Check-in performed successfully for " + selectedBooking.getGuestName());
-                            alert.showAndWait();
-
-                            // Refresh the table
-                            tblBookings.setItems(CheckinRepository.getAllBookings());
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
-                            Alert alert = new Alert(Alert.AlertType.ERROR, 
-                                "Failed to perform check-in: " + ex.getMessage());
-                            alert.showAndWait();
-                        }
-                    }
-                });
-            } else {
-                e.printStackTrace();
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to create stay: " + e.getMessage());
-                alert.showAndWait();
-            }
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to create or access stay: " + e.getMessage());
+            alert.showAndWait();
         }
     }
 
@@ -169,7 +140,7 @@ public class CheckInController {
         }
 
         try {
-            // Create a new Staying_Management record or get existing Staying_id
+            // Create or get existing Staying_id
             String stayingId = CheckinRepository.createStayingFromBooking(selectedBooking);
 
             // Load the CheckInForm
@@ -190,35 +161,9 @@ public class CheckInController {
             tblBookings.setItems(CheckinRepository.getAllBookings());
 
         } catch (SQLException e) {
-            if (e.getMessage().contains("A stay has already been created")) {
-                // Extract Staying_id from the error message
-                String stayingId = e.getMessage().split("Staying_id: ")[1].split("\\)")[0];
-                
-                try {
-                    // Load the CheckInForm with existing Staying_id
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/HotelApp/CheckInForm.fxml"));
-                    Parent formRoot = loader.load();
-                    CheckInFormController controller = loader.getController();
-                    controller.setBookingData(selectedBooking, stayingId);
-
-                    Stage stage = new Stage();
-                    stage.setTitle("Check-in Form (Existing Stay)");
-                    stage.setScene(new Scene(formRoot));
-                    stage.initModality(Modality.APPLICATION_MODAL);
-                    stage.showAndWait();
-
-                    // Refresh the table
-                    tblBookings.setItems(CheckinRepository.getAllBookings());
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                    Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open check-in form: " + ex.getMessage());
-                    alert.showAndWait();
-                }
-            } else {
-                e.printStackTrace();
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to create stay: " + e.getMessage());
-                alert.showAndWait();
-            }
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to create or access stay: " + e.getMessage());
+            alert.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.ERROR, "Could not open check-in form: " + e.getMessage());
