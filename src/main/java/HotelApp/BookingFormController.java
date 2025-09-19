@@ -9,7 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-
+import java.time.temporal.ChronoUnit;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -25,8 +25,8 @@ public class BookingFormController {
     @FXML private DatePicker dpCheckin, dpCheckout;
 
     private final BookingRepository repo = new BookingRepository();
-    private String bookingId;                     
-    private BookingController.FormMode mode;      
+    private String bookingId;
+    private BookingController.FormMode mode;
 
     @FXML
     private void initialize(){
@@ -46,7 +46,11 @@ public class BookingFormController {
                 setDisable(empty || !item.isAfter(ci));
             }
         });
-        dpCheckin.valueProperty().addListener((obs, o, n) -> dpCheckout.setValue(null));
+        dpCheckin.valueProperty().addListener((obs, o, n) -> {
+            dpCheckout.setValue(null);
+            autoCalculateDeposit(n, dpCheckout.getValue());   // NEW
+        });
+        dpCheckout.valueProperty().addListener((obs, o, n) -> autoCalculateDeposit(dpCheckin.getValue(), n)); // NEW
     }
 
     private Callback<DatePicker, DateCell> disableBefore(LocalDate min){
@@ -81,6 +85,7 @@ public class BookingFormController {
                 dpCheckout.setValue(dates[1]);
             }
             tblRooms.setItems(FXCollections.observableArrayList(repo.getRoomsVM(bookingId)));
+            autoCalculateDeposit(dpCheckin.getValue(), dpCheckout.getValue()); // NEW
         }else{
             tblRooms.setItems(FXCollections.observableArrayList());
         }
@@ -101,7 +106,7 @@ public class BookingFormController {
             return;
         }
 
-        // Tạo dialog có checkbox để chọn nhiều phòng
+        // Dialog chọn nhiều phòng bằng checkbox
         TableView<SelectableRoomVM> table = new TableView<>();
         table.setEditable(true);
 
@@ -145,6 +150,7 @@ public class BookingFormController {
             }
         }
         tblRooms.setItems(FXCollections.observableArrayList(repo.getRoomsVM(bookingId)));
+        autoCalculateDeposit(ci, co); // NEW
     }
 
     @FXML
@@ -153,6 +159,7 @@ public class BookingFormController {
         if(sel == null || bookingId == null) return;
         repo.removeRoomFromBooking(bookingId, sel.id());
         tblRooms.getItems().remove(sel);
+        autoCalculateDeposit(dpCheckin.getValue(), dpCheckout.getValue()); // NEW
     }
 
     @FXML
@@ -201,7 +208,25 @@ public class BookingFormController {
         }
     }
 
-    private int parseIntSafe(String s, int def){ try{ return Integer.parseInt(s); }catch(Exception e){ return def; } }
+    private int parseIntSafe(String s, int def){
+        try{ return Integer.parseInt(s); }catch(Exception e){ return def; }
+    }
+
+    // NEW: tự động tính deposit = 30% * (tổng tiền phòng * số ngày)
+    private void autoCalculateDeposit(LocalDate ci, LocalDate co){
+        if(ci == null || co == null || !co.isAfter(ci)) return;
+
+        long days = ChronoUnit.DAYS.between(ci, co);
+        if(days <= 0) days = 1;
+
+        int totalPrice = 0;
+        for(RoomVM room : tblRooms.getItems()){
+            totalPrice += room.price();
+        }
+
+        double deposit = totalPrice * days * 0.3;
+        txtDeposit.setText(String.valueOf((int) deposit));
+    }
 
     public record RoomVM(String id, String num, String category, String quality, int price) {}
     public record BookingDTO(String id, String booker, String phone, int deposit, String payment) {}
