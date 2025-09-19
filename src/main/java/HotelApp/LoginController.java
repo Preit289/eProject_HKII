@@ -18,6 +18,27 @@ public class LoginController {
     @FXML private Label errorLabel;
     @FXML private Button loginButton;
 
+    @FXML
+    private void initialize() {
+        assert usernameField != null : "usernameField not injected";
+        assert passwordField != null : "passwordField not injected";
+        assert errorLabel   != null : "errorLabel not injected";
+        assert loginButton  != null : "loginButton not injected";
+        hideError();
+    }
+
+    private void showError(String msg) {
+        errorLabel.setText(msg);
+        errorLabel.setManaged(true);
+        errorLabel.setVisible(true);
+    }
+
+    private void hideError() {
+        errorLabel.setText("");
+        errorLabel.setManaged(false);
+        errorLabel.setVisible(false);
+    }
+
    @FXML
     private void onLogin() {
         String username = usernameField.getText().trim();
@@ -37,7 +58,7 @@ public class LoginController {
                 Account user = AccountRepository.getCurrentUser();
                 System.out.println("Login success. User: " + user.getUsername() + ", isAdmin: " + user.isAdmin());
 
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("Main.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/HotelApp/Main.fxml"));
                 Parent root = loader.load();
 
                 MainController mainCtrl = loader.getController();

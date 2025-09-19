@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="HotelApp.CheckInFormController" stylesheets="@HotelApp/styles.css"
+            fx:controller="HotelApp.CheckInFormController"
             prefWidth="900" prefHeight="560">
 
     <top>
