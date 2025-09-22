@@ -35,6 +35,23 @@ public class App extends Application {
     }
 
     //login role//////////////////////////
+
+    public static void showLogin(Stage stage) {
+        try {
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("Login.fxml"));
+            Parent loginRoot = loader.load();
+
+            Scene scene = new Scene(loginRoot, 1090, 715);
+            scene.getStylesheets().add(App.class.getResource("styles.css").toExternalForm());
+
+            stage.setScene(scene);
+            stage.setTitle("Login - Hotel Management");
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void logout() {
         try { setRoot("Login"); } 
         catch (Exception e) { e.printStackTrace(); } 

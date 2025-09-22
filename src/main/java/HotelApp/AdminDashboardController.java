@@ -39,7 +39,10 @@ public class AdminDashboardController {
         colUsername.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getUsername()));
 
         // password
-        colPassword.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getPassword()));
+        colPassword.setCellValueFactory(data -> {
+            String pw = data.getValue().getPassword();
+            return new SimpleStringProperty("*".repeat(pw.length()));
+        });
 
         // Role
         colIsAdmin.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().isAdmin() ? "Admin" : "Staff"));
@@ -90,13 +93,15 @@ public class AdminDashboardController {
             return;
         }
 
-        Account newAcc = new Account(username, password, "Admin".equals(role));
+        boolean isAdmin = "Admin".equalsIgnoreCase(role);
+        Account newAcc = new Account(username, password, isAdmin);
+
         if (AccountRepository.addAccount(newAcc)) {
-            accounts.add(newAcc); // TableView hiển thị mask
+            accounts.add(newAcc);
             showAlert("Success", "Account added successfully.");
             onClear();
         } else {
-            showAlert("Error", "Failed to add account. Username may exist.");
+            showAlert("Error", "Failed to add account. Username may already exist.");
         }
     }
 
@@ -110,6 +115,7 @@ public class AdminDashboardController {
 
         String password = txtPassword.getText().trim();
         String role = cbRole.getValue();
+
         if (password.isEmpty() || role == null) {
             showAlert("Error", "Please fill all fields.");
             return;
@@ -119,7 +125,8 @@ public class AdminDashboardController {
             return;
         }
 
-        boolean isAdmin = "Admin".equals(role);
+        boolean isAdmin = "Admin".equalsIgnoreCase(role);
+
         if (AccountRepository.updateAccount(selected.getUsername(), password, isAdmin)) {
             selected.setPassword(password);
             selected.setAdmin(isAdmin);
@@ -134,20 +141,48 @@ public class AdminDashboardController {
     @FXML
     private void onDelete() {
         Account selected = accountTable.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete user: " + selected.getUsername() + "?",
-                    ButtonType.OK, ButtonType.CANCEL);
-            confirm.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    if (AccountRepository.deleteAccount(selected.getUsername())) {
-                        accounts.remove(selected);
-                        showAlert("Success", "Account deleted successfully.");
-                    } else {
-                        showAlert("Error", "Failed to delete account.");
-                    }
+        if (selected == null)
+            return;
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "Delete user: " + selected.getUsername() + "?",
+                ButtonType.OK, ButtonType.CANCEL);
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                if (AccountRepository.deleteAccount(selected.getUsername())) {
+                    accounts.remove(selected);
+                    showAlert("Success", "Account deleted successfully.");
+                    onClear();
+                } else {
+                    showAlert("Error", "Failed to delete account.");
                 }
-            });
+            }
+        });
+    }
+
+    @FXML
+    private void onResetPassword() {
+        Account selected = accountTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Error", "Please select a user to reset password.");
+            return;
         }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "Reset password for user: " + selected.getUsername() + "?\n(Default = 123456)",
+                ButtonType.OK, ButtonType.CANCEL);
+
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                if (AccountRepository.resetAccount(selected.getUsername())) {
+                    selected.setPassword("123456");
+                    accountTable.refresh();
+                    showAlert("Success", "Password reset to 123456. User must change it at next login.");
+                } else {
+                    showAlert("Error", "Failed to reset password.");
+                }
+            }
+        });
     }
 
     @FXML
