@@ -13,12 +13,16 @@ public class Booking {
     private final ObjectProperty<Room> room = new SimpleObjectProperty<>();
     private final DoubleProperty price = new SimpleDoubleProperty(0.0);
 
+    // NEW: ngày tạo booking
+    private final ObjectProperty<LocalDate> createdAt = new SimpleObjectProperty<>();
+
     public Booking(String guest, String roomNumber, LocalDate checkIn, LocalDate checkOut, Room room) {
         this.guestName.set(guest);
         this.roomNumber.set(roomNumber);
         this.checkInDate.set(checkIn);
         this.checkOutDate.set(checkOut);
         this.room.set(room);
+        this.createdAt.set(LocalDate.now()); // mặc định tạo = hôm nay
     }
 
     public StringProperty guestNameProperty() {
@@ -47,6 +51,11 @@ public class Booking {
 
     public DoubleProperty priceProperty() {
         return price;
+    }
+
+    // NEW: property ngày tạo
+    public ObjectProperty<LocalDate> createdAtProperty() {
+        return createdAt;
     }
 
     public String getGuestName() {
@@ -87,5 +96,14 @@ public class Booking {
 
     public void setPrice(double price) {
         this.price.set(price);
+    }
+
+    // NEW: getter/setter createdAt
+    public LocalDate getCreatedAt() {
+        return createdAt.get();
+    }
+
+    public void setCreatedAt(LocalDate createdAt) {
+        this.createdAt.set(createdAt);
     }
 }

@@ -17,7 +17,10 @@ public class BookingFormController {
 
     @FXML private Label lblTitle;
     @FXML private TextField txtBooker, txtPhone, txtDeposit;
-    @FXML private ComboBox<String> cbPayment;
+    // Đổi từ ComboBox sang RadioButton
+    @FXML private RadioButton rbCash, rbCard, rbOnline;
+    @FXML private ToggleGroup paymentGroup;
+
     @FXML private TableView<RoomVM> tblRooms;
     @FXML private TableColumn<RoomVM,String> colRoomNum, colCategory, colQuality;
     @FXML private TableColumn<RoomVM,Number> colPrice;
@@ -30,7 +33,7 @@ public class BookingFormController {
 
     @FXML
     private void initialize(){
-        cbPayment.setItems(FXCollections.observableArrayList("Cash","Card","Transfer"));
+        // Xóa phần setItems cho cbPayment vì đã đổi sang RadioButton
 
         colRoomNum.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().num()));
         colCategory.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().category()));
@@ -48,9 +51,9 @@ public class BookingFormController {
         });
         dpCheckin.valueProperty().addListener((obs, o, n) -> {
             dpCheckout.setValue(null);
-            autoCalculateDeposit(n, dpCheckout.getValue());   // NEW
+            autoCalculateDeposit(n, dpCheckout.getValue());
         });
-        dpCheckout.valueProperty().addListener((obs, o, n) -> autoCalculateDeposit(dpCheckin.getValue(), n)); // NEW
+        dpCheckout.valueProperty().addListener((obs, o, n) -> autoCalculateDeposit(dpCheckin.getValue(), n));
     }
 
     private Callback<DatePicker, DateCell> disableBefore(LocalDate min){
@@ -76,7 +79,12 @@ public class BookingFormController {
             if(b != null){
                 txtBooker.setText(b.booker());
                 txtPhone.setText(b.phone());
-                cbPayment.getSelectionModel().select(b.payment());
+                // chọn radio tương ứng với payment
+                switch (b.payment()) {
+                    case "Cash" -> rbCash.setSelected(true);
+                    case "Card" -> rbCard.setSelected(true);
+                    case "Transfer", "Online" -> rbOnline.setSelected(true);
+                }
                 txtDeposit.setText(String.valueOf(b.deposit()));
             }
             var dates = repo.getPlannedDates(bookingId);
@@ -85,7 +93,7 @@ public class BookingFormController {
                 dpCheckout.setValue(dates[1]);
             }
             tblRooms.setItems(FXCollections.observableArrayList(repo.getRoomsVM(bookingId)));
-            autoCalculateDeposit(dpCheckin.getValue(), dpCheckout.getValue()); // NEW
+            autoCalculateDeposit(dpCheckin.getValue(), dpCheckout.getValue());
         }else{
             tblRooms.setItems(FXCollections.observableArrayList());
         }
@@ -106,7 +114,6 @@ public class BookingFormController {
             return;
         }
 
-        // Dialog chọn nhiều phòng bằng checkbox
         TableView<SelectableRoomVM> table = new TableView<>();
         table.setEditable(true);
 
@@ -150,7 +157,7 @@ public class BookingFormController {
             }
         }
         tblRooms.setItems(FXCollections.observableArrayList(repo.getRoomsVM(bookingId)));
-        autoCalculateDeposit(ci, co); // NEW
+        autoCalculateDeposit(ci, co);
     }
 
     @FXML
@@ -159,14 +166,25 @@ public class BookingFormController {
         if(sel == null || bookingId == null) return;
         repo.removeRoomFromBooking(bookingId, sel.id());
         tblRooms.getItems().remove(sel);
-        autoCalculateDeposit(dpCheckin.getValue(), dpCheckout.getValue()); // NEW
+        autoCalculateDeposit(dpCheckin.getValue(), dpCheckout.getValue());
     }
 
     @FXML
     private void onSave(){
         String booker = txtBooker.getText().trim();
         String phone  = txtPhone.getText().trim();
-        String pay    = cbPayment.getValue();
+
+        if (!validatePhone(phone)) {
+            new Alert(Alert.AlertType.WARNING,
+                    "Số điện thoại không hợp lệ:\n" +
+                    "- Chỉ được nhập số\n" +
+                    "- Bắt đầu bằng số 0\n" +
+                    "- Tối thiểu 10 số\n" +
+                    "- 4 số đầu tiên không được trùng nhau").showAndWait();
+            return;
+        }
+
+        String pay    = getSelectedPayment();
         int deposit   = parseIntSafe(txtDeposit.getText().trim(), 0);
         LocalDate ci  = dpCheckin.getValue();
         LocalDate co  = dpCheckout.getValue();
@@ -199,7 +217,7 @@ public class BookingFormController {
         if(mode == BookingController.FormMode.CREATE){
             bookingId = repo.createBooking(new BookingDTO(
                     null, txtBooker.getText().trim(), txtPhone.getText().trim(),
-                    parseIntSafe(txtDeposit.getText().trim(), 0), cbPayment.getValue()
+                    parseIntSafe(txtDeposit.getText().trim(), 0), getSelectedPayment()
             ), ci, co);
             mode = BookingController.FormMode.UPDATE;
             btnSave.setText("Update");
@@ -212,7 +230,6 @@ public class BookingFormController {
         try{ return Integer.parseInt(s); }catch(Exception e){ return def; }
     }
 
-    // NEW: tự động tính deposit = 30% * (tổng tiền phòng * số ngày)
     private void autoCalculateDeposit(LocalDate ci, LocalDate co){
         if(ci == null || co == null || !co.isAfter(ci)) return;
 
@@ -226,6 +243,23 @@ public class BookingFormController {
 
         double deposit = totalPrice * days * 0.3;
         txtDeposit.setText(String.valueOf((int) deposit));
+    }
+
+    // Validate phone
+    private boolean validatePhone(String phone) {
+        if (!phone.matches("\\d+")) return false;
+        if (!phone.startsWith("0")) return false;
+        if (phone.length() < 10) return false;
+        if (phone.length() >= 4) {
+            String firstFour = phone.substring(0, 4);
+            if (firstFour.chars().distinct().count() == 1) return false;
+        }
+        return true;
+    }
+
+    private String getSelectedPayment() {
+        RadioButton selected = (RadioButton) paymentGroup.getSelectedToggle();
+        return selected != null ? selected.getText() : null;
     }
 
     public record RoomVM(String id, String num, String category, String quality, int price) {}
