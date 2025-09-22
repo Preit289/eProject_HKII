@@ -12,6 +12,8 @@
     </properties>
 
     <dependencies>
+        
+        
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -27,6 +29,14 @@
             <artifactId>mssql-jdbc</artifactId>
             <version>13.2.0.jre11</version>
         </dependency>
+        
+        <!-- Ikonli Core -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-core</artifactId>
+            <version>12.4.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>
             <artifactId>ikonli-javafx</artifactId>
@@ -80,11 +90,24 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <!-- explicitly include the deps you must have inside the shaded jar -->
+                            <artifactSet>
+                                <includes>
+                                    <include>org.kordamp.ikonli:ikonli-core</include>
+                                    <include>org.kordamp.ikonli:ikonli-javafx</include>
+                                    <include>org.kordamp.ikonli:ikonli-fontawesome-pack</include>
+                                    <include>com.microsoft.sqlserver:mssql-jdbc</include>
+                                </includes>
+                            </artifactSet>
+
+                            <!-- merge service descriptors so JDBC drivers (and other service providers) are registered -->
                             <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>HotelApp.App</mainClass>
                                 </transformer>
                             </transformers>
+
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -99,6 +122,18 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.fxml</include>
+                    <include>**/*.css</include>
+                    <include>**/*.otf</include>
+                    <include>**/*.ttf</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
 </project>
