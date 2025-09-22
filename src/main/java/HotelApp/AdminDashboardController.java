@@ -8,8 +8,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-import java.io.IOException;
-
 public class AdminDashboardController {
     @FXML
     private TableView<Account> accountTable;
@@ -192,11 +190,6 @@ public class AdminDashboardController {
         cbRole.setValue("Staff");
         accountTable.getSelectionModel().clearSelection();
         txtUsername.setDisable(false);
-    }
-
-    @FXML
-    private void onBackToLogin() throws IOException {
-        App.setRoot("Login");
     }
 
     private void showAlert(String title, String message) {

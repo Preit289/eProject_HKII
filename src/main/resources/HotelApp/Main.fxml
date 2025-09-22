@@ -39,9 +39,7 @@
             <children>
                 <Label fx:id="pageTitle" styleClass="page-title" text="Dashboard" />
                 <Region HBox.hgrow="ALWAYS" />
-                <TextField fx:id="searchField" promptText="Search..." />
-                <Button onAction="#onSearch" text="Search" />
-                <MenuButton styleClass="account-menu" text="Account">
+                <MenuButton styleClass="button-secondary" text="Account">
                     <items>
                         <MenuItem onAction="#onLogout" text="Logout" />
                     </items>

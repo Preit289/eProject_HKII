@@ -22,7 +22,7 @@
 
 
             <Label text="Role:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
-            <ChoiceBox fx:id="cbRole" prefWidth="100"
+            <ChoiceBox fx:id="cbRole" prefWidth="100" styleClass="button-secondary"
                 GridPane.rowIndex="2" GridPane.columnIndex="1" />
         </children>
     </GridPane>
@@ -36,8 +36,6 @@
             <Button fx:id="btnReset" text="Reset Password" styleClass="button-secondary"
                 onAction="#onResetPassword" />
             <Button fx:id="btnClear" text="Clear" styleClass="button-secondary" onAction="#onClear" />
-            <Button fx:id="btnBack" text="Back to Login" styleClass="button-secondary"
-                cancelButton="true" onAction="#onBackToLogin" />
         </children>
     </HBox>
 
