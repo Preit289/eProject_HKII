@@ -1,88 +1,112 @@
 package HotelApp;
 
+import java.io.IOException;
+
 import HotelApp.model.Account;
 import HotelApp.repository.AccountRepository;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-
-import java.io.IOException;
 
 public class LoginController {
 
-    @FXML private TextField usernameField;
-    @FXML private PasswordField passwordField;
-    @FXML private Label errorLabel;
-    @FXML private Button loginButton;
+    @FXML
+    private TextField usernameField;
+    @FXML
+    private PasswordField passwordField;
+    @FXML
+    private Label errorLabel;
 
     @FXML
-    private void initialize() {
-        assert usernameField != null : "usernameField not injected";
-        assert passwordField != null : "passwordField not injected";
-        assert errorLabel   != null : "errorLabel not injected";
-        assert loginButton  != null : "loginButton not injected";
-        hideError();
-    }
-
-    private void showError(String msg) {
-        errorLabel.setText(msg);
-        errorLabel.setManaged(true);
-        errorLabel.setVisible(true);
-    }
-
-    private void hideError() {
-        errorLabel.setText("");
-        errorLabel.setManaged(false);
-        errorLabel.setVisible(false);
-    }
-
-   @FXML
     private void onLogin() {
         String username = usernameField.getText().trim();
         String password = passwordField.getText().trim();
 
-        if (username.isEmpty() || password.isEmpty()) {
-            errorLabel.setText("Please enter username and password.");
-            return;
-        }
-
         try {
-            System.out.println("Attempting login for user: " + username);
-
-            boolean success = AccountRepository.login(username, password);
-
-            if (success) {
-                Account user = AccountRepository.getCurrentUser();
-                System.out.println("Login success. User: " + user.getUsername() + ", isAdmin: " + user.isAdmin());
-
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/HotelApp/Main.fxml"));
-                Parent root = loader.load();
-
-                MainController mainCtrl = loader.getController();
-                mainCtrl.setRole(user.isAdmin());
-
-                Stage stage = (Stage) loginButton.getScene().getWindow();
-                stage.setScene(new Scene(root));
-                stage.show();
-            } else {
-                System.err.println("Login failed for user: " + username);
-                errorLabel.setStyle("-fx-text-fill: red;");
-                errorLabel.setText("Invalid username or password.");
-                usernameField.clear();
-                passwordField.clear();
+            if (username.isEmpty() || password.isEmpty()) {
+                throw new Exception("Please enter username and password.");
             }
 
-        } catch (IOException e) {
-            System.err.println("FXML loading failed: " + e.getMessage());
-            e.printStackTrace();
-            errorLabel.setText("Error loading main screen.");
+            boolean success = AccountRepository.login(username, password);
+            if (success) {
+                Account user = AccountRepository.getCurrentUser();
+
+                if ("123456".equals(user.getPassword())) {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("ChangePassword.fxml"));
+                    Parent root = loader.load();
+
+                    ChangePasswordController controller = loader.getController();
+                    controller.setUsername(username);
+
+                    Stage stage = (Stage) usernameField.getScene().getWindow();
+                    stage.setScene(new Scene(root));
+                    stage.setTitle("Change Password - Hotel Management");
+                    stage.show();
+                    return;
+                }
+
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("Main.fxml"));
+                Parent root = loader.load();
+
+                MainController controller = loader.getController();
+                controller.setRole(user.isAdmin());
+
+                Stage stage = (Stage) usernameField.getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.setTitle("Hotel Management - Main");
+                stage.show();
+
+            } else {
+                throw new Exception("Invalid username or password.");
+            }
+
         } catch (Exception e) {
-            System.err.println("Unexpected error: " + e.getMessage());
-            e.printStackTrace();
-            errorLabel.setText("Unexpected error occurred.");
+            e.printStackTrace(); // console
+            showErrorDialog(e.getMessage()); // popup Alert
         }
+    }
+
+    private void showErrorDialog(String message) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+        alert.setTitle("Login Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void loadChangePasswordView(String username) throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("ChangePassword.fxml"));
+        Parent root = loader.load();
+
+        ChangePasswordController controller = loader.getController();
+        controller.setUsername(username);
+
+        Stage stage = (Stage) usernameField.getScene().getWindow();
+        stage.setScene(new Scene(root));
+        stage.setTitle("Change Password - Hotel Management");
+        stage.show();
+    }
+
+    private void loadMainView(boolean isAdmin) throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Main.fxml"));
+        Parent root = loader.load();
+
+        MainController controller = loader.getController();
+        controller.setRole(isAdmin);
+
+        Stage stage = (Stage) usernameField.getScene().getWindow();
+        stage.setScene(new Scene(root));
+        stage.setTitle("Hotel Management - Main");
+        stage.show();
+    }
+
+    private void showError(String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
     }
 }

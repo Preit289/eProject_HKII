@@ -43,7 +43,6 @@
                 <Button onAction="#onSearch" text="Search" />
                 <MenuButton styleClass="account-menu" text="Account">
                     <items>
-                        <MenuItem text="Profile" />
                         <MenuItem onAction="#onLogout" text="Logout" />
                     </items>
                 </MenuButton>

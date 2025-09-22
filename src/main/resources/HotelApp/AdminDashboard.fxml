@@ -2,8 +2,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-    spacing="15" alignment="CENTER"
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
+    spacing="8" alignment="CENTER" stylesheets="@HotelApp/styles.css"
     fx:controller="HotelApp.AdminDashboardController">
 
     <Label text="Admin - Account Management"
@@ -17,8 +17,9 @@
                 GridPane.rowIndex="0" GridPane.columnIndex="1" />
 
             <Label text="Password:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-            <TextField fx:id="txtPassword" prefWidth="400"
+            <PasswordField fx:id="txtPassword" prefWidth="400"
                 GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
 
             <Label text="Role:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
             <ChoiceBox fx:id="cbRole" prefWidth="100"
@@ -32,6 +33,8 @@
                 onAction="#onAdd" />
             <Button fx:id="btnUpdate" text="Update" styleClass="button-primary" onAction="#onUpdate" />
             <Button fx:id="btnDelete" text="Delete" styleClass="button-primary" onAction="#onDelete" />
+            <Button fx:id="btnReset" text="Reset Password" styleClass="button-secondary"
+                onAction="#onResetPassword" />
             <Button fx:id="btnClear" text="Clear" styleClass="button-secondary" onAction="#onClear" />
             <Button fx:id="btnBack" text="Back to Login" styleClass="button-secondary"
                 cancelButton="true" onAction="#onBackToLogin" />
@@ -40,7 +43,7 @@
 
 
     <!-- Bảng -->
-    <TableView fx:id="accountTable" VBox.vgrow="ALWAYS">
+    <TableView fx:id="accountTable" prefHeight="600"  VBox.vgrow="ALWAYS">
         <columns>
             <TableColumn fx:id="colUsername" text="Username" prefWidth="220" />
             <TableColumn fx:id="colPassword" text="Password" prefWidth="220" />
