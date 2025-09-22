@@ -31,9 +31,9 @@ INSERT INTO Room_Management VALUES
 -- 3. Account_Management
 INSERT INTO Account_Management VALUES
 ('admin', '123456', 1),
-('staff1', 'staff123', 0),
-('staff2', 'staff234', 0),
-('reception1', 'recep123', 0);
+('staff1', '123456', 0),
+('staff2', '123456', 0),
+('reception1', '123456', 0);
 
 -- 4. Customer_Management
 INSERT INTO Customer_Management VALUES
