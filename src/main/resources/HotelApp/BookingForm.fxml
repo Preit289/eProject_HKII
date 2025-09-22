@@ -2,6 +2,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
+
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
             fx:controller="HotelApp.BookingFormController"
             prefWidth="800" prefHeight="520">
@@ -27,7 +28,17 @@
             <Label text="Deposit" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
             <TextField fx:id="txtDeposit" promptText="0" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
             <Label text="Payment" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-            <ComboBox fx:id="cbPayment" promptText="Select" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+            <HBox spacing="12" GridPane.rowIndex="1" GridPane.columnIndex="3">
+                <!-- Khởi tạo ToggleGroup tại nút đầu tiên -->
+                <RadioButton fx:id="rbCash" text="Tiền mặt">
+                    <toggleGroup>
+                        <ToggleGroup fx:id="paymentGroup"/>
+                    </toggleGroup>
+                </RadioButton>
+                <!-- Tham chiếu lại ToggleGroup cho các nút khác -->
+                <RadioButton fx:id="rbCard" text="Thẻ" toggleGroup="$paymentGroup"/>
+                <RadioButton fx:id="rbOnline" text="Online" toggleGroup="$paymentGroup"/>
+            </HBox>
 
             <!-- Row 2: Dates -->
             <Label text="Check-in" GridPane.rowIndex="2" GridPane.columnIndex="0"/>

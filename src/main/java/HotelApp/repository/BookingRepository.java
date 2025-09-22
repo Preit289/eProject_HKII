@@ -16,16 +16,22 @@ public class BookingRepository {
     }
 
     // Lấy danh sách booking để hiển thị
-    public List<BookingController.BookingVM> searchVM(String keyword){
-        String sql = "SELECT b.Booking_id, b.Book_by, b.Book_contact, " +
-                     "b.Deposit_amount, b.Payment_method, " +
-                     "(SELECT COUNT(*) FROM Booking_Room br WHERE br.Booking_id = b.Booking_id) AS Rooms " +
-                     "FROM Booking_Management b " +
-                     "ORDER BY b.Booking_id";
-        List<BookingController.BookingVM> list = new ArrayList<>();
-        try (Connection cn = getConn();
-             PreparedStatement ps = cn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+    // Lấy danh sách booking để hiển thị
+public List<BookingController.BookingVM> searchVM(String keyword){
+    String sql = "SELECT b.Booking_id, b.Book_by, b.Book_contact, " +
+                 "b.Deposit_amount, b.Payment_method, " +
+                 "(SELECT COUNT(*) FROM Booking_Room br WHERE br.Booking_id = b.Booking_id) AS Rooms, " +
+                 "b.Created_at, b.Planned_checkin_date " +  // thêm 2 cột
+                 "FROM Booking_Management b " +
+                 "WHERE b.Book_by LIKE ? OR b.Book_contact LIKE ? " +  // có tìm kiếm
+                 "ORDER BY b.Booking_id";
+    List<BookingController.BookingVM> list = new ArrayList<>();
+    try (Connection cn = getConn();
+         PreparedStatement ps = cn.prepareStatement(sql)) {
+        String kw = "%" + keyword + "%";
+        ps.setString(1, kw);
+        ps.setString(2, kw);
+        try (ResultSet rs = ps.executeQuery()) {
             while(rs.next()){
                 list.add(new BookingController.BookingVM(
                         rs.getString("Booking_id"),
@@ -33,12 +39,15 @@ public class BookingRepository {
                         rs.getString("Book_contact"),
                         rs.getInt("Deposit_amount"),
                         rs.getString("Payment_method"),
-                        rs.getInt("Rooms")
+                        rs.getInt("Rooms"),
+                        rs.getTimestamp("Created_at") != null ? rs.getTimestamp("Created_at").toLocalDateTime() : null,
+                        rs.getTimestamp("Planned_checkin_date") != null ? rs.getTimestamp("Planned_checkin_date").toLocalDateTime() : null
                 ));
             }
-        } catch (Exception e){ e.printStackTrace(); }
-        return list;
-    }
+        }
+    } catch (Exception e){ e.printStackTrace(); }
+    return list;
+}
 
     // Lấy booking chi tiết
     public BookingFormController.BookingDTO getById(String id){
