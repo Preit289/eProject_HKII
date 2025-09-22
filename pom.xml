@@ -90,7 +90,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <!-- explicitly include the deps you must have inside the shaded jar -->
+                            <!-- explicitly include the deps must have inside the shaded jar -->
                             <artifactSet>
                                 <includes>
                                     <include>org.kordamp.ikonli:ikonli-core</include>
