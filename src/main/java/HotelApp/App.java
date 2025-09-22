@@ -14,9 +14,14 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("Login"), 1090, 715);
+        Parent root = FXMLLoader.load(getClass().getResource("/HotelApp/Login.fxml"));
+        scene = new Scene(root, 600, 400);
+
+        // load CSS
+        scene.getStylesheets().add(getClass().getResource("/HotelApp/styles.css").toExternalForm());
+
+        stage.setTitle("Hotel Management Login");
         stage.setScene(scene);
-        stage.setTitle("Hotel Management System");
         stage.show();
     }
 
