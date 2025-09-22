@@ -30,13 +30,13 @@
             <Label text="Payment" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
             <HBox spacing="12" GridPane.rowIndex="1" GridPane.columnIndex="3">
                 <!-- Khởi tạo ToggleGroup tại nút đầu tiên -->
-                <RadioButton fx:id="rbCash" text="Tiền mặt">
+                <RadioButton fx:id="rbCash" text="Cash">
                     <toggleGroup>
                         <ToggleGroup fx:id="paymentGroup"/>
                     </toggleGroup>
                 </RadioButton>
                 <!-- Tham chiếu lại ToggleGroup cho các nút khác -->
-                <RadioButton fx:id="rbCard" text="Thẻ" toggleGroup="$paymentGroup"/>
+                <RadioButton fx:id="rbCard" text="Card" toggleGroup="$paymentGroup"/>
                 <RadioButton fx:id="rbOnline" text="Online" toggleGroup="$paymentGroup"/>
             </HBox>
 
