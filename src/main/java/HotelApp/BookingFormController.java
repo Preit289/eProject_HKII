@@ -17,7 +17,6 @@ public class BookingFormController {
 
     @FXML private Label lblTitle;
     @FXML private TextField txtBooker, txtPhone, txtDeposit;
-    // Đổi từ ComboBox sang RadioButton
     @FXML private RadioButton rbCash, rbCard, rbOnline;
     @FXML private ToggleGroup paymentGroup;
 
@@ -33,8 +32,6 @@ public class BookingFormController {
 
     @FXML
     private void initialize(){
-        // Xóa phần setItems cho cbPayment vì đã đổi sang RadioButton
-
         colRoomNum.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().num()));
         colCategory.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().category()));
         colQuality.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().quality()));
@@ -71,7 +68,7 @@ public class BookingFormController {
         boolean isUpdate = mode == BookingController.FormMode.UPDATE;
 
         btnSave.setText(isUpdate ? "Update" : "Create");
-        btnDelete.setDisable(!isUpdate);
+        btnDelete.setVisible(isUpdate); // chỉ hiển thị khi update
         lblTitle.setText(isUpdate ? "Update Booking" : "New Booking");
 
         if(isUpdate){
@@ -79,7 +76,6 @@ public class BookingFormController {
             if(b != null){
                 txtBooker.setText(b.booker());
                 txtPhone.setText(b.phone());
-                // chọn radio tương ứng với payment
                 switch (b.payment()) {
                     case "Cash" -> rbCash.setSelected(true);
                     case "Card" -> rbCard.setSelected(true);
@@ -200,7 +196,7 @@ public class BookingFormController {
             bookingId = repo.createBooking(new BookingDTO(null, booker, phone, deposit, pay), ci, co);
             mode = BookingController.FormMode.UPDATE;
             btnSave.setText("Update");
-            btnDelete.setDisable(false);
+            btnDelete.setVisible(true);
             lblTitle.setText("Update Booking");
         }
         if(bookingId != null){
@@ -221,7 +217,7 @@ public class BookingFormController {
             ), ci, co);
             mode = BookingController.FormMode.UPDATE;
             btnSave.setText("Update");
-            btnDelete.setDisable(false);
+            btnDelete.setVisible(true);
             lblTitle.setText("Update Booking");
         }
     }
@@ -245,7 +241,6 @@ public class BookingFormController {
         txtDeposit.setText(String.valueOf((int) deposit));
     }
 
-    // Validate phone
     private boolean validatePhone(String phone) {
         if (!phone.matches("\\d+")) return false;
         if (!phone.startsWith("0")) return false;

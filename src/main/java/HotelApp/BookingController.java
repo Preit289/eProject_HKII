@@ -24,7 +24,8 @@ public class BookingController {
     @FXML private TableView<BookingVM> tblBooking;
     @FXML private TableColumn<BookingVM,String> colId, colBooker, colPhone, colPay;
     @FXML private TableColumn<BookingVM,Number>  colDeposit, colRooms;
-    @FXML private TableColumn<BookingVM,String>  colCreatedAt; // thêm cột ngày tạo
+    @FXML private TableColumn<BookingVM,String>  colCreatedAt;
+    @FXML private TableColumn<BookingVM,String>  colCheckinDate; // thêm cột check-in date
 
     private final BookingRepository repo = new BookingRepository();
 
@@ -39,6 +40,13 @@ public class BookingController {
         colCreatedAt.setCellValueFactory(c -> new SimpleStringProperty(
                 c.getValue().createdAt() != null ? c.getValue().createdAt().toString() : ""
         ));
+        colCheckinDate.setCellValueFactory(c -> new SimpleStringProperty(
+                c.getValue().plannedCheckin() != null ? c.getValue().plannedCheckin().toLocalDate().toString() : ""
+        ));
+
+        // Sort mặc định theo check-in date ASC
+        tblBooking.getSortOrder().add(colCheckinDate);
+        colCheckinDate.setSortType(TableColumn.SortType.ASCENDING);
 
         // Gắn nút More ở cuối mỗi dòng trong cột Rooms
         colRooms.setCellFactory(col -> new TableCell<>() {
@@ -75,16 +83,13 @@ public class BookingController {
                         LocalDateTime standardCheckin = plannedCheckin.withHour(12).withMinute(0);
 
                         if (now.isAfter(standardCheckin.plusHours(2))) {
-                            // Đỏ: đã quá 2h sau giờ check-in mà chưa tới
-                            setStyle("-fx-background-color: #ff4d4d;");
+                            setStyle("-fx-background-color: #ff4d4d;"); // đỏ
                         } else {
                             long days = ChronoUnit.DAYS.between(now.toLocalDate(), plannedCheckin.toLocalDate());
                             if (days <= 2) {
-                                // Vàng: sắp check-in trong vòng 2 ngày
-                                setStyle("-fx-background-color: #ffff99;");
+                                setStyle("-fx-background-color: #ffff99;"); // vàng
                             } else if (days > 3) {
-                                // Xanh: còn trên 3 ngày
-                                setStyle("-fx-background-color: #99ff99;");
+                                setStyle("-fx-background-color: #99ff99;"); // xanh
                             } else {
                                 setStyle("");
                             }
@@ -118,7 +123,7 @@ public class BookingController {
             FXMLLoader f = new FXMLLoader(getClass().getResource("/HotelApp/BookingForm.fxml"));
             Parent root = f.load();
             BookingFormController c = f.getController();
-            c.init(mode, bookingId); // CREATE=null, UPDATE=bookingId
+            c.init(mode, bookingId);
             Stage s = new Stage();
             s.initModality(Modality.APPLICATION_MODAL);
             s.setTitle(mode==FormMode.CREATE? "New Booking" : "Update Booking");
@@ -130,7 +135,6 @@ public class BookingController {
 
     public enum FormMode { CREATE, UPDATE }
 
-    // BookingVM thêm createdAt và plannedCheckin để phục vụ rowFactory
     public record BookingVM(String id, String booker, String phone,
                             int deposit, String payment, int rooms,
                             LocalDateTime createdAt, LocalDateTime plannedCheckin) {}

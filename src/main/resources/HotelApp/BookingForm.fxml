@@ -6,17 +6,28 @@
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
             fx:controller="HotelApp.BookingFormController"
             prefWidth="800" prefHeight="520">
+
+    <!-- Heading -->
     <top>
-        <Label fx:id="lblTitle" text="Booking" />
+        <HBox alignment="CENTER" style="-fx-padding: 15;">
+            <Label fx:id="lblTitle" text="New Booking"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+        </HBox>
     </top>
+
+    <!-- Form -->
     <center>
-        <GridPane hgap="8" vgap="8">
-            <columnConstraints>
-                <ColumnConstraints percentWidth="20"/>
-                <ColumnConstraints percentWidth="30"/>
-                <ColumnConstraints percentWidth="20"/>
-                <ColumnConstraints percentWidth="30"/>
-            </columnConstraints>
+       <GridPane hgap="10" vgap="12" style="-fx-padding: 20;">
+    <columnConstraints>
+        <!-- Label cột 0: nhỏ hơn -->
+        <ColumnConstraints minWidth="80" maxWidth="100"/>
+        <!-- Input cột 1 -->
+        <ColumnConstraints hgrow="ALWAYS"/>
+        <!-- Label cột 2 -->
+        <ColumnConstraints minWidth="80" maxWidth="100"/>
+        <!-- Input cột 3 -->
+        <ColumnConstraints hgrow="ALWAYS"/>
+    </columnConstraints>
 
             <!-- Row 0 -->
             <Label text="Booker" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
@@ -29,18 +40,16 @@
             <TextField fx:id="txtDeposit" promptText="0" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
             <Label text="Payment" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
             <HBox spacing="12" GridPane.rowIndex="1" GridPane.columnIndex="3">
-                <!-- Khởi tạo ToggleGroup tại nút đầu tiên -->
-                <RadioButton fx:id="rbCash" text="Cash">
+                <RadioButton fx:id="rbCash" text="Cash" selected="true">
                     <toggleGroup>
                         <ToggleGroup fx:id="paymentGroup"/>
                     </toggleGroup>
                 </RadioButton>
-                <!-- Tham chiếu lại ToggleGroup cho các nút khác -->
                 <RadioButton fx:id="rbCard" text="Card" toggleGroup="$paymentGroup"/>
                 <RadioButton fx:id="rbOnline" text="Online" toggleGroup="$paymentGroup"/>
             </HBox>
 
-            <!-- Row 2: Dates -->
+            <!-- Row 2 -->
             <Label text="Check-in" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
             <DatePicker fx:id="dpCheckin" promptText="yyyy-MM-dd" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
             <Label text="Check-out" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
@@ -53,7 +62,8 @@
             </HBox>
 
             <!-- Row 4: Rooms table -->
-            <TableView fx:id="tblRooms" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="4" prefHeight="320">
+            <TableView fx:id="tblRooms" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="4"
+                       prefHeight="320">
                 <columns>
                     <TableColumn fx:id="colRoomNum" text="Room No" prefWidth="120"/>
                     <TableColumn fx:id="colCategory" text="Category" prefWidth="140"/>
@@ -63,10 +73,12 @@
             </TableView>
         </GridPane>
     </center>
+
+    <!-- Footer -->
     <bottom>
-        <HBox spacing="8" alignment="CENTER_RIGHT" BorderPane.alignment="CENTER_RIGHT" style="-fx-padding: 10;">
-            <Button text="Delete" onAction="#onDelete" fx:id="btnDelete"/>
-            <Button text="Save" onAction="#onSave" fx:id="btnSave"/>
+        <HBox spacing="8" alignment="CENTER_RIGHT" style="-fx-padding: 10;">
+            <Button fx:id="btnDelete" text="Delete" onAction="#onDelete"/>
+            <Button fx:id="btnSave" text="Save" onAction="#onSave"/>
             <Button text="Close" onAction="#onClose"/>
         </HBox>
     </bottom>
