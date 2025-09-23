@@ -61,6 +61,11 @@ public class Room {
         return capacity;
     }
 
+    // Setters
+    public void setStatus(String status) {
+        this.status.set(status);
+    }
+
     // Getters
     public String getRoomId() {
         return roomId.get();
