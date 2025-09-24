@@ -4,52 +4,96 @@ import HotelApp.model.Checkin;
 import HotelApp.repository.CheckinRepository;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import java.sql.*;
 import HotelApp.db.DButil;
 import java.util.Map;
+
+import javafx.print.PageLayout;
+import javafx.print.PrinterJob;
+import javafx.scene.Group;
+import javafx.scene.shape.Rectangle;
+
 import javafx.scene.text.Text;
+import javafx.print.PrinterJob;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
+
+import java.io.File;
+import java.io.IOException;
 
 public class CheckInFormController {
 
-    @FXML private BorderPane rootPane;
-    @FXML private Label lblTitle;
-    @FXML private TextField txtBooker;
-    @FXML private TextField txtPhone;
-    @FXML private ComboBox<String> cbPayment;
-    @FXML private TextField txtDeposit;
-    @FXML private TextField txtCheckinDate;
-    @FXML private TextField txtCheckoutDate;
-    @FXML private Button btnAddRoom;
-    @FXML private Button btnRemoveRoom;
-    @FXML private TableView<RoomVM> tblRooms;
-    @FXML private TableColumn<RoomVM, String> colRoomNum;
-    @FXML private TableColumn<RoomVM, String> colCategory;
-    @FXML private TableColumn<RoomVM, String> colQuality;
-    @FXML private TableColumn<RoomVM, Number> colPrice;
-    @FXML private TableColumn<RoomVM, String> colCustomer;
-    @FXML private TableColumn<RoomVM, String> colServices;
-    @FXML private TableColumn<RoomVM, Void> colAssign;
-    @FXML private TableColumn<RoomVM, Void> colAssignService;
-    @FXML private TableColumn<RoomVM, Void> colRemoveCustomer;
-    @FXML private TableColumn<RoomVM, Void> colRemoveService;
-    @FXML private TableColumn<RoomVM, Void> colEditServiceQty;
-    @FXML private Button btnDelete;
-    @FXML private Button btnUpdate;
-    @FXML private Button btnClose;
+    @FXML
+    private BorderPane rootPane;
+    @FXML
+    private Label lblTitle;
+    @FXML
+    private TextField txtBooker;
+    @FXML
+    private TextField txtPhone;
+    @FXML
+    private ComboBox<String> cbPayment;
+    @FXML
+    private TextField txtDeposit;
+    @FXML
+    private TextField txtCheckinDate;
+    @FXML
+    private TextField txtCheckoutDate;
+    @FXML
+    private Button btnAddRoom;
+    @FXML
+    private Button btnRemoveRoom;
+    @FXML
+    private TableView<RoomVM> tblRooms;
+    @FXML
+    private TableColumn<RoomVM, String> colRoomNum;
+    @FXML
+    private TableColumn<RoomVM, String> colCategory;
+    @FXML
+    private TableColumn<RoomVM, String> colQuality;
+    @FXML
+    private TableColumn<RoomVM, Number> colPrice;
+    @FXML
+    private TableColumn<RoomVM, String> colCustomer;
+    @FXML
+    private TableColumn<RoomVM, String> colServices;
+    @FXML
+    private TableColumn<RoomVM, Void> colAssign;
+    @FXML
+    private TableColumn<RoomVM, Void> colAssignService;
+    @FXML
+    private TableColumn<RoomVM, Void> colRemoveCustomer;
+    @FXML
+    private TableColumn<RoomVM, Void> colRemoveService;
+    @FXML
+    private TableColumn<RoomVM, Void> colEditServiceQty;
+    @FXML
+    private Button btnDelete;
+    @FXML
+    private Button btnUpdate;
+    @FXML
+    private Button btnClose;
+    @FXML
+    private Button btnPrint;
 
     private String stayingId;
     private Checkin currentBooking;
 
     // Record for room view model with customer and services
-    public record RoomVM(String roomNumber, String category, String quality, double price, 
-                         String customer, String services) {}
+    public record RoomVM(String roomNumber, String category, String quality, double price,
+            String customer, String services) {
+    }
 
     @FXML
     private void initialize() {
@@ -220,12 +264,12 @@ public class CheckInFormController {
 
     private String getPaymentMethod(String phone) {
         String sql = """
-            SELECT Payment_method
-            FROM Booking_Management
-            WHERE Book_contact = ?
-        """;
+                    SELECT Payment_method
+                    FROM Booking_Management
+                    WHERE Book_contact = ?
+                """;
         try (Connection conn = DButil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, phone);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
@@ -239,12 +283,12 @@ public class CheckInFormController {
 
     private String getDepositAmount(String phone) {
         String sql = """
-            SELECT Deposit_amount
-            FROM Booking_Management
-            WHERE Book_contact = ?
-        """;
+                    SELECT Deposit_amount
+                    FROM Booking_Management
+                    WHERE Book_contact = ?
+                """;
         try (Connection conn = DButil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, phone);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
@@ -258,12 +302,12 @@ public class CheckInFormController {
 
     private String getCheckinDate(String stayingId) {
         String sql = """
-            SELECT Checkin_date
-            FROM Staying_Management
-            WHERE Staying_id = ?
-        """;
+                    SELECT Checkin_date
+                    FROM Staying_Management
+                    WHERE Staying_id = ?
+                """;
         try (Connection conn = DButil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next() && rs.getTimestamp("Checkin_date") != null) {
@@ -277,12 +321,12 @@ public class CheckInFormController {
 
     private String getCheckoutDate(String stayingId) {
         String sql = """
-            SELECT Checkout_date
-            FROM Staying_Management
-            WHERE Staying_id = ?
-        """;
+                    SELECT Checkout_date
+                    FROM Staying_Management
+                    WHERE Staying_id = ?
+                """;
         try (Connection conn = DButil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next() && rs.getTimestamp("Checkout_date") != null) {
@@ -297,35 +341,35 @@ public class CheckInFormController {
     private void populateRoomTable(Checkin booking) {
         ObservableList<RoomVM> rooms = FXCollections.observableArrayList();
         String sql = """
-            SELECT 
-                rm.Room_num,
-                rm.Room_category,
-                rm.Room_quality,
-                rm.Room_price,
-                COALESCE(cust_agg.Customers, '') AS Customer_names,
-                COALESCE(serv_agg.Services, '') AS Services
-            FROM Booking_Management bm
-            JOIN Booking_Room br ON bm.Booking_id = br.Booking_id
-            JOIN Room_Management rm ON br.Room_id = rm.Room_id
-            LEFT JOIN (
-                SELECT src.Room_id, STRING_AGG(cm.Customer_name, '\n') AS Customers
-                FROM Staying_Room_Customer src
-                JOIN Customer_Management cm ON src.Customer_id = cm.Customer_id
-                WHERE src.Staying_id = ?
-                GROUP BY src.Room_id
-            ) cust_agg ON rm.Room_id = cust_agg.Room_id
-            LEFT JOIN (
-                SELECT srs.Room_id, STRING_AGG(sm.Service_name + ' x ' + CAST(srs.Quantity AS NVARCHAR), '\n') AS Services
-                FROM Staying_Room_Service srs
-                JOIN Service_Management sm ON srs.Service_id = sm.Service_id
-                WHERE srs.Staying_id = ?
-                GROUP BY srs.Room_id
-            ) serv_agg ON rm.Room_id = serv_agg.Room_id
-            WHERE bm.Book_contact = ?
-        """;
+                    SELECT
+                        rm.Room_num,
+                        rm.Room_category,
+                        rm.Room_quality,
+                        rm.Room_price,
+                        COALESCE(cust_agg.Customers, '') AS Customer_names,
+                        COALESCE(serv_agg.Services, '') AS Services
+                    FROM Booking_Management bm
+                    JOIN Booking_Room br ON bm.Booking_id = br.Booking_id
+                    JOIN Room_Management rm ON br.Room_id = rm.Room_id
+                    LEFT JOIN (
+                        SELECT src.Room_id, STRING_AGG(cm.Customer_name, '\n') AS Customers
+                        FROM Staying_Room_Customer src
+                        JOIN Customer_Management cm ON src.Customer_id = cm.Customer_id
+                        WHERE src.Staying_id = ?
+                        GROUP BY src.Room_id
+                    ) cust_agg ON rm.Room_id = cust_agg.Room_id
+                    LEFT JOIN (
+                        SELECT srs.Room_id, STRING_AGG(sm.Service_name + ' x ' + CAST(srs.Quantity AS NVARCHAR), '\n') AS Services
+                        FROM Staying_Room_Service srs
+                        JOIN Service_Management sm ON srs.Service_id = sm.Service_id
+                        WHERE srs.Staying_id = ?
+                        GROUP BY srs.Room_id
+                    ) serv_agg ON rm.Room_id = serv_agg.Room_id
+                    WHERE bm.Book_contact = ?
+                """;
 
         try (Connection conn = DButil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
             pstmt.setString(2, stayingId);
             pstmt.setString(3, booking.getGuestPhone());
@@ -333,13 +377,12 @@ public class CheckInFormController {
 
             while (rs.next()) {
                 rooms.add(new RoomVM(
-                    rs.getString("Room_num"),
-                    rs.getString("Room_category"),
-                    rs.getString("Room_quality"),
-                    rs.getDouble("Room_price"),
-                    rs.getString("Customer_names"),
-                    rs.getString("Services")
-                ));
+                        rs.getString("Room_num"),
+                        rs.getString("Room_category"),
+                        rs.getString("Room_quality"),
+                        rs.getDouble("Room_price"),
+                        rs.getString("Customer_names"),
+                        rs.getString("Services")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -367,11 +410,10 @@ public class CheckInFormController {
         dialog.getDialogPane().setContent(content);
 
         dialog.getDialogPane().lookupButton(assignButtonType).setDisable(true);
-        customerListView.getSelectionModel().getSelectedItems().addListener((javafx.beans.Observable observable) ->
-            dialog.getDialogPane().lookupButton(assignButtonType).setDisable(
-                customerListView.getSelectionModel().getSelectedItems().isEmpty()
-            )
-        );
+        customerListView.getSelectionModel().getSelectedItems()
+                .addListener((javafx.beans.Observable observable) -> dialog.getDialogPane()
+                        .lookupButton(assignButtonType).setDisable(
+                                customerListView.getSelectionModel().getSelectedItems().isEmpty()));
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == assignButtonType) {
@@ -428,11 +470,10 @@ public class CheckInFormController {
         dialog.getDialogPane().setContent(content);
 
         dialog.getDialogPane().lookupButton(removeButtonType).setDisable(true);
-        customerListView.getSelectionModel().getSelectedItems().addListener((javafx.beans.Observable observable) ->
-            dialog.getDialogPane().lookupButton(removeButtonType).setDisable(
-                customerListView.getSelectionModel().getSelectedItems().isEmpty()
-            )
-        );
+        customerListView.getSelectionModel().getSelectedItems()
+                .addListener((javafx.beans.Observable observable) -> dialog.getDialogPane()
+                        .lookupButton(removeButtonType).setDisable(
+                                customerListView.getSelectionModel().getSelectedItems().isEmpty()));
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == removeButtonType) {
@@ -487,11 +528,10 @@ public class CheckInFormController {
         dialog.getDialogPane().setContent(content);
 
         dialog.getDialogPane().lookupButton(assignButtonType).setDisable(true);
-        serviceListView.getSelectionModel().getSelectedItems().addListener((javafx.beans.Observable observable) ->
-            dialog.getDialogPane().lookupButton(assignButtonType).setDisable(
-                serviceListView.getSelectionModel().getSelectedItems().isEmpty()
-            )
-        );
+        serviceListView.getSelectionModel().getSelectedItems()
+                .addListener((javafx.beans.Observable observable) -> dialog.getDialogPane()
+                        .lookupButton(assignButtonType).setDisable(
+                                serviceListView.getSelectionModel().getSelectedItems().isEmpty()));
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == assignButtonType) {
@@ -547,11 +587,10 @@ public class CheckInFormController {
         dialog.getDialogPane().setContent(content);
 
         dialog.getDialogPane().lookupButton(removeButtonType).setDisable(true);
-        serviceListView.getSelectionModel().getSelectedItems().addListener((javafx.beans.Observable observable) ->
-            dialog.getDialogPane().lookupButton(removeButtonType).setDisable(
-                serviceListView.getSelectionModel().getSelectedItems().isEmpty()
-            )
-        );
+        serviceListView.getSelectionModel().getSelectedItems()
+                .addListener((javafx.beans.Observable observable) -> dialog.getDialogPane()
+                        .lookupButton(removeButtonType).setDisable(
+                                serviceListView.getSelectionModel().getSelectedItems().isEmpty()));
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == removeButtonType) {
@@ -603,22 +642,17 @@ public class CheckInFormController {
 
         VBox content = new VBox(10);
         content.getChildren().addAll(
-            new Label("Select Service:"), serviceComboBox,
-            new Label("Quantity:"), txtQuantity
-        );
+                new Label("Select Service:"), serviceComboBox,
+                new Label("Quantity:"), txtQuantity);
         dialog.getDialogPane().setContent(content);
 
         dialog.getDialogPane().lookupButton(updateButtonType).setDisable(true);
-        serviceComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) ->
-            dialog.getDialogPane().lookupButton(updateButtonType).setDisable(
-                newVal == null || txtQuantity.getText().trim().isEmpty()
-            )
-        );
-        txtQuantity.textProperty().addListener((obs, oldVal, newVal) ->
-            dialog.getDialogPane().lookupButton(updateButtonType).setDisable(
-                serviceComboBox.getSelectionModel().isEmpty() || newVal.trim().isEmpty()
-            )
-        );
+        serviceComboBox.getSelectionModel().selectedItemProperty()
+                .addListener((obs, oldVal, newVal) -> dialog.getDialogPane().lookupButton(updateButtonType).setDisable(
+                        newVal == null || txtQuantity.getText().trim().isEmpty()));
+        txtQuantity.textProperty()
+                .addListener((obs, oldVal, newVal) -> dialog.getDialogPane().lookupButton(updateButtonType).setDisable(
+                        serviceComboBox.getSelectionModel().isEmpty() || newVal.trim().isEmpty()));
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == updateButtonType) {
@@ -643,7 +677,8 @@ public class CheckInFormController {
                     alert.showAndWait();
                 } catch (SQLException e) {
                     e.printStackTrace();
-                    Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to update service quantity: " + e.getMessage());
+                    Alert alert = new Alert(Alert.AlertType.ERROR,
+                            "Failed to update service quantity: " + e.getMessage());
                     alert.showAndWait();
                 }
             }
@@ -703,12 +738,11 @@ public class CheckInFormController {
 
         try {
             CheckinRepository.updateBookingAndStay(
-                currentBooking.getGuestPhone(),
-                currentBooking.getGuestName(),
-                stayingId,
-                paymentMethod,
-                depositAmount
-            );
+                    currentBooking.getGuestPhone(),
+                    currentBooking.getGuestName(),
+                    stayingId,
+                    paymentMethod,
+                    depositAmount);
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION, "Booking and stay updated successfully.");
             alert.showAndWait();
@@ -727,4 +761,110 @@ public class CheckInFormController {
         Stage stage = (Stage) btnClose.getScene().getWindow();
         stage.close();
     }
+
+    @FXML
+    private void onPrint() {
+        PrinterJob job = PrinterJob.createPrinterJob();
+        if (job == null || !job.showPrintDialog(btnPrint.getScene().getWindow()))
+            return;
+
+        PageLayout pageLayout = job.getJobSettings().getPageLayout();
+        double pageWidth = pageLayout.getPrintableWidth();
+        double pageHeight = pageLayout.getPrintableHeight();
+
+        // ===== Root content =====
+        VBox printContent = new VBox(15);
+        printContent.setPadding(new Insets(30));
+        printContent.setStyle("-fx-background-color: white;");
+        printContent.setPrefWidth(pageWidth * 0.8); // nhỏ hơn A4 một chút để có lề
+        printContent.setMaxWidth(pageWidth * 0.8);
+
+        // ===== Header =====
+        Label hotelName = new Label("HOTEL");
+        hotelName.setStyle("-fx-font-size: 24; -fx-font-weight: bold;");
+        hotelName.setAlignment(Pos.CENTER);
+        hotelName.setMaxWidth(Double.MAX_VALUE);
+
+        Label billTitle = new Label("INVOICE");
+        billTitle.setStyle("-fx-font-size: 20; -fx-font-weight: bold; -fx-padding: 10 0 20 0;");
+        billTitle.setAlignment(Pos.CENTER);
+        billTitle.setMaxWidth(Double.MAX_VALUE);
+
+        // ===== Guest Info =====
+        GridPane guestInfo = new GridPane();
+        guestInfo.setHgap(15);
+        guestInfo.setVgap(8);
+        guestInfo.addRow(0, new Label("Guest Name:"), new Label(txtBooker.getText()));
+        guestInfo.addRow(1, new Label("Phone:"), new Label(txtPhone.getText()));
+        guestInfo.addRow(2, new Label("Check-in:"), new Label(txtCheckinDate.getText()));
+        guestInfo.addRow(3, new Label("Check-out:"), new Label(txtCheckoutDate.getText()));
+        guestInfo.getChildren().filtered(n -> n instanceof Label)
+                .forEach(n -> ((Label) n).setStyle("-fx-font-size: 12;"));
+
+        // ===== Room list (GridPane thay cho TableView) =====
+        GridPane roomGrid = new GridPane();
+        roomGrid.setHgap(15);
+        roomGrid.setVgap(5);
+        roomGrid.addRow(0,
+                new Label("Room No."), new Label("Category"),
+                new Label("Price"), new Label("Services"));
+
+        int row = 1;
+        for (RoomVM room : tblRooms.getItems()) {
+            roomGrid.addRow(row++,
+                    new Label(room.roomNumber()),
+                    new Label(room.category()),
+                    new Label(String.format("$%.2f", room.price())),
+                    new Label(room.services()));
+        }
+
+        // ===== Summary =====
+        double roomTotal = tblRooms.getItems().stream().mapToDouble(RoomVM::price).sum();
+        double deposit = txtDeposit.getText().isEmpty() ? 0 : Double.parseDouble(txtDeposit.getText());
+        double balance = roomTotal - deposit;
+
+        GridPane summary = new GridPane();
+        summary.setHgap(50);
+        summary.setVgap(8);
+        summary.addRow(0, new Label("Payment Method:"), new Label(cbPayment.getValue()));
+        summary.addRow(1, new Label("Total Amount:"), new Label(String.format("$%.2f", roomTotal)));
+        summary.addRow(2, new Label("Deposit Paid:"), new Label(String.format("$%.2f", deposit)));
+        summary.addRow(3, new Label("Balance Due:"), new Label(String.format("$%.2f", balance)));
+        summary.getChildren().filtered(n -> n instanceof Label)
+                .forEach(n -> ((Label) n).setStyle("-fx-font-size: 14; -fx-font-weight: bold;"));
+
+        // ===== Footer =====
+        Label footer = new Label("Thank you for choosing our hotel!");
+        footer.setStyle("-fx-font-size: 12; -fx-font-style: italic; -fx-padding: 20 0 0 0;");
+        footer.setAlignment(Pos.CENTER);
+        footer.setMaxWidth(Double.MAX_VALUE);
+
+        // Gắn tất cả vào nội dung
+        printContent.getChildren().addAll(
+                hotelName, billTitle, guestInfo,
+                new Separator(), new Label("Room Details:"), roomGrid,
+                new Separator(), summary, footer);
+
+        // ===== Wrapper để căn giữa trên A4 =====
+        StackPane wrapper = new StackPane(printContent);
+        wrapper.setPrefSize(pageWidth, pageHeight);
+        StackPane.setAlignment(printContent, Pos.TOP_CENTER);
+
+        // ===== Page break =====
+        double totalHeight = printContent.prefHeight(-1);
+        double y = 0;
+        while (y < totalHeight) {
+            Group page = new Group(wrapper);
+            page.setClip(new Rectangle(0, y, pageWidth, pageHeight));
+            page.setTranslateY(-y);
+
+            if (!job.printPage(page))
+                break;
+            y += pageHeight;
+        }
+
+        job.endJob();
+        new Alert(Alert.AlertType.INFORMATION, "Bill printed successfully!").showAndWait();
+    }
+
 }

@@ -62,9 +62,10 @@
 
     <bottom>
         <HBox spacing="8" style="-fx-padding: 10;" alignment="CENTER_RIGHT">
-            <Button text="Delete"  onAction="#onDelete"  fx:id="btnDelete" styleClass="button-secondary"/>
-            <Button text="Update"  onAction="#onUpdate"  fx:id="btnUpdate"  styleClass="button-primary"/>
-            <Button text="Close"   onAction="#onClose"   styleClass="button-secondary"/>
+            <Button fx:id="btnPrint" text="Print" onAction="#onPrint" styleClass="button-secondary"/>
+            <Button fx:id="btnDelete" text="Delete" onAction="#onDelete" styleClass="button-secondary"/>
+            <Button fx:id="btnUpdate" text="Update" onAction="#onUpdate" styleClass="button-primary"/>
+            <Button fx:id="btnClose" text="Close" onAction="#onClose" styleClass="button-secondary"/>
         </HBox>
     </bottom>
     <padding>
