@@ -205,3 +205,9 @@
     -fx-text-fill: #1a3c5a;
     -fx-font-weight: bold;
 }
+.form-title {
+    -fx-font-size: 24px;        
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;     
+}
+
