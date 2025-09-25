@@ -6,9 +6,6 @@
     spacing="8" alignment="CENTER" stylesheets="@HotelApp/styles.css"
     fx:controller="HotelApp.AdminDashboardController">
 
-    <Label text="Admin - Account Management"
-        style="-fx-font-size: 18px; -fx-font-weight: bold;" />
-
     <!-- Form account -->
     <GridPane hgap="10" vgap="10" alignment="CENTER">
         <children>
