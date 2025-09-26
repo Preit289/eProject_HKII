@@ -13,6 +13,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.LocalDate;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class BookingFormController {
 
     @FXML private Label lblTitle;
@@ -68,7 +69,7 @@ public class BookingFormController {
         boolean isUpdate = mode == BookingController.FormMode.UPDATE;
 
         btnSave.setText(isUpdate ? "Update" : "Create");
-        btnDelete.setVisible(isUpdate); // chỉ hiển thị khi update
+        btnDelete.setVisible(isUpdate);
         lblTitle.setText(isUpdate ? "Update Booking" : "New Booking");
 
         if(isUpdate){
@@ -100,26 +101,26 @@ public class BookingFormController {
         LocalDate ci = dpCheckin.getValue();
         LocalDate co = dpCheckout.getValue();
         if(ci == null || co == null || !co.isAfter(ci)){
-            new Alert(Alert.AlertType.WARNING, "Chọn ngày Check-in/Check-out hợp lệ trước khi thêm phòng.").showAndWait();
+            new Alert(Alert.AlertType.WARNING, "Please select valid Check-in/Check-out dates before adding rooms.").showAndWait();
             return;
         }
 
         var options = repo.pickFreeRoomsVM(ci, co);
         if(options.isEmpty()){
-            new Alert(Alert.AlertType.INFORMATION, "Không còn phòng trống trong khoảng ngày này.").showAndWait();
+            new Alert(Alert.AlertType.INFORMATION, "No available rooms for the selected date range.").showAndWait();
             return;
         }
 
         TableView<SelectableRoomVM> table = new TableView<>();
         table.setEditable(true);
 
-        TableColumn<SelectableRoomVM, Boolean> colSelect = new TableColumn<>("Chọn");
+    TableColumn<SelectableRoomVM, Boolean> colSelect = new TableColumn<>("Select");
         colSelect.setCellValueFactory(c -> c.getValue().selectedProperty());
         colSelect.setCellFactory(CheckBoxTableCell.forTableColumn(colSelect));
         colSelect.setEditable(true);
         colSelect.setPrefWidth(60);
 
-        TableColumn<SelectableRoomVM, String> colLabel = new TableColumn<>("Phòng");
+    TableColumn<SelectableRoomVM, String> colLabel = new TableColumn<>("Room");
         colLabel.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().label()));
         colLabel.setPrefWidth(300);
 
@@ -132,7 +133,7 @@ public class BookingFormController {
         table.setPrefHeight(300);
 
         Dialog<List<SelectableRoomVM>> dlg = new Dialog<>();
-        dlg.setTitle("Danh sách phòng");
+    dlg.setTitle("Room List");
         dlg.getDialogPane().setContent(table);
         dlg.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
@@ -144,7 +145,7 @@ public class BookingFormController {
         });
 
         var pickedList = dlg.showAndWait().orElse(null);
-        if(pickedList == null || pickedList.isEmpty()) return;
+    if(pickedList == null || pickedList.isEmpty()) return;
 
         ensureCreatedIfNeeded(ci, co);
         for(var picked : pickedList){

@@ -17,7 +17,7 @@ public class BookingRepository {
         return DButil.getConnection();
     }
 
-    // Lấy danh sách booking để hiển thị (chỉ booking status = 2)
+    // Get list of bookings for display (only booking_status = 2)
     public List<BookingController.BookingVM> searchVM(String keyword) {
         String sql = "SELECT b.Booking_id, b.Book_by, b.Book_contact, " +
                 "b.Deposit_amount, b.Payment_method, " +
@@ -53,7 +53,7 @@ public class BookingRepository {
         return list;
     }
 
-    // Lấy booking chi tiết
+    // Get booking details
     public BookingFormController.BookingDTO getById(String id) {
         String sql = "SELECT Booking_id, Book_by, Book_contact, Deposit_amount, Payment_method " +
                 "FROM Booking_Management WHERE Booking_id=?";
@@ -73,7 +73,7 @@ public class BookingRepository {
         return null;
     }
 
-    // Tạo booking (có ngày checkin/checkout)
+    // Create booking (with checkin/checkout dates)
     public String createBooking(BookingFormController.BookingDTO b, LocalDate checkin, LocalDate checkout) {
         String newId = nextBookingId();
         String sql =
@@ -97,7 +97,7 @@ public class BookingRepository {
         return null;
     }
 
-    // Update booking (có ngày)
+    // Update booking (with dates)
     public boolean updateBooking(BookingFormController.BookingDTO b, LocalDate checkin, LocalDate checkout) {
         String sql = "UPDATE Booking_Management SET Deposit_amount=?, Payment_method=?, Book_by=?, Book_contact=?," +
                 " Planned_checkin_date=?, Planned_checkout_date=?, Updated_at=GETDATE() WHERE Booking_id=?";
@@ -116,7 +116,7 @@ public class BookingRepository {
         return false;
     }
 
-    // Xóa booking
+    // Delete booking
     public boolean deleteBooking(String id) {
         try (Connection cn = getConn()) {
             cn.setAutoCommit(false);
@@ -140,7 +140,7 @@ public class BookingRepository {
         return false;
     }
 
-    // Lấy danh sách phòng đã add vào booking
+    // Get list of rooms already added to the booking
     public List<BookingFormController.RoomVM> getRoomsVM(String bookingId) {
         String sql = "SELECT r.Room_id, r.Room_num, r.Room_category, r.Room_quality, r.Room_price " +
                 "FROM Booking_Room br JOIN Room_Management r ON r.Room_id=br.Room_id " +
@@ -162,7 +162,7 @@ public class BookingRepository {
         return list;
     }
 
-    // Thêm phòng vào booking
+    // Add room to booking
     public boolean addRoomToBooking(String bookingId, String roomId) {
         String sql = "INSERT INTO Booking_Room(Booking_id, Room_id) VALUES(?, ?)";
         try (Connection cn = getConn(); PreparedStatement ps = cn.prepareStatement(sql)) {
@@ -175,7 +175,7 @@ public class BookingRepository {
         return false;
     }
 
-    // Xóa phòng khỏi booking
+    // Remove room from booking
     public boolean removeRoomFromBooking(String bookingId, String roomId) {
         String sql = "DELETE FROM Booking_Room WHERE Booking_id=? AND Room_id=?";
         try (Connection cn = getConn(); PreparedStatement ps = cn.prepareStatement(sql)) {
@@ -188,7 +188,7 @@ public class BookingRepository {
         return false;
     }
 
-    // Lấy danh sách phòng trống trong khoảng ngày
+    // Get list of available rooms in a date range
     public List<BookingFormController.RoomPickVM> pickFreeRoomsVM(LocalDate checkin, LocalDate checkout) {
         String sql = "SELECT r.Room_id, r.Room_num, r.Room_category, r.Room_quality " +
                 "FROM Room_Management r " +
@@ -215,7 +215,7 @@ public class BookingRepository {
         return list;
     }
 
-    // Kiểm tra phòng có trống không
+    // Check if a room is available
     public boolean isRoomAvailable(String roomId, LocalDate checkin, LocalDate checkout) {
         String sql = "SELECT COUNT(*) " +
                 "FROM Booking_Management bm " +
@@ -236,7 +236,7 @@ public class BookingRepository {
         return false;
     }
 
-    // Lấy planned checkin/checkout
+    // Get planned checkin/checkout dates
     public LocalDate[] getPlannedDates(String bookingId) {
         String sql = "SELECT Planned_checkin_date, Planned_checkout_date FROM Booking_Management WHERE Booking_id=?";
         try (Connection cn = getConn(); PreparedStatement ps = cn.prepareStatement(sql)) {
@@ -254,7 +254,7 @@ public class BookingRepository {
         return null;
     }
 
-    // Sinh BookingID mới
+    // Generate new Booking ID
     private String nextBookingId() {
         String sql = "SELECT dbo.fn_GenerateNextBookingID()";
         try (Connection cn = getConn(); Statement st = cn.createStatement(); ResultSet rs = st.executeQuery(sql)) {

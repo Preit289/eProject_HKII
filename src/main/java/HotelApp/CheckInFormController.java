@@ -20,7 +20,7 @@ import java.sql.*;
 import HotelApp.db.DButil;
 
 import java.text.NumberFormat;
-import java.util.Locale;
+import java.util.Locale; // Keep Locale import for usage in NumberFormat
 
 import java.util.List;
 import java.util.Map;
@@ -28,19 +28,17 @@ import java.util.Map;
 import javafx.print.PageLayout;
 import javafx.print.PrinterJob;
 import javafx.scene.Group;
-import javafx.scene.shape.Rectangle;
 
 import javafx.scene.text.Text;
-import javafx.print.PrinterJob;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 
-import java.io.File;
-import java.io.IOException;
+// removed unused java.io imports
 
+@SuppressWarnings("unused")
 public class CheckInFormController {
 
     @FXML
@@ -95,6 +93,12 @@ public class CheckInFormController {
     private Button btnClose;
     @FXML
     private Button btnPrint;
+    @FXML
+    private Button btnCheckOut;
+    @FXML
+    private Button btnSetStatus;
+    @FXML
+    private Label lblStayingStatus;
 
     private String stayingId;
     private Checkin currentBooking;
@@ -267,8 +271,42 @@ public class CheckInFormController {
         txtDeposit.setText(getDepositAmount(booking.getGuestPhone()));
         txtCheckinDate.setText(getCheckinDate(stayingId));
         txtCheckoutDate.setText(getCheckoutDate(stayingId));
-
         populateRoomTable(booking);
+
+        // Update staying status label and checkout button state
+        Integer status = CheckinRepository.getStayingStatus(stayingId);
+        updateStatusUI(status);
+    }
+
+    private void updateStatusUI(Integer status) {
+        String label = "";
+        String style = "status-chip";
+        if (status == null) {
+            label = "Unknown";
+        } else {
+            switch (status) {
+                case 0 -> { label = "Reserved"; style += " status-reserved"; }
+                case 1 -> { label = "Checked-in"; style += " status-checkedin"; }
+                case 2 -> { label = "Checked-out"; style += " status-checkedout"; }
+                case 3 -> { label = "Cancelled"; style += " status-cancelled"; }
+                default -> label = "Status " + status;
+            }
+        }
+        lblStayingStatus.setText(label);
+        lblStayingStatus.getStyleClass().clear();
+        lblStayingStatus.getStyleClass().addAll("status-chip");
+        if (status != null) {
+            switch (status) {
+                case 2 -> lblStayingStatus.getStyleClass().add("status-checkedout");
+                case 1 -> lblStayingStatus.getStyleClass().add("status-checkedin");
+                case 0 -> lblStayingStatus.getStyleClass().add("status-reserved");
+                case 3 -> lblStayingStatus.getStyleClass().add("status-cancelled");
+            }
+        }
+
+    // Disable checkout button only if the staying is already checked-out (status == 2)
+    boolean checkedOut = (status != null && status == 2);
+    btnCheckOut.setDisable(checkedOut);
     }
 
     private String getPaymentMethod(String phone) {
@@ -457,6 +495,61 @@ public class CheckInFormController {
             }
         });
     }
+
+    @FXML
+    private void onAddRoom() {
+        // pick an available room
+        var options = CheckinRepository.getAvailableRooms();
+        if (options.isEmpty()) {
+            new Alert(Alert.AlertType.INFORMATION, "No available rooms.").showAndWait();
+            return;
+        }
+
+        ChoiceDialog<String> dlg = new ChoiceDialog<>(options.get(0), options);
+        dlg.setTitle("Add Room");
+        dlg.setHeaderText("Select an available room to add to this staying");
+        dlg.setContentText("Room:");
+        dlg.showAndWait().ifPresent(roomNum -> {
+            try {
+                boolean ok = CheckinRepository.addRoomToStaying(stayingId, roomNum);
+                if (ok) {
+                    populateRoomTable(currentBooking);
+                    Alert a = new Alert(Alert.AlertType.INFORMATION, "Room added successfully.");
+                    a.showAndWait();
+                }
+            } catch (SQLException e) {
+                new Alert(Alert.AlertType.ERROR, "Failed to add room: " + e.getMessage()).showAndWait();
+            }
+        });
+    }
+
+    @FXML
+    private void onRemoveRoom(RoomVM room) {
+        // If called from button in table, room param is provided. Otherwise get selected.
+        RoomVM target = room != null ? room : tblRooms.getSelectionModel().getSelectedItem();
+        if (target == null) {
+            new Alert(Alert.AlertType.WARNING, "Select a room to remove.").showAndWait();
+            return;
+        }
+
+        // Confirm
+        Alert c = new Alert(Alert.AlertType.CONFIRMATION, "Remove room " + target.roomNumber() + " from staying?", ButtonType.OK, ButtonType.CANCEL);
+        c.showAndWait().ifPresent(b -> {
+            if (b == ButtonType.OK) {
+                try {
+                    boolean ok = CheckinRepository.removeRoomFromStaying(stayingId, target.roomNumber());
+                    if (ok) {
+                        populateRoomTable(currentBooking);
+                        new Alert(Alert.AlertType.INFORMATION, "Room removed successfully.").showAndWait();
+                    }
+                } catch (SQLException e) {
+                    new Alert(Alert.AlertType.ERROR, "Failed to remove room: " + e.getMessage()).showAndWait();
+                }
+            }
+        });
+    }
+
+    // (delegation handled by the ActionEvent overload later in the file)
 
     private void onRemoveCustomer(RoomVM room) {
         Dialog<ObservableList<String>> dialog = new Dialog<>();
@@ -699,17 +792,34 @@ public class CheckInFormController {
 
     @FXML
     private void onAddRoom(ActionEvent event) {
-        System.out.println("Add Room clicked");
+        onAddRoom();
     }
 
     @FXML
     private void onRemoveRoom(ActionEvent event) {
-        System.out.println("Remove Room clicked");
+        onRemoveRoom((RoomVM) null);
     }
 
     @FXML
     private void onDelete(ActionEvent event) {
-        System.out.println("Delete clicked");
+        if (stayingId == null || stayingId.isBlank()) {
+            new Alert(Alert.AlertType.ERROR, "No staying selected.").showAndWait();
+            return;
+        }
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete this staying and all related data?", ButtonType.OK, ButtonType.CANCEL);
+        confirm.showAndWait().ifPresent(b -> {
+            if (b == ButtonType.OK) {
+                try {
+                    CheckinRepository.deleteStaying(stayingId);
+                    new Alert(Alert.AlertType.INFORMATION, "Staying deleted.").showAndWait();
+                    // close window
+                    Stage stage = (Stage) btnClose.getScene().getWindow();
+                    stage.close();
+                } catch (SQLException e) {
+                    new Alert(Alert.AlertType.ERROR, "Failed to delete staying: " + e.getMessage()).showAndWait();
+                }
+            }
+        });
     }
 
     @FXML
@@ -771,7 +881,75 @@ public class CheckInFormController {
         stage.close();
     }
 
-    NumberFormat vndFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+    @FXML
+    private void onCheckOut(ActionEvent event) {
+        if (stayingId == null || stayingId.isBlank()) {
+            new Alert(Alert.AlertType.ERROR, "No staying selected.").showAndWait();
+            return;
+        }
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirm Check Out");
+        confirm.setHeaderText("Are you sure you want to check out this stay?");
+        confirm.setContentText("Staying ID: " + stayingId);
+        confirm.showAndWait().ifPresent(buttonType -> {
+            if (buttonType == ButtonType.OK) {
+                try {
+                    CheckinRepository.performCheckout(stayingId);
+                    // refresh checkout date and table
+                    txtCheckoutDate.setText(getCheckoutDate(stayingId));
+                    populateRoomTable(currentBooking);
+                    // update status UI
+                    Integer status = CheckinRepository.getStayingStatus(stayingId);
+                    updateStatusUI(status);
+                    new Alert(Alert.AlertType.INFORMATION, "Checked out successfully.").showAndWait();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    new Alert(Alert.AlertType.ERROR, "Failed to check out: " + e.getMessage()).showAndWait();
+                }
+            }
+        });
+    }
+
+    @FXML
+    private void onSetStatus(ActionEvent event) {
+        if (stayingId == null || stayingId.isBlank()) {
+            new Alert(Alert.AlertType.ERROR, "No staying selected.").showAndWait();
+            return;
+        }
+        Map<Integer, String> statusMap = Map.of(
+                0, "Reserved",
+                1, "Checked-in",
+                2, "Checked-out",
+                3, "Cancelled"
+        );
+        List<String> choices = statusMap.values().stream().toList();
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.get(0), choices);
+        dialog.setTitle("Set Staying Status");
+        dialog.setHeaderText("Select staying status for " + stayingId);
+        dialog.setContentText("Status:");
+
+        dialog.showAndWait().ifPresent(selectedLabel -> {
+            try {
+                int selectedStatus = statusMap.entrySet().stream()
+                        .filter(e -> e.getValue().equals(selectedLabel))
+                        .map(Map.Entry::getKey)
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalStateException("Unknown status: " + selectedLabel));
+
+                CheckinRepository.updateStayingStatus(stayingId, selectedStatus);
+                // refresh UI state
+                txtCheckoutDate.setText(getCheckoutDate(stayingId));
+                Integer statusAfter = CheckinRepository.getStayingStatus(stayingId);
+                updateStatusUI(statusAfter);
+                new Alert(Alert.AlertType.INFORMATION, "Status updated to '" + selectedLabel + "'.").showAndWait();
+            } catch (SQLException e) {
+                e.printStackTrace();
+                new Alert(Alert.AlertType.ERROR, "Failed to update status: " + e.getMessage()).showAndWait();
+            }
+        });
+    }
+
+    NumberFormat vndFormat = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN"));
 
     @FXML
     private void onPrint() {

@@ -30,7 +30,7 @@
 
         <children>
             <Label text="Room Category:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-            <ChoiceBox fx:id="cbCategory" prefHeight="26.0" prefWidth="146.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+            <ChoiceBox fx:id="cbCategory" prefHeight="26.0" prefWidth="146.0" GridPane.columnIndex="1" GridPane.rowIndex="0" value="none">
                 <items>
                     <FXCollections fx:factory="observableArrayList">
                         <String fx:value="single" />
@@ -41,7 +41,7 @@
             </ChoiceBox>
 
             <Label prefHeight="11.0" prefWidth="73.0" text="Quality Level:" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
-            <ChoiceBox fx:id="cbQuality" prefHeight="26.0" prefWidth="115.0" GridPane.columnIndex="3">
+            <ChoiceBox fx:id="cbQuality" prefHeight="26.0" prefWidth="115.0" GridPane.columnIndex="3" value="none">
                 <items>
                     <FXCollections fx:factory="observableArrayList">
                         <String fx:value="standard" />

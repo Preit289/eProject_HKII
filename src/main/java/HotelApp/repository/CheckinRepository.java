@@ -31,15 +31,17 @@ public class CheckinRepository {
         try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                data.add(new Checkin(
-                        rs.getString("GuestName"),
-                        rs.getString("GuestPhone"),
-                        rs.getString("Rooms"),
-                        rs.getString("Categories"),
-                        rs.getString("Types"),
-                        rs.getTimestamp("Planned_checkin_date").toString(),
-                        rs.getTimestamp("Planned_checkout_date").toString()
-                ));
+        java.sql.Timestamp pci = rs.getTimestamp("Planned_checkin_date");
+        java.sql.Timestamp pco = rs.getTimestamp("Planned_checkout_date");
+        data.add(new Checkin(
+            rs.getString("GuestName"),
+            rs.getString("GuestPhone"),
+            rs.getString("Rooms"),
+            rs.getString("Categories"),
+            rs.getString("Types"),
+            pci != null ? pci.toString() : "",
+            pco != null ? pco.toString() : ""
+        ));
             }
 
         } catch (Exception e) {
@@ -73,14 +75,16 @@ public class CheckinRepository {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
+                java.sql.Timestamp pci = rs.getTimestamp("Planned_checkin_date");
+                java.sql.Timestamp pco = rs.getTimestamp("Planned_checkout_date");
                 data.add(new Checkin(
                         rs.getString("GuestName"),
                         rs.getString("GuestPhone"),
                         rs.getString("Rooms"),
                         rs.getString("Categories"),
                         rs.getString("Types"),
-                        rs.getTimestamp("Planned_checkin_date").toString(),
-                        rs.getTimestamp("Planned_checkout_date").toString()
+                        pci != null ? pci.toString() : "",
+                        pco != null ? pco.toString() : ""
                 ));
             }
 
@@ -115,7 +119,6 @@ public class CheckinRepository {
 
             String bookingId = rs.getString("Booking_id");
             String paymentMethod = rs.getString("Payment_method");
-            int depositAmount = rs.getInt("Deposit_amount");
 
             String checkStayingSql = """
             SELECT Staying_id
@@ -160,7 +163,19 @@ public class CheckinRepository {
             PreparedStatement insertStayingStmt = conn.prepareStatement(insertStayingSql);
             insertStayingStmt.setString(1, stayingId);
             insertStayingStmt.setString(2, bookingId);
-            insertStayingStmt.setTimestamp(3, Timestamp.valueOf(booking.getPlannedCheckOut()));
+            // planned checkout may be empty or malformed; guard parsing and fall back to current time
+            java.sql.Timestamp checkoutTs;
+            try {
+                String planned = booking.getPlannedCheckOut();
+                if (planned == null || planned.isBlank()) {
+                    checkoutTs = new java.sql.Timestamp(System.currentTimeMillis());
+                } else {
+                    checkoutTs = Timestamp.valueOf(planned);
+                }
+            } catch (Exception ex) {
+                checkoutTs = new java.sql.Timestamp(System.currentTimeMillis());
+            }
+            insertStayingStmt.setTimestamp(3, checkoutTs);
             insertStayingStmt.setString(4, paymentMethod);
             insertStayingStmt.setInt(5, totalAmount);
             insertStayingStmt.executeUpdate();
@@ -635,5 +650,314 @@ public class CheckinRepository {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    public static void performCheckout(String stayingId) throws SQLException {
+        try (Connection conn = DButil.getConnection()) {
+            conn.setAutoCommit(false);
+
+            String checkSql = "SELECT Staying_id FROM Staying_Management WHERE Staying_id = ?";
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                checkStmt.setString(1, stayingId);
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (!rs.next()) {
+                        throw new SQLException("Stay not found: " + stayingId);
+                    }
+                }
+            }
+
+            String updateSql = """
+                UPDATE Staying_Management
+                SET Checkout_date = GETDATE(), Staying_status = 2, Updated_at = GETDATE()
+                WHERE Staying_id = ?
+            """;
+            try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                updateStmt.setString(1, stayingId);
+                updateStmt.executeUpdate();
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public static void updateStayingStatus(String stayingId, int status) throws SQLException {
+        try (Connection conn = DButil.getConnection()) {
+            String checkSql = "SELECT Staying_id FROM Staying_Management WHERE Staying_id = ?";
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                checkStmt.setString(1, stayingId);
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (!rs.next()) {
+                        throw new SQLException("Stay not found: " + stayingId);
+                    }
+                }
+            }
+
+            String updateSql = "UPDATE Staying_Management SET Staying_status = ?, Updated_at = GETDATE() WHERE Staying_id = ?";
+            try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                updateStmt.setInt(1, status);
+                updateStmt.setString(2, stayingId);
+                updateStmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    /**
+     * Return the Staying_status integer for a given stayingId, or null if not found.
+     */
+    public static Integer getStayingStatus(String stayingId) {
+        String sql = """
+            SELECT Staying_status
+            FROM Staying_Management
+            WHERE Staying_id = ?
+        """;
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, stayingId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("Staying_status");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Return a list of room numbers that are currently available.
+     */
+    public static java.util.List<String> getAvailableRooms() {
+        java.util.List<String> rooms = new java.util.ArrayList<>();
+        String sql = """
+            SELECT Room_num
+            FROM Room_Management
+            -- Room_status is stored as tinyint: 0 = Available/Empty, 1 = Occupied, 2 = Cleaning
+            WHERE Room_status = 0
+            ORDER BY Room_num
+        """;
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                rooms.add(rs.getString("Room_num"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rooms;
+    }
+
+    /**
+     * Add a room to an existing staying. Will set room status to 'Occupied' and insert a Staying_Room_Customer row.
+     * Attempts to associate a customer by booking phone if available. Returns true on success.
+     */
+    public static boolean addRoomToStaying(String stayingId, String roomNum) throws SQLException {
+        try (Connection conn = DButil.getConnection()) {
+            conn.setAutoCommit(false);
+
+                    String findRoomSql = "SELECT Room_id, Room_status FROM Room_Management WHERE Room_num = ?";
+            try (PreparedStatement findRoomStmt = conn.prepareStatement(findRoomSql)) {
+                findRoomStmt.setString(1, roomNum);
+                try (ResultSet rs = findRoomStmt.executeQuery()) {
+                    if (!rs.next()) {
+                        throw new SQLException("Room not found: " + roomNum);
+                    }
+                    String roomId = rs.getString("Room_id");
+                    int status = rs.getInt("Room_status");
+                    if (status != 0) { // 0 == Available
+                        throw new SQLException("Room is not available: " + roomNum);
+                    }
+
+                    // Try to find a customer_id from the booking related to this staying
+                    String findBookingSql = "SELECT Booking_id FROM Staying_Management WHERE Staying_id = ?";
+                    String bookingId = null;
+                    try (PreparedStatement pb = conn.prepareStatement(findBookingSql)) {
+                        pb.setString(1, stayingId);
+                        try (ResultSet r2 = pb.executeQuery()) {
+                            if (r2.next()) bookingId = r2.getString("Booking_id");
+                        }
+                    }
+
+                    String customerId = null;
+                    if (bookingId != null) {
+                        String findCustomerSql = "SELECT TOP 1 cm.Customer_id FROM Customer_Management cm JOIN Booking_Management bm ON bm.Book_contact = cm.Phone_num WHERE bm.Booking_id = ?";
+                        try (PreparedStatement pc = conn.prepareStatement(findCustomerSql)) {
+                            pc.setString(1, bookingId);
+                            try (ResultSet r3 = pc.executeQuery()) {
+                                if (r3.next()) customerId = r3.getString("Customer_id");
+                            }
+                        }
+                    }
+
+                    // Insert mapping into Staying_Room_Customer. The schema requires Customer_id NOT NULL,
+                    // so we must have a customer to insert. If none found, fail with a clear message.
+                    if (customerId != null) {
+                        String insertSql = "INSERT INTO Staying_Room_Customer (Staying_id, Room_id, Customer_id) VALUES (?, ?, ?)";
+                        try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+                            insertStmt.setString(1, stayingId);
+                            insertStmt.setString(2, roomId);
+                            insertStmt.setString(3, customerId);
+                            insertStmt.executeUpdate();
+                        }
+                    } else {
+                        throw new SQLException("No customer found for this staying; assign a customer before adding a room.");
+                    }
+
+                    // Update room status
+                    String updateRoomSql = "UPDATE Room_Management SET Room_status = 1 WHERE Room_id = ?";
+                    try (PreparedStatement upd = conn.prepareStatement(updateRoomSql)) {
+                        upd.setString(1, roomId);
+                        upd.executeUpdate();
+                    }
+                }
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    /**
+     * Remove a room from a staying. Will fail if the room has any assigned services; otherwise removes mappings and sets room to Available.
+     */
+    public static boolean removeRoomFromStaying(String stayingId, String roomNum) throws SQLException {
+        try (Connection conn = DButil.getConnection()) {
+            conn.setAutoCommit(false);
+
+            String findRoomSql = "SELECT Room_id FROM Room_Management WHERE Room_num = ?";
+            String roomId;
+            try (PreparedStatement fr = conn.prepareStatement(findRoomSql)) {
+                fr.setString(1, roomNum);
+                try (ResultSet r = fr.executeQuery()) {
+                    if (!r.next()) throw new SQLException("Room not found: " + roomNum);
+                    roomId = r.getString("Room_id");
+                }
+            }
+
+            // Check for services assigned
+            String checkServiceSql = "SELECT 1 FROM Staying_Room_Service WHERE Staying_id = ? AND Room_id = ?";
+            try (PreparedStatement cs = conn.prepareStatement(checkServiceSql)) {
+                cs.setString(1, stayingId);
+                cs.setString(2, roomId);
+                try (ResultSet rs = cs.executeQuery()) {
+                    if (rs.next()) {
+                        throw new SQLException("Room has assigned services; remove them before removing the room.");
+                    }
+                }
+            }
+
+            // Delete customer assignments (may be multiple)
+            String deleteCustSql = "DELETE FROM Staying_Room_Customer WHERE Staying_id = ? AND Room_id = ?";
+            try (PreparedStatement dc = conn.prepareStatement(deleteCustSql)) {
+                dc.setString(1, stayingId);
+                dc.setString(2, roomId);
+                int affected = dc.executeUpdate();
+                if (affected == 0) {
+                    throw new SQLException("No room assignment found to remove for room " + roomNum);
+                }
+            }
+
+            // Set room status back to Available
+            String updateRoomSql = "UPDATE Room_Management SET Room_status = 0 WHERE Room_id = ?";
+            try (PreparedStatement upd = conn.prepareStatement(updateRoomSql)) {
+                upd.setString(1, roomId);
+                upd.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    /**
+     * Delete a staying and all related mappings (room assignments, services), and set related rooms to Available.
+     */
+    public static void deleteStaying(String stayingId) throws SQLException {
+        try (Connection conn = DButil.getConnection()) {
+            conn.setAutoCommit(false);
+
+            // find room ids for this staying
+            String roomsSql = "SELECT Room_id FROM Staying_Room_Customer WHERE Staying_id = ?";
+            java.util.List<String> roomIds = new java.util.ArrayList<>();
+            try (PreparedStatement prs = conn.prepareStatement(roomsSql)) {
+                prs.setString(1, stayingId);
+                try (ResultSet rs = prs.executeQuery()) {
+                    while (rs.next()) roomIds.add(rs.getString("Room_id"));
+                }
+            }
+
+            // delete services
+            String delServicesSql = "DELETE FROM Staying_Room_Service WHERE Staying_id = ?";
+            try (PreparedStatement pds = conn.prepareStatement(delServicesSql)) {
+                pds.setString(1, stayingId);
+                pds.executeUpdate();
+            }
+
+            // delete customer-room mappings
+            String delCustSql = "DELETE FROM Staying_Room_Customer WHERE Staying_id = ?";
+            try (PreparedStatement pdc = conn.prepareStatement(delCustSql)) {
+                pdc.setString(1, stayingId);
+                pdc.executeUpdate();
+            }
+
+            // delete staying record
+            String delStayingSql = "DELETE FROM Staying_Management WHERE Staying_id = ?";
+            try (PreparedStatement pds = conn.prepareStatement(delStayingSql)) {
+                pds.setString(1, stayingId);
+                pds.executeUpdate();
+            }
+
+            // set rooms back to Available
+            if (!roomIds.isEmpty()) {
+                String updateRoomSql = "UPDATE Room_Management SET Room_status = 0 WHERE Room_id = ?";
+                try (PreparedStatement pru = conn.prepareStatement(updateRoomSql)) {
+                    for (String rid : roomIds) {
+                        pru.setString(1, rid);
+                        pru.executeUpdate();
+                    }
+                }
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    /**
+     * Return count of current checked-in stayings (Staying_status = 1).
+     */
+    public static int countCurrentCheckins() {
+        String sql = "SELECT COUNT(*) AS cnt FROM Staying_Management WHERE Staying_status = 1";
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) return rs.getInt("cnt");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * Return count of stayings that checked out today (date portion of Checkout_date = today).
+     */
+    public static int countTodayCheckouts() {
+        String sql = "SELECT COUNT(*) AS cnt FROM Staying_Management WHERE Checkout_date IS NOT NULL AND CAST(Checkout_date AS date) = CAST(GETDATE() AS date)";
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) return rs.getInt("cnt");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

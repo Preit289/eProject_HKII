@@ -18,6 +18,7 @@ import javafx.stage.Stage;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
+@SuppressWarnings("unused")
 public class BookingController {
 
     @FXML private TextField txtSearch;
@@ -25,7 +26,7 @@ public class BookingController {
     @FXML private TableColumn<BookingVM,String> colId, colBooker, colPhone, colPay;
     @FXML private TableColumn<BookingVM,Number>  colDeposit, colRooms;
     @FXML private TableColumn<BookingVM,String>  colCreatedAt;
-    @FXML private TableColumn<BookingVM,String>  colCheckinDate; // thêm cột check-in date
+    @FXML private TableColumn<BookingVM,String>  colCheckinDate; // add column: check-in date
 
     private final BookingRepository repo = new BookingRepository();
 
@@ -44,11 +45,11 @@ public class BookingController {
                 c.getValue().plannedCheckin() != null ? c.getValue().plannedCheckin().toLocalDate().toString() : ""
         ));
 
-        // Sort mặc định theo check-in date ASC
+    // Default sort by check-in date ASC
         tblBooking.getSortOrder().add(colCheckinDate);
         colCheckinDate.setSortType(TableColumn.SortType.ASCENDING);
 
-        // Gắn nút More ở cuối mỗi dòng trong cột Rooms
+    // Attach a 'More' button at the end of each row in the Rooms column
         colRooms.setCellFactory(col -> new TableCell<>() {
             private final Label lbl = new Label();
             private final Pane spacer = new Pane();
@@ -68,7 +69,7 @@ public class BookingController {
             }
         });
 
-        // RowFactory: đổi màu dòng
+    // RowFactory: color rows based on timing
         tblBooking.setRowFactory(tv -> new TableRow<>() {
             @Override
             protected void updateItem(BookingVM item, boolean empty) {

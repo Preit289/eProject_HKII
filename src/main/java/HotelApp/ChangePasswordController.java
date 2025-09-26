@@ -2,13 +2,11 @@ package HotelApp;
 
 import HotelApp.repository.AccountRepository;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.stage.Stage;
 
+@SuppressWarnings("unused")
 public class ChangePasswordController {
     @FXML
     private PasswordField txtNewPassword;
