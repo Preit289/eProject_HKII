@@ -18,6 +18,9 @@ import javafx.stage.Stage;
 import java.sql.*;
 import HotelApp.db.DButil;
 
+import java.text.NumberFormat;
+import java.util.Locale;
+
 import java.util.List;
 import java.util.Map;
 
@@ -766,144 +769,146 @@ public class CheckInFormController {
         stage.close();
     }
 
-   @FXML
-private void onPrint() {
-    PrinterJob job = PrinterJob.createPrinterJob();
-    if (job == null || !job.showPrintDialog(btnPrint.getScene().getWindow()))
-        return;
+    NumberFormat vndFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
 
-    PageLayout pageLayout = job.getJobSettings().getPageLayout();
-    double pageWidth = pageLayout.getPrintableWidth();
-    double pageHeight = pageLayout.getPrintableHeight();
+    @FXML
+    private void onPrint() {
+        PrinterJob job = PrinterJob.createPrinterJob();
+        if (job == null || !job.showPrintDialog(btnPrint.getScene().getWindow()))
+            return;
 
-    VBox printContent = new VBox(15);
-    printContent.setPadding(new Insets(20));
-    printContent.setStyle("-fx-background-color: white;");
-    printContent.setPrefWidth(pageWidth * 0.8);
-    printContent.setMaxWidth(pageWidth * 0.8);
+        PageLayout pageLayout = job.getJobSettings().getPageLayout();
+        double pageWidth = pageLayout.getPrintableWidth();
+        double pageHeight = pageLayout.getPrintableHeight();
 
-    // ===== Hotel Header =====
-    Label hotelName = new Label("HOTEL");
-    hotelName.setStyle("-fx-font-size: 28; -fx-font-weight: bold;");
-    hotelName.setAlignment(Pos.CENTER);
-    hotelName.setMaxWidth(Double.MAX_VALUE);
+        VBox printContent = new VBox(15);
+        printContent.setPadding(new Insets(20));
+        printContent.setStyle("-fx-background-color: white;");
+        printContent.setPrefWidth(pageWidth * 0.8);
+        printContent.setMaxWidth(pageWidth * 0.8);
 
-    Label billTitle = new Label("INVOICE");
-    billTitle.setStyle("-fx-font-size: 22; -fx-font-weight: bold; -fx-padding: 10 0 20 0;");
-    billTitle.setAlignment(Pos.CENTER);
-    billTitle.setMaxWidth(Double.MAX_VALUE);
+        // ===== Hotel Header =====
+        Label hotelName = new Label("HOTEL");
+        hotelName.setStyle("-fx-font-size: 28; -fx-font-weight: bold;");
+        hotelName.setAlignment(Pos.CENTER);
+        hotelName.setMaxWidth(Double.MAX_VALUE);
 
-    // ===== Guest Info =====
-    GridPane guestInfo = new GridPane();
-    guestInfo.setHgap(20);
-    guestInfo.setVgap(10);
-    guestInfo.addRow(0, new Label("Guest Name:"), new Label(txtBooker.getText()));
-    guestInfo.addRow(1, new Label("Phone:"), new Label(txtPhone.getText()));
-    guestInfo.addRow(2, new Label("Check-in:"), new Label(txtCheckinDate.getText()));
-    guestInfo.addRow(3, new Label("Check-out:"), new Label(txtCheckoutDate.getText()));
-    guestInfo.getChildren().filtered(n -> n instanceof Label)
-            .forEach(n -> ((Label) n).setStyle("-fx-font-size: 12;"));
+        Label billTitle = new Label("INVOICE");
+        billTitle.setStyle("-fx-font-size: 22; -fx-font-weight: bold; -fx-padding: 10 0 20 0;");
+        billTitle.setAlignment(Pos.CENTER);
+        billTitle.setMaxWidth(Double.MAX_VALUE);
 
-    // ===== Room List =====
-    GridPane roomGrid = new GridPane();
-    roomGrid.setHgap(20);
-    roomGrid.setVgap(8);
-    roomGrid.addRow(0,
-            new Label("Room No."),
-            new Label("Category"),
-            new Label("Price"),
-            new Label("Services"));
-    roomGrid.getChildren().filtered(n -> n instanceof Label)
-            .forEach(n -> ((Label) n).setStyle("-fx-font-weight: bold; -fx-font-size: 12;"));
+        // ===== Guest Info =====
+        GridPane guestInfo = new GridPane();
+        guestInfo.setHgap(20);
+        guestInfo.setVgap(10);
+        guestInfo.addRow(0, new Label("Guest Name:"), new Label(txtBooker.getText()));
+        guestInfo.addRow(1, new Label("Phone:"), new Label(txtPhone.getText()));
+        guestInfo.addRow(2, new Label("Check-in:"), new Label(txtCheckinDate.getText()));
+        guestInfo.addRow(3, new Label("Check-out:"), new Label(txtCheckoutDate.getText()));
+        guestInfo.getChildren().filtered(n -> n instanceof Label)
+                .forEach(n -> ((Label) n).setStyle("-fx-font-size: 12;"));
 
-    int row = 1;
-    ServicesRepository servicesRepo = new ServicesRepository();
-    double totalAmount = 0;
+        // ===== Room List =====
+        GridPane roomGrid = new GridPane();
+        roomGrid.setHgap(20);
+        roomGrid.setVgap(8);
+        roomGrid.addRow(0,
+                new Label("Room No."),
+                new Label("Category"),
+                new Label("Price"),
+                new Label("Services"));
+        roomGrid.getChildren().filtered(n -> n instanceof Label)
+                .forEach(n -> ((Label) n).setStyle("-fx-font-weight: bold; -fx-font-size: 12;"));
 
-    for (RoomVM room : tblRooms.getItems()) {
-        Label roomNo = new Label(room.roomNumber());
-        Label category = new Label(room.category());
-        Label price = new Label(String.format("$%.2f", room.price()));
-        totalAmount += room.price();
+        int row = 1;
+        ServicesRepository servicesRepo = new ServicesRepository();
+        double totalAmount = 0;
 
-        VBox servicesBox = new VBox(2);
-        if (room.services() != null && !room.services().isEmpty()) {
-            String[] servicesArr = room.services().split("\n");
-            for (String s : servicesArr) {
-                String[] parts = s.split(" x ");
-                String serviceName = parts[0].trim();
-                int qty = 1;
-                if (parts.length > 1) {
-                    try {
-                        qty = Integer.parseInt(parts[1].trim());
-                    } catch (NumberFormatException ignored) {
+        for (RoomVM room : tblRooms.getItems()) {
+            Label roomNo = new Label(room.roomNumber());
+            Label category = new Label(room.category());
+            Label price = new Label(vndFormat.format(room.price()));
+            totalAmount += room.price();
+
+            VBox servicesBox = new VBox(2);
+            if (room.services() != null && !room.services().isEmpty()) {
+                String[] servicesArr = room.services().split("\n");
+                for (String s : servicesArr) {
+                    String[] parts = s.split(" x ");
+                    String serviceName = parts[0].trim();
+                    int qty = 1;
+                    if (parts.length > 1) {
+                        try {
+                            qty = Integer.parseInt(parts[1].trim());
+                        } catch (NumberFormatException ignored) {
+                        }
                     }
-                }
 
-                // Tính tổng tiền dịch vụ nhưng không hiển thị riêng lẻ
-                int servicePrice = 0;
-                List<Services> allServices = servicesRepo.getAllServices();
-                for (Services svc : allServices) {
-                    if (svc.getServiceName().equalsIgnoreCase(serviceName)) {
-                        servicePrice = svc.getServicePrice();
-                        break;
+                    // Tính tổng tiền dịch vụ nhưng không hiển thị riêng lẻ
+                    int servicePrice = 0;
+                    List<Services> allServices = servicesRepo.getAllServices();
+                    for (Services svc : allServices) {
+                        if (svc.getServiceName().equalsIgnoreCase(serviceName)) {
+                            servicePrice = svc.getServicePrice();
+                            break;
+                        }
                     }
-                }
-                totalAmount += servicePrice * qty;
+                    totalAmount += servicePrice * qty;
 
-                Label lbl = new Label(serviceName + " x" + qty);
-                lbl.setStyle("-fx-font-size: 12;");
-                servicesBox.getChildren().add(lbl);
+                    Label lbl = new Label(serviceName + " x" + qty + "\n(" + vndFormat.format(servicePrice) + ")");
+
+                    lbl.setStyle("-fx-font-size: 12;");
+                    servicesBox.getChildren().add(lbl);
+                }
+            } else {
+                servicesBox.getChildren().add(new Label("-"));
             }
-        } else {
-            servicesBox.getChildren().add(new Label("-"));
+
+            roomGrid.addRow(row++, roomNo, category, price, servicesBox);
         }
 
-        roomGrid.addRow(row++, roomNo, category, price, servicesBox);
+        // ===== Summary =====
+        double deposit = txtDeposit.getText().isEmpty() ? 0 : Double.parseDouble(txtDeposit.getText());
+        double balance = totalAmount - deposit;
+
+        GridPane summary = new GridPane();
+        summary.setHgap(50);
+        summary.setVgap(8);
+        summary.addRow(0, new Label("Payment Method:"), new Label(cbPayment.getValue()));
+        summary.addRow(1, new Label("Total Amount:"), new Label(vndFormat.format(totalAmount)));
+        summary.addRow(2, new Label("Deposit Paid:"), new Label(vndFormat.format(deposit)));
+        summary.addRow(3, new Label("Balance Due:"), new Label(vndFormat.format(balance)));
+        summary.getChildren().filtered(n -> n instanceof Label)
+                .forEach(n -> ((Label) n).setStyle("-fx-font-size: 14; -fx-font-weight: bold;"));
+
+        Label footer = new Label("Thank you for choosing our hotel!");
+        footer.setStyle("-fx-font-size: 12; -fx-font-style: italic; -fx-padding: 20 0 0 0;");
+        footer.setAlignment(Pos.CENTER);
+        footer.setMaxWidth(Double.MAX_VALUE);
+
+        printContent.getChildren().addAll(
+                hotelName, billTitle, guestInfo,
+                new Separator(), new Label("Room Details:"), roomGrid,
+                new Separator(), summary, footer);
+
+        StackPane wrapper = new StackPane(printContent);
+        wrapper.setPrefSize(pageWidth, pageHeight);
+        StackPane.setAlignment(printContent, Pos.TOP_CENTER);
+
+        double totalHeight = printContent.prefHeight(-1);
+        double y = 0;
+        while (y < totalHeight) {
+            Group page = new Group(wrapper);
+            page.setClip(new Rectangle(0, y, pageWidth, pageHeight));
+            page.setTranslateY(-y);
+            if (!job.printPage(page))
+                break;
+            y += pageHeight;
+        }
+
+        job.endJob();
+        new Alert(Alert.AlertType.INFORMATION, "Bill printed successfully!").showAndWait();
     }
-
-    // ===== Summary =====
-    double deposit = txtDeposit.getText().isEmpty() ? 0 : Double.parseDouble(txtDeposit.getText());
-    double balance = totalAmount - deposit;
-
-    GridPane summary = new GridPane();
-    summary.setHgap(50);
-    summary.setVgap(8);
-    summary.addRow(0, new Label("Payment Method:"), new Label(cbPayment.getValue()));
-    summary.addRow(1, new Label("Total Amount:"), new Label(String.format("$%.2f", totalAmount)));
-    summary.addRow(2, new Label("Deposit Paid:"), new Label(String.format("$%.2f", deposit)));
-    summary.addRow(3, new Label("Balance Due:"), new Label(String.format("$%.2f", balance)));
-    summary.getChildren().filtered(n -> n instanceof Label)
-            .forEach(n -> ((Label) n).setStyle("-fx-font-size: 14; -fx-font-weight: bold;"));
-
-    Label footer = new Label("Thank you for choosing our hotel!");
-    footer.setStyle("-fx-font-size: 12; -fx-font-style: italic; -fx-padding: 20 0 0 0;");
-    footer.setAlignment(Pos.CENTER);
-    footer.setMaxWidth(Double.MAX_VALUE);
-
-    printContent.getChildren().addAll(
-            hotelName, billTitle, guestInfo,
-            new Separator(), new Label("Room Details:"), roomGrid,
-            new Separator(), summary, footer);
-
-    StackPane wrapper = new StackPane(printContent);
-    wrapper.setPrefSize(pageWidth, pageHeight);
-    StackPane.setAlignment(printContent, Pos.TOP_CENTER);
-
-    double totalHeight = printContent.prefHeight(-1);
-    double y = 0;
-    while (y < totalHeight) {
-        Group page = new Group(wrapper);
-        page.setClip(new Rectangle(0, y, pageWidth, pageHeight));
-        page.setTranslateY(-y);
-        if (!job.printPage(page))
-            break;
-        y += pageHeight;
-    }
-
-    job.endJob();
-    new Alert(Alert.AlertType.INFORMATION, "Bill printed successfully!").showAndWait();
-}
-
 
 }
