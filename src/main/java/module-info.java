@@ -12,6 +12,7 @@ module hotelmanagementsystemfxml {
 
     opens HotelApp to javafx.fxml;
     opens HotelApp.model to javafx.base;
+    exports HotelApp.model;
     exports HotelApp.db;
     exports HotelApp;
 

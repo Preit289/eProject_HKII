@@ -4,22 +4,23 @@
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="HotelApp.DashboardController"
-      spacing="12" alignment="TOP_LEFT" styleClass="view-pane">
+    fx:controller="HotelApp.DashboardController"
+    spacing="12" alignment="TOP_LEFT" styleClass="view-pane"
+    stylesheets="@styles.css">
 
     <Label text="Dashboard Overview" styleClass="section-title"/>
 
     <HBox spacing="10">
         <children>
             <Label text="Today's Check-ins:"/>
-            <Label fx:id="lblCheckins" text="0"/>
+            <Label fx:id="lblCheckins" text="0" styleClass="label-compact"/>
         </children>
     </HBox>
 
     <HBox spacing="10">
         <children>
             <Label text="Today's Check-outs:"/>
-            <Label fx:id="lblCheckouts" text="0"/>
+            <Label fx:id="lblCheckouts" text="0" styleClass="label-compact"/>
         </children>
     </HBox>
 

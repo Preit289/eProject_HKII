@@ -5,27 +5,23 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
             fx:controller="HotelApp.BookingFormController"
-            prefWidth="800" prefHeight="520">
+            prefWidth="800" prefHeight="520"
+            stylesheets="@styles.css">
 
     <!-- Heading -->
     <top>
-        <HBox alignment="CENTER" style="-fx-padding: 15;">
-            <Label fx:id="lblTitle" text="New Booking"
-                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+        <HBox alignment="CENTER" styleClass="header">
+            <Label fx:id="lblTitle" text="New Booking" styleClass="form-title"/>
         </HBox>
     </top>
 
     <!-- Form -->
     <center>
-       <GridPane hgap="10" vgap="12" style="-fx-padding: 20;">
+    <GridPane hgap="10" vgap="12" styleClass="view-pane">
     <columnConstraints>
-        <!-- Label cột 0: nhỏ hơn -->
         <ColumnConstraints minWidth="80" maxWidth="100"/>
-        <!-- Input cột 1 -->
         <ColumnConstraints hgrow="ALWAYS"/>
-        <!-- Label cột 2 -->
         <ColumnConstraints minWidth="80" maxWidth="100"/>
-        <!-- Input cột 3 -->
         <ColumnConstraints hgrow="ALWAYS"/>
     </columnConstraints>
 

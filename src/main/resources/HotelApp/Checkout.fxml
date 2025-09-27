@@ -4,8 +4,9 @@
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="HotelApp.CheckOutController"
-      spacing="15" alignment="TOP_LEFT" styleClass="view-pane">
+    fx:controller="HotelApp.CheckOutController"
+    spacing="15" alignment="TOP_LEFT" styleClass="view-pane"
+    stylesheets="@styles.css">
 
     <!-- Title -->
     <Label text="Check-out Management" styleClass="section-title"/>
@@ -22,7 +23,7 @@
     </TableView>
 
     <!-- Add Checkout Button -->
-    <HBox spacing="10" alignment="CENTER_RIGHT">
+    <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding:10;">
         <Button fx:id="btnCheckOut" text="Check Out" 
                 onAction="#onCheckOut" 
                 styleClass="button-primary"/>

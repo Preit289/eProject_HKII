@@ -21,6 +21,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+@SuppressWarnings("unused")
 public class CustomerController implements Initializable {
 
     @FXML
@@ -70,10 +71,48 @@ public class CustomerController implements Initializable {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
         dobColumn.setCellValueFactory(new PropertyValueFactory<>("dob"));
         identityColumn.setCellValueFactory(new PropertyValueFactory<>("citizenIdentityNumber"));
-        foreignerColumn.setCellValueFactory(new PropertyValueFactory<>("isForeigner"));
-        genderColumn.setCellValueFactory(new PropertyValueFactory<>("gender"));
-        childColumn.setCellValueFactory(new PropertyValueFactory<>("isChild"));
+    // boolean columns: use readable string (Yes/No) via cell value factory
+        foreignerColumn.setCellValueFactory(cell -> cell.getValue().isForeignerProperty());
+        foreignerColumn.setCellFactory(col -> new javafx.scene.control.TableCell<Customer, Boolean>() {
+            @Override
+            protected void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item ? "Có" : "Không");
+                }
+            }
+        });
+
+        genderColumn.setCellValueFactory(cell -> cell.getValue().genderProperty());
+        genderColumn.setCellFactory(col -> new javafx.scene.control.TableCell<Customer, Boolean>() {
+            @Override
+            protected void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item ? "Nam" : "Nữ");
+                }
+            }
+        });
+
+        childColumn.setCellValueFactory(cell -> cell.getValue().isChildProperty());
+        childColumn.setCellFactory(col -> new javafx.scene.control.TableCell<Customer, Boolean>() {
+            @Override
+            protected void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item ? "Có" : "Không");
+                }
+            }
+        });
         phoneColumn.setCellValueFactory(new PropertyValueFactory<>("phoneNum"));
+
+        
 
         // Load data
         loadCustomers();
@@ -90,6 +129,7 @@ public class CustomerController implements Initializable {
                 phoneNumberField.setText(newSelection.getPhoneNum());
             }
         });
+        
     }
 
     @FXML

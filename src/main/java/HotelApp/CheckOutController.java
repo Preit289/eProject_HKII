@@ -15,6 +15,7 @@ import javafx.geometry.Insets;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public class CheckOutController {
 
     @FXML
