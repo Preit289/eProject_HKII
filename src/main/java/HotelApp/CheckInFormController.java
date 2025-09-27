@@ -20,6 +20,9 @@ import java.sql.*;
 import HotelApp.db.DButil;
 
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale; // Keep Locale import for usage in NumberFormat
 
 import java.util.List;
@@ -285,10 +288,22 @@ public class CheckInFormController {
             label = "Unknown";
         } else {
             switch (status) {
-                case 0 -> { label = "Reserved"; style += " status-reserved"; }
-                case 1 -> { label = "Checked-in"; style += " status-checkedin"; }
-                case 2 -> { label = "Checked-out"; style += " status-checkedout"; }
-                case 3 -> { label = "Cancelled"; style += " status-cancelled"; }
+                case 0 -> {
+                    label = "Reserved";
+                    style += " status-reserved";
+                }
+                case 1 -> {
+                    label = "Checked-in";
+                    style += " status-checkedin";
+                }
+                case 2 -> {
+                    label = "Checked-out";
+                    style += " status-checkedout";
+                }
+                case 3 -> {
+                    label = "Cancelled";
+                    style += " status-cancelled";
+                }
                 default -> label = "Status " + status;
             }
         }
@@ -304,9 +319,10 @@ public class CheckInFormController {
             }
         }
 
-    // Disable checkout button only if the staying is already checked-out (status == 2)
-    boolean checkedOut = (status != null && status == 2);
-    btnCheckOut.setDisable(checkedOut);
+        // Disable checkout button only if the staying is already checked-out (status ==
+        // 2)
+        boolean checkedOut = (status != null && status == 2);
+        btnCheckOut.setDisable(checkedOut);
     }
 
     private String getPaymentMethod(String phone) {
@@ -525,7 +541,8 @@ public class CheckInFormController {
 
     @FXML
     private void onRemoveRoom(RoomVM room) {
-        // If called from button in table, room param is provided. Otherwise get selected.
+        // If called from button in table, room param is provided. Otherwise get
+        // selected.
         RoomVM target = room != null ? room : tblRooms.getSelectionModel().getSelectedItem();
         if (target == null) {
             new Alert(Alert.AlertType.WARNING, "Select a room to remove.").showAndWait();
@@ -533,7 +550,8 @@ public class CheckInFormController {
         }
 
         // Confirm
-        Alert c = new Alert(Alert.AlertType.CONFIRMATION, "Remove room " + target.roomNumber() + " from staying?", ButtonType.OK, ButtonType.CANCEL);
+        Alert c = new Alert(Alert.AlertType.CONFIRMATION, "Remove room " + target.roomNumber() + " from staying?",
+                ButtonType.OK, ButtonType.CANCEL);
         c.showAndWait().ifPresent(b -> {
             if (b == ButtonType.OK) {
                 try {
@@ -806,7 +824,8 @@ public class CheckInFormController {
             new Alert(Alert.AlertType.ERROR, "No staying selected.").showAndWait();
             return;
         }
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete this staying and all related data?", ButtonType.OK, ButtonType.CANCEL);
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete this staying and all related data?",
+                ButtonType.OK, ButtonType.CANCEL);
         confirm.showAndWait().ifPresent(b -> {
             if (b == ButtonType.OK) {
                 try {
@@ -920,8 +939,7 @@ public class CheckInFormController {
                 0, "Reserved",
                 1, "Checked-in",
                 2, "Checked-out",
-                3, "Cancelled"
-        );
+                3, "Cancelled");
         List<String> choices = statusMap.values().stream().toList();
         ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.get(0), choices);
         dialog.setTitle("Set Staying Status");
@@ -1022,9 +1040,24 @@ public class CheckInFormController {
         ServicesRepository servicesRepo = new ServicesRepository();
         double totalAmount = 0;
 
+        // Determine number of nights from check-in/check-out strings (fallback to 1)
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+        long nights = 1;
+        try {
+            LocalDateTime ci = LocalDateTime.parse(txtCheckinDate.getText(), formatter);
+            LocalDateTime co = LocalDateTime.parse(txtCheckoutDate.getText(), formatter);
+            nights = ChronoUnit.DAYS.between(ci.toLocalDate(), co.toLocalDate());
+            if (nights < 1)
+                nights = 1; 
+        } catch (Exception e) {
+            nights = 1;
+        }
+
         for (RoomVM room : tblRooms.getItems()) {
             int startRow = row;
-            totalAmount += room.price(); 
+            // Room total = price per night * number of nights
+            double roomTotal = room.price() * (double) nights;
+            totalAmount += roomTotal;
 
             if (room.services() != null && !room.services().isEmpty()) {
                 String[] servicesArr = room.services().split("\n");
@@ -1044,7 +1077,8 @@ public class CheckInFormController {
 
                     Label roomNo = new Label(room.roomNumber());
                     Label category = new Label(room.category());
-                    Label roomPrice = new Label(vndFormat.format(room.price()));
+                    // Show room total for the stay (price * nights) on the first service row
+                    Label roomPrice = new Label(vndFormat.format(roomTotal));
                     Label lblServiceName = new Label(serviceName + " x" + qty);
                     Label lblServicePrice = new Label(vndFormat.format(servicePrice * qty));
 
@@ -1059,7 +1093,7 @@ public class CheckInFormController {
                 roomGrid.addRow(row++,
                         new Label(room.roomNumber()),
                         new Label(room.category()),
-                        new Label(vndFormat.format(room.price())),
+                        new Label(vndFormat.format(roomTotal)),
                         new Label("-"),
                         new Label("-"));
             }
