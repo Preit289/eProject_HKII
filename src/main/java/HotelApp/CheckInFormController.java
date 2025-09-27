@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -34,6 +35,7 @@ import javafx.print.PrinterJob;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 
 import java.io.File;
@@ -784,17 +786,17 @@ public class CheckInFormController {
         VBox printContent = new VBox(15);
         printContent.setPadding(new Insets(20));
         printContent.setStyle("-fx-background-color: white;");
-        printContent.setPrefWidth(pageWidth * 0.8);
-        printContent.setMaxWidth(pageWidth * 0.8);
+        printContent.setPrefWidth(pageWidth);
+        printContent.setMaxWidth(pageWidth);
 
         // ===== Hotel Header =====
         Label hotelName = new Label("HOTEL");
-        hotelName.setStyle("-fx-font-size: 28; -fx-font-weight: bold;");
+        hotelName.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
         hotelName.setAlignment(Pos.CENTER);
         hotelName.setMaxWidth(Double.MAX_VALUE);
 
         Label billTitle = new Label("INVOICE");
-        billTitle.setStyle("-fx-font-size: 22; -fx-font-weight: bold; -fx-padding: 10 0 20 0;");
+        billTitle.setStyle("-fx-font-size: 16; -fx-font-weight: bold;");
         billTitle.setAlignment(Pos.CENTER);
         billTitle.setMaxWidth(Double.MAX_VALUE);
 
@@ -807,48 +809,54 @@ public class CheckInFormController {
         guestInfo.addRow(2, new Label("Check-in:"), new Label(txtCheckinDate.getText()));
         guestInfo.addRow(3, new Label("Check-out:"), new Label(txtCheckoutDate.getText()));
         guestInfo.getChildren().filtered(n -> n instanceof Label)
-                .forEach(n -> ((Label) n).setStyle("-fx-font-size: 12;"));
+                .forEach(n -> ((Label) n).setStyle("-fx-font-size: 10;"));
 
         // ===== Room List =====
         GridPane roomGrid = new GridPane();
+
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setPercentWidth(10); // Room
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setPercentWidth(15); // Category
+        ColumnConstraints col3 = new ColumnConstraints();
+        col3.setPercentWidth(30); // Room Price
+        ColumnConstraints col4 = new ColumnConstraints();
+        col4.setPercentWidth(30); // Service Name
+        ColumnConstraints col5 = new ColumnConstraints();
+        col5.setPercentWidth(20); // Service Cost
+
+        roomGrid.getColumnConstraints().addAll(col1, col2, col3, col4, col5);
+
+        roomGrid.setMaxWidth(pageWidth);
+
         roomGrid.setHgap(20);
         roomGrid.setVgap(8);
         roomGrid.addRow(0,
-                new Label("Room No."),
+                new Label("Room"),
                 new Label("Category"),
                 new Label("Price"),
-                new Label("Services"));
+                new Label("Services"),
+                new Label("Service Cost"));
         roomGrid.getChildren().filtered(n -> n instanceof Label)
-                .forEach(n -> ((Label) n).setStyle("-fx-font-weight: bold; -fx-font-size: 12;"));
+                .forEach(n -> ((Label) n).setStyle("-fx-font-weight: bold; -fx-font-size: 10;"));
 
         int row = 1;
         ServicesRepository servicesRepo = new ServicesRepository();
         double totalAmount = 0;
 
         for (RoomVM room : tblRooms.getItems()) {
-            Label roomNo = new Label(room.roomNumber());
-            Label category = new Label(room.category());
-            Label price = new Label(vndFormat.format(room.price()));
-            totalAmount += room.price();
+            int startRow = row;
+            totalAmount += room.price(); 
 
-            VBox servicesBox = new VBox(2);
             if (room.services() != null && !room.services().isEmpty()) {
                 String[] servicesArr = room.services().split("\n");
                 for (String s : servicesArr) {
                     String[] parts = s.split(" x ");
                     String serviceName = parts[0].trim();
-                    int qty = 1;
-                    if (parts.length > 1) {
-                        try {
-                            qty = Integer.parseInt(parts[1].trim());
-                        } catch (NumberFormatException ignored) {
-                        }
-                    }
+                    int qty = (parts.length > 1) ? Integer.parseInt(parts[1].trim()) : 1;
 
-                    // Tính tổng tiền dịch vụ nhưng không hiển thị riêng lẻ
                     int servicePrice = 0;
-                    List<Services> allServices = servicesRepo.getAllServices();
-                    for (Services svc : allServices) {
+                    for (Services svc : servicesRepo.getAllServices()) {
                         if (svc.getServiceName().equalsIgnoreCase(serviceName)) {
                             servicePrice = svc.getServicePrice();
                             break;
@@ -856,16 +864,27 @@ public class CheckInFormController {
                     }
                     totalAmount += servicePrice * qty;
 
-                    Label lbl = new Label(serviceName + " x" + qty + "\n(" + vndFormat.format(servicePrice) + ")");
+                    Label roomNo = new Label(room.roomNumber());
+                    Label category = new Label(room.category());
+                    Label roomPrice = new Label(vndFormat.format(room.price()));
+                    Label lblServiceName = new Label(serviceName + " x" + qty);
+                    Label lblServicePrice = new Label(vndFormat.format(servicePrice * qty));
 
-                    lbl.setStyle("-fx-font-size: 12;");
-                    servicesBox.getChildren().add(lbl);
+                    if (row == startRow) {
+                        roomGrid.addRow(row++, roomNo, category, roomPrice, lblServiceName, lblServicePrice);
+                    } else {
+                        roomGrid.addRow(row++, new Label(""), new Label(""), new Label(""), lblServiceName,
+                                lblServicePrice);
+                    }
                 }
             } else {
-                servicesBox.getChildren().add(new Label("-"));
+                roomGrid.addRow(row++,
+                        new Label(room.roomNumber()),
+                        new Label(room.category()),
+                        new Label(vndFormat.format(room.price())),
+                        new Label("-"),
+                        new Label("-"));
             }
-
-            roomGrid.addRow(row++, roomNo, category, price, servicesBox);
         }
 
         // ===== Summary =====
@@ -875,15 +894,31 @@ public class CheckInFormController {
         GridPane summary = new GridPane();
         summary.setHgap(50);
         summary.setVgap(8);
-        summary.addRow(0, new Label("Payment Method:"), new Label(cbPayment.getValue()));
-        summary.addRow(1, new Label("Total Amount:"), new Label(vndFormat.format(totalAmount)));
-        summary.addRow(2, new Label("Deposit Paid:"), new Label(vndFormat.format(deposit)));
-        summary.addRow(3, new Label("Balance Due:"), new Label(vndFormat.format(balance)));
-        summary.getChildren().filtered(n -> n instanceof Label)
-                .forEach(n -> ((Label) n).setStyle("-fx-font-size: 14; -fx-font-weight: bold;"));
+
+        String[] labels = {
+                "Payment Method:", "Total Amount:", "Deposit Paid:", "Balance Due:"
+        };
+        String[] values = {
+                cbPayment.getValue(),
+                vndFormat.format(totalAmount),
+                vndFormat.format(deposit),
+                vndFormat.format(balance)
+        };
+
+        for (int i = 0; i < labels.length; i++) {
+            Label lblKey = new Label(labels[i]);
+            lblKey.setStyle("-fx-font-size: 10; -fx-font-weight: bold;");
+
+            Label lblValue = new Label(values[i]);
+            lblValue.setStyle("-fx-font-size: 10;");
+            lblValue.setWrapText(true);
+            lblValue.setMaxWidth(pageWidth * 0.4);
+
+            summary.addRow(i, lblKey, lblValue);
+        }
 
         Label footer = new Label("Thank you for choosing our hotel!");
-        footer.setStyle("-fx-font-size: 12; -fx-font-style: italic; -fx-padding: 20 0 0 0;");
+        footer.setStyle("-fx-font-size: 10; -fx-font-style: italic; -fx-padding: 20 0 0 0;");
         footer.setAlignment(Pos.CENTER);
         footer.setMaxWidth(Double.MAX_VALUE);
 
