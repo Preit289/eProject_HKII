@@ -20,6 +20,7 @@ import java.sql.*;
 import HotelApp.db.DButil;
 
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -363,18 +364,17 @@ public class CheckInFormController {
         return "";
     }
 
+    private final DateTimeFormatter dtFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
     private String getCheckinDate(String stayingId) {
-        String sql = """
-                    SELECT Checkin_date
-                    FROM Staying_Management
-                    WHERE Staying_id = ?
-                """;
+        String sql = "SELECT Checkin_date FROM Staying_Management WHERE Staying_id = ?";
         try (Connection conn = DButil.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next() && rs.getTimestamp("Checkin_date") != null) {
-                return rs.getTimestamp("Checkin_date").toString();
+                LocalDateTime dt = rs.getTimestamp("Checkin_date").toLocalDateTime();
+                return dt.format(dtFormatter);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -383,17 +383,14 @@ public class CheckInFormController {
     }
 
     private String getCheckoutDate(String stayingId) {
-        String sql = """
-                    SELECT Checkout_date
-                    FROM Staying_Management
-                    WHERE Staying_id = ?
-                """;
+        String sql = "SELECT Checkout_date FROM Staying_Management WHERE Staying_id = ?";
         try (Connection conn = DButil.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next() && rs.getTimestamp("Checkout_date") != null) {
-                return rs.getTimestamp("Checkout_date").toString();
+                LocalDateTime dt = rs.getTimestamp("Checkout_date").toLocalDateTime();
+                return dt.format(dtFormatter);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -975,176 +972,18 @@ public class CheckInFormController {
         if (job == null || !job.showPrintDialog(btnPrint.getScene().getWindow()))
             return;
 
-        PageLayout pageLayout = job.getJobSettings().getPageLayout();
-        double pageWidth = pageLayout.getPrintableWidth();
-        double pageHeight = pageLayout.getPrintableHeight();
+        PageLayout layout = job.getJobSettings().getPageLayout();
+        double pageWidth = layout.getPrintableWidth();
+        double pageHeight = layout.getPrintableHeight();
 
-        VBox printContent = new VBox(15);
-        printContent.setPadding(new Insets(20));
-        printContent.setStyle("-fx-background-color: white;");
-        printContent.setPrefWidth(pageWidth);
-        printContent.setMaxWidth(pageWidth);
-
-        // ===== Hotel Header =====
-        Label hotelName = new Label("HOTEL");
-        hotelName.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
-        hotelName.setAlignment(Pos.CENTER);
-        hotelName.setMaxWidth(Double.MAX_VALUE);
-
-        Label billTitle = new Label("INVOICE");
-        billTitle.setStyle("-fx-font-size: 16; -fx-font-weight: bold;");
-        billTitle.setAlignment(Pos.CENTER);
-        billTitle.setMaxWidth(Double.MAX_VALUE);
-
-        // ===== Guest Info =====
-        GridPane guestInfo = new GridPane();
-        guestInfo.setHgap(20);
-        guestInfo.setVgap(10);
-        guestInfo.addRow(0, new Label("Guest Name:"), new Label(txtBooker.getText()));
-        guestInfo.addRow(1, new Label("Phone:"), new Label(txtPhone.getText()));
-        guestInfo.addRow(2, new Label("Check-in:"), new Label(txtCheckinDate.getText()));
-        guestInfo.addRow(3, new Label("Check-out:"), new Label(txtCheckoutDate.getText()));
-        guestInfo.getChildren().filtered(n -> n instanceof Label)
-                .forEach(n -> ((Label) n).setStyle("-fx-font-size: 10;"));
-
-        // ===== Room List =====
-        GridPane roomGrid = new GridPane();
-
-        ColumnConstraints col1 = new ColumnConstraints();
-        col1.setPercentWidth(10); // Room
-        ColumnConstraints col2 = new ColumnConstraints();
-        col2.setPercentWidth(15); // Category
-        ColumnConstraints col3 = new ColumnConstraints();
-        col3.setPercentWidth(30); // Room Price
-        ColumnConstraints col4 = new ColumnConstraints();
-        col4.setPercentWidth(30); // Service Name
-        ColumnConstraints col5 = new ColumnConstraints();
-        col5.setPercentWidth(20); // Service Cost
-
-        roomGrid.getColumnConstraints().addAll(col1, col2, col3, col4, col5);
-
-        roomGrid.setMaxWidth(pageWidth);
-
-        roomGrid.setHgap(20);
-        roomGrid.setVgap(8);
-        roomGrid.addRow(0,
-                new Label("Room"),
-                new Label("Category"),
-                new Label("Price"),
-                new Label("Services"),
-                new Label("Service Cost"));
-        roomGrid.getChildren().filtered(n -> n instanceof Label)
-                .forEach(n -> ((Label) n).setStyle("-fx-font-weight: bold; -fx-font-size: 10;"));
-
-        int row = 1;
-        ServicesRepository servicesRepo = new ServicesRepository();
-        double totalAmount = 0;
-
-        // Determine number of nights from check-in/check-out strings (fallback to 1)
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-        long nights = 1;
-        try {
-            LocalDateTime ci = LocalDateTime.parse(txtCheckinDate.getText(), formatter);
-            LocalDateTime co = LocalDateTime.parse(txtCheckoutDate.getText(), formatter);
-            nights = ChronoUnit.DAYS.between(ci.toLocalDate(), co.toLocalDate());
-            if (nights < 1)
-                nights = 1; 
-        } catch (Exception e) {
-            nights = 1;
-        }
-
-        for (RoomVM room : tblRooms.getItems()) {
-            int startRow = row;
-            // Room total = price per night * number of nights
-            double roomTotal = room.price() * (double) nights;
-            totalAmount += roomTotal;
-
-            if (room.services() != null && !room.services().isEmpty()) {
-                String[] servicesArr = room.services().split("\n");
-                for (String s : servicesArr) {
-                    String[] parts = s.split(" x ");
-                    String serviceName = parts[0].trim();
-                    int qty = (parts.length > 1) ? Integer.parseInt(parts[1].trim()) : 1;
-
-                    int servicePrice = 0;
-                    for (Services svc : servicesRepo.getAllServices()) {
-                        if (svc.getServiceName().equalsIgnoreCase(serviceName)) {
-                            servicePrice = svc.getServicePrice();
-                            break;
-                        }
-                    }
-                    totalAmount += servicePrice * qty;
-
-                    Label roomNo = new Label(room.roomNumber());
-                    Label category = new Label(room.category());
-                    // Show room total for the stay (price * nights) on the first service row
-                    Label roomPrice = new Label(vndFormat.format(roomTotal));
-                    Label lblServiceName = new Label(serviceName + " x" + qty);
-                    Label lblServicePrice = new Label(vndFormat.format(servicePrice * qty));
-
-                    if (row == startRow) {
-                        roomGrid.addRow(row++, roomNo, category, roomPrice, lblServiceName, lblServicePrice);
-                    } else {
-                        roomGrid.addRow(row++, new Label(""), new Label(""), new Label(""), lblServiceName,
-                                lblServicePrice);
-                    }
-                }
-            } else {
-                roomGrid.addRow(row++,
-                        new Label(room.roomNumber()),
-                        new Label(room.category()),
-                        new Label(vndFormat.format(roomTotal)),
-                        new Label("-"),
-                        new Label("-"));
-            }
-        }
-
-        // ===== Summary =====
-        double deposit = txtDeposit.getText().isEmpty() ? 0 : Double.parseDouble(txtDeposit.getText());
-        double balance = totalAmount - deposit;
-
-        GridPane summary = new GridPane();
-        summary.setHgap(50);
-        summary.setVgap(8);
-
-        String[] labels = {
-                "Payment Method:", "Total Amount:", "Deposit Paid:", "Balance Due:"
-        };
-        String[] values = {
-                cbPayment.getValue(),
-                vndFormat.format(totalAmount),
-                vndFormat.format(deposit),
-                vndFormat.format(balance)
-        };
-
-        for (int i = 0; i < labels.length; i++) {
-            Label lblKey = new Label(labels[i]);
-            lblKey.setStyle("-fx-font-size: 10; -fx-font-weight: bold;");
-
-            Label lblValue = new Label(values[i]);
-            lblValue.setStyle("-fx-font-size: 10;");
-            lblValue.setWrapText(true);
-            lblValue.setMaxWidth(pageWidth * 0.4);
-
-            summary.addRow(i, lblKey, lblValue);
-        }
-
-        Label footer = new Label("Thank you for choosing our hotel!");
-        footer.setStyle("-fx-font-size: 10; -fx-font-style: italic; -fx-padding: 20 0 0 0;");
-        footer.setAlignment(Pos.CENTER);
-        footer.setMaxWidth(Double.MAX_VALUE);
-
-        printContent.getChildren().addAll(
-                hotelName, billTitle, guestInfo,
-                new Separator(), new Label("Room Details:"), roomGrid,
-                new Separator(), summary, footer);
-
-        StackPane wrapper = new StackPane(printContent);
+        VBox content = buildBillContent(pageWidth);
+        StackPane wrapper = new StackPane(content);
         wrapper.setPrefSize(pageWidth, pageHeight);
-        StackPane.setAlignment(printContent, Pos.TOP_CENTER);
+        StackPane.setAlignment(content, Pos.TOP_CENTER);
 
-        double totalHeight = printContent.prefHeight(-1);
+        double totalHeight = content.prefHeight(-1);
         double y = 0;
+
         while (y < totalHeight) {
             Group page = new Group(wrapper);
             page.setClip(new Rectangle(0, y, pageWidth, pageHeight));
@@ -1156,6 +995,153 @@ public class CheckInFormController {
 
         job.endJob();
         new Alert(Alert.AlertType.INFORMATION, "Bill printed successfully!").showAndWait();
+    }
+
+    private VBox buildBillContent(double pageWidth) {
+        VBox container = new VBox(15);
+        container.setPadding(new Insets(20));
+        container.setStyle("-fx-background-color: white;");
+        container.setPrefWidth(pageWidth);
+
+        Label hotelName = new Label("HOTEL");
+        hotelName.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
+        hotelName.setMaxWidth(Double.MAX_VALUE);
+        hotelName.setAlignment(Pos.CENTER);
+
+        Label title = new Label("INVOICE");
+        title.setStyle("-fx-font-size: 16; -fx-font-weight: bold;");
+        title.setMaxWidth(Double.MAX_VALUE);
+        title.setAlignment(Pos.CENTER);
+
+        container.getChildren().addAll(hotelName, title, buildGuestInfo(), new Separator(), buildRoomGrid(),
+                new Separator(), buildSummary(), new Label("Thank you for choosing our hotel!"));
+
+        return container;
+    }
+
+    private GridPane buildGuestInfo() {
+        GridPane guestInfo = new GridPane();
+        guestInfo.setHgap(20);
+        guestInfo.setVgap(10);
+        guestInfo.addRow(0, new Label("Guest Name:"), new Label(txtBooker.getText()));
+        guestInfo.addRow(1, new Label("Phone:"), new Label(txtPhone.getText()));
+        guestInfo.addRow(2, new Label("Check-in:"), new Label(txtCheckinDate.getText()));
+        guestInfo.addRow(3, new Label("Check-out:"), new Label(txtCheckoutDate.getText()));
+
+        guestInfo.getChildren().filtered(n -> n instanceof Label)
+                .forEach(n -> ((Label) n).setStyle("-fx-font-size: 10;"));
+
+        return guestInfo;
+    }
+
+    private GridPane buildRoomGrid() {
+        GridPane roomGrid = new GridPane();
+        roomGrid.setHgap(20);
+        roomGrid.setVgap(8);
+        roomGrid.addRow(0, new Label("Room"), new Label("Category"), new Label("Price"), new Label("Services"),
+                new Label("Service Cost"));
+        roomGrid.getChildren().filtered(n -> n instanceof Label)
+                .forEach(n -> ((Label) n).setStyle("-fx-font-weight: bold; -fx-font-size: 10;"));
+
+        double totalAmount = 0;
+        LocalDate checkin = LocalDate.parse(txtCheckinDate.getText(), dtFormatter);
+        LocalDate checkout = LocalDate.parse(txtCheckoutDate.getText(), dtFormatter);
+        long nights = Math.max(1, ChronoUnit.DAYS.between(checkin, checkout));
+        
+        ServicesRepository servicesRepo = new ServicesRepository();
+        int row = 1;
+
+        for (RoomVM room : tblRooms.getItems()) {
+            double roomTotal = room.price();
+            totalAmount += roomTotal;
+
+            if (room.services() != null && !room.services().isBlank()) {
+                String[] servicesArr = room.services().split("\n");
+                boolean firstRow = true;
+                for (String s : servicesArr) {
+                    try {
+                        String[] parts = s.split(" x ");
+                        String serviceName = parts[0].trim();
+                        int qty = (parts.length > 1) ? Integer.parseInt(parts[1].trim()) : 1;
+
+                        int servicePrice = servicesRepo.getAllServices().stream()
+                                .filter(svc -> svc.getServiceName().equalsIgnoreCase(serviceName))
+                                .mapToInt(Services::getServicePrice)
+                                .findFirst().orElse(0);
+
+                        totalAmount += servicePrice * qty;
+
+                        Label lblRoom = firstRow ? new Label(room.roomNumber()) : new Label("");
+                        Label lblCategory = firstRow ? new Label(room.category()) : new Label("");
+                        Label lblRoomPrice = firstRow ? new Label(vndFormat.format(roomTotal)) : new Label("");
+                        Label lblServiceName = new Label(serviceName + " x" + qty);
+                        Label lblServiceCost = new Label(vndFormat.format(servicePrice * qty));
+
+                        roomGrid.addRow(row++, lblRoom, lblCategory, lblRoomPrice, lblServiceName, lblServiceCost);
+                        firstRow = false;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            } else {
+                roomGrid.addRow(row++, new Label(room.roomNumber()), new Label(room.category()),
+                        new Label(vndFormat.format(roomTotal)), new Label("-"), new Label("-"));
+            }
+        }
+
+        return roomGrid;
+    }
+
+    private GridPane buildSummary() {
+        GridPane summary = new GridPane();
+        summary.setHgap(50);
+        summary.setVgap(8);
+
+        LocalDateTime checkin = LocalDateTime.parse(txtCheckinDate.getText(), dtFormatter);
+        LocalDateTime checkout = LocalDateTime.parse(txtCheckoutDate.getText(), dtFormatter);
+        long nights = Math.max(1, ChronoUnit.DAYS.between(checkin.toLocalDate(), checkout.toLocalDate()));
+
+        ServicesRepository servicesRepo = new ServicesRepository();
+        double totalAmount = 0;
+
+        for (RoomVM room : tblRooms.getItems()) {
+            double roomTotal = room.price() * nights;
+            totalAmount += roomTotal;
+
+            if (room.services() != null && !room.services().isBlank()) {
+                String[] servicesArr = room.services().split("\n");
+                for (String s : servicesArr) {
+                    String[] parts = s.split(" x ");
+                    String serviceName = parts[0].trim();
+                    int qty = (parts.length > 1) ? Integer.parseInt(parts[1].trim()) : 1;
+
+                    int servicePrice = servicesRepo.getAllServices().stream()
+                            .filter(svc -> svc.getServiceName().equalsIgnoreCase(serviceName))
+                            .mapToInt(Services::getServicePrice)
+                            .findFirst().orElse(0);
+                        // System.out.println("Room " + room.roomNumber() + ": pricePerNight=" + room.price() + ", nights=" + nights + ", roomTotal=" + roomTotal);
+                    totalAmount += servicePrice * qty;
+                }
+            }
+        }
+
+        double deposit = txtDeposit.getText().isEmpty() ? 0 : Double.parseDouble(txtDeposit.getText());
+        double balance = totalAmount - deposit;
+
+        String[] labels = { "Payment Method:", "Total Amount:", "Deposit Paid:", "Balance Due:" };
+        String[] values = { cbPayment.getValue(), vndFormat.format(totalAmount), vndFormat.format(deposit),
+                vndFormat.format(balance) };
+
+        for (int i = 0; i < labels.length; i++) {
+            Label lblKey = new Label(labels[i]);
+            lblKey.setStyle("-fx-font-size: 10; -fx-font-weight: bold;");
+            Label lblValue = new Label(values[i]);
+            lblValue.setStyle("-fx-font-size: 10;");
+            lblValue.setWrapText(true);
+            summary.addRow(i, lblKey, lblValue);
+        }
+
+        return summary;
     }
 
 }

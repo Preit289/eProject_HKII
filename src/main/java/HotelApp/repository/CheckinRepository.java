@@ -1,8 +1,11 @@
 package HotelApp.repository;
 
+import HotelApp.DateTime;
 import HotelApp.db.DButil;
 import HotelApp.model.Checkin;
 import java.sql.*;
+import java.time.format.DateTimeFormatter;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.util.HashMap;
@@ -12,36 +15,42 @@ public class CheckinRepository {
 
     public static ObservableList<Checkin> getAllBookings() {
         ObservableList<Checkin> data = FXCollections.observableArrayList();
-
         String sql = """
-            SELECT 
-                bm.Book_by AS GuestName,
-                bm.Book_contact AS GuestPhone,
-                bm.Planned_checkin_date,
-                bm.Planned_checkout_date,
-                STRING_AGG(rm.Room_num, ', ') WITHIN GROUP (ORDER BY rm.Room_num) AS Rooms,
-                STRING_AGG(rm.Room_category, ', ') WITHIN GROUP (ORDER BY rm.Room_num) AS Categories,
-                STRING_AGG(rm.Room_quality, ', ') WITHIN GROUP (ORDER BY rm.Room_num) AS Types
-            FROM Booking_Management bm
-            JOIN Booking_Room br ON bm.Booking_id = br.Booking_id
-            JOIN Room_Management rm ON br.Room_id = rm.Room_id
-            GROUP BY bm.Book_by, bm.Book_contact, bm.Planned_checkin_date, bm.Planned_checkout_date
-        """;
+                    SELECT
+                        bm.Book_by AS GuestName,
+                        bm.Book_contact AS GuestPhone,
+                        bm.Planned_checkin_date,
+                        bm.Planned_checkout_date,
+                        STRING_AGG(rm.Room_num, ', ') WITHIN GROUP (ORDER BY rm.Room_num) AS Rooms,
+                        STRING_AGG(rm.Room_category, ', ') WITHIN GROUP (ORDER BY rm.Room_num) AS Categories,
+                        STRING_AGG(rm.Room_quality, ', ') WITHIN GROUP (ORDER BY rm.Room_num) AS Types
+                    FROM Booking_Management bm
+                    JOIN Booking_Room br ON bm.Booking_id = br.Booking_id
+                    JOIN Room_Management rm ON br.Room_id = rm.Room_id
+                    GROUP BY bm.Book_by, bm.Book_contact, bm.Planned_checkin_date, bm.Planned_checkout_date
+                """;
 
-        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+        try (Connection conn = DButil.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
+
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
             while (rs.next()) {
-        java.sql.Timestamp pci = rs.getTimestamp("Planned_checkin_date");
-        java.sql.Timestamp pco = rs.getTimestamp("Planned_checkout_date");
-        data.add(new Checkin(
-            rs.getString("GuestName"),
-            rs.getString("GuestPhone"),
-            rs.getString("Rooms"),
-            rs.getString("Categories"),
-            rs.getString("Types"),
-            pci != null ? pci.toString() : "",
-            pco != null ? pco.toString() : ""
-        ));
+                java.sql.Timestamp pci = rs.getTimestamp("Planned_checkin_date");
+                java.sql.Timestamp pco = rs.getTimestamp("Planned_checkout_date");
+
+                String checkinStr = pci != null ? dtf.format(pci.toLocalDateTime()) : "";
+                String checkoutStr = pco != null ? dtf.format(pco.toLocalDateTime()) : "";
+
+                data.add(new Checkin(
+                        rs.getString("GuestName"),
+                        rs.getString("GuestPhone"),
+                        rs.getString("Rooms"),
+                        rs.getString("Categories"),
+                        rs.getString("Types"),
+                        checkinStr,
+                        checkoutStr));
             }
 
         } catch (Exception e) {
@@ -54,38 +63,44 @@ public class CheckinRepository {
     public static ObservableList<Checkin> searchBookingsByPhone(String phone) {
         ObservableList<Checkin> data = FXCollections.observableArrayList();
         String sql = """
-            SELECT 
-                bm.Book_by AS GuestName,
-                bm.Book_contact AS GuestPhone,
-                bm.Planned_checkin_date,
-                bm.Planned_checkout_date,
-                STRING_AGG(rm.Room_num, ', ') WITHIN GROUP (ORDER BY rm.Room_num) AS Rooms,
-                STRING_AGG(rm.Room_category, ', ') WITHIN GROUP (ORDER BY rm.Room_num) AS Categories,
-                STRING_AGG(rm.Room_quality, ', ') WITHIN GROUP (ORDER BY rm.Room_num) AS Types
-            FROM Booking_Management bm
-            JOIN Booking_Room br ON bm.Booking_id = br.Booking_id
-            JOIN Room_Management rm ON br.Room_id = rm.Room_id
-            WHERE bm.Book_contact LIKE ?
-            GROUP BY bm.Book_by, bm.Book_contact, bm.Planned_checkin_date, bm.Planned_checkout_date
-        """;
+                    SELECT
+                        bm.Book_by AS GuestName,
+                        bm.Book_contact AS GuestPhone,
+                        bm.Planned_checkin_date,
+                        bm.Planned_checkout_date,
+                        STRING_AGG(rm.Room_num, ', ') WITHIN GROUP (ORDER BY rm.Room_num) AS Rooms,
+                        STRING_AGG(rm.Room_category, ', ') WITHIN GROUP (ORDER BY rm.Room_num) AS Categories,
+                        STRING_AGG(rm.Room_quality, ', ') WITHIN GROUP (ORDER BY rm.Room_num) AS Types
+                    FROM Booking_Management bm
+                    JOIN Booking_Room br ON bm.Booking_id = br.Booking_id
+                    JOIN Room_Management rm ON br.Room_id = rm.Room_id
+                    WHERE bm.Book_contact LIKE ?
+                    GROUP BY bm.Book_by, bm.Book_contact, bm.Planned_checkin_date, bm.Planned_checkout_date
+                """;
 
-        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DButil.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, "%" + phone + "%");
             ResultSet rs = pstmt.executeQuery();
 
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
             while (rs.next()) {
                 java.sql.Timestamp pci = rs.getTimestamp("Planned_checkin_date");
                 java.sql.Timestamp pco = rs.getTimestamp("Planned_checkout_date");
+
+                String checkinStr = pci != null ? dtf.format(pci.toLocalDateTime()) : "";
+                String checkoutStr = pco != null ? dtf.format(pco.toLocalDateTime()) : "";
+
                 data.add(new Checkin(
                         rs.getString("GuestName"),
                         rs.getString("GuestPhone"),
                         rs.getString("Rooms"),
                         rs.getString("Categories"),
                         rs.getString("Types"),
-                        pci != null ? pci.toString() : "",
-                        pco != null ? pco.toString() : ""
-                ));
+                        checkinStr,
+                        checkoutStr));
             }
 
         } catch (Exception e) {
@@ -101,13 +116,13 @@ public class CheckinRepository {
             conn.setAutoCommit(false);
 
             String findBookingIdSql = """
-            SELECT bm.Booking_id, bm.Payment_method, bm.Deposit_amount
-            FROM Booking_Management bm
-            JOIN Booking_Room br ON bm.Booking_id = br.Booking_id
-            JOIN Room_Management rm ON br.Room_id = rm.Room_id
-            WHERE bm.Book_contact = ? AND bm.Book_by = ?
-            GROUP BY bm.Booking_id, bm.Payment_method, bm.Deposit_amount
-        """;
+                        SELECT bm.Booking_id, bm.Payment_method, bm.Deposit_amount
+                        FROM Booking_Management bm
+                        JOIN Booking_Room br ON bm.Booking_id = br.Booking_id
+                        JOIN Room_Management rm ON br.Room_id = rm.Room_id
+                        WHERE bm.Book_contact = ? AND bm.Book_by = ?
+                        GROUP BY bm.Booking_id, bm.Payment_method, bm.Deposit_amount
+                    """;
             PreparedStatement findStmt = conn.prepareStatement(findBookingIdSql);
             findStmt.setString(1, booking.getGuestPhone());
             findStmt.setString(2, booking.getGuestName());
@@ -121,10 +136,10 @@ public class CheckinRepository {
             String paymentMethod = rs.getString("Payment_method");
 
             String checkStayingSql = """
-            SELECT Staying_id
-            FROM Staying_Management
-            WHERE Booking_id = ?
-        """;
+                        SELECT Staying_id
+                        FROM Staying_Management
+                        WHERE Booking_id = ?
+                    """;
             PreparedStatement checkStayingStmt = conn.prepareStatement(checkStayingSql);
             checkStayingStmt.setString(1, bookingId);
             ResultSet checkRs = checkStayingStmt.executeQuery();
@@ -135,11 +150,11 @@ public class CheckinRepository {
             }
 
             String totalAmountSql = """
-            SELECT SUM(rm.Room_price) AS Total
-            FROM Booking_Room br
-            JOIN Room_Management rm ON br.Room_id = rm.Room_id
-            WHERE br.Booking_id = ?
-        """;
+                        SELECT SUM(rm.Room_price) AS Total
+                        FROM Booking_Room br
+                        JOIN Room_Management rm ON br.Room_id = rm.Room_id
+                        WHERE br.Booking_id = ?
+                    """;
             PreparedStatement totalStmt = conn.prepareStatement(totalAmountSql);
             totalStmt.setString(1, bookingId);
             ResultSet totalRs = totalStmt.executeQuery();
@@ -153,17 +168,18 @@ public class CheckinRepository {
             }
 
             String insertStayingSql = """
-            INSERT INTO Staying_Management (
-                Staying_id, Booking_id, Checkin_date, Checkout_date, 
-                Payment_method, Staying_status, Total_amount, 
-                Created_at, Updated_at, By_role
-            )
-            VALUES (?, ?, GETDATE(), ?, ?, 0, ?, GETDATE(), GETDATE(), 'admin')
-        """;
+                        INSERT INTO Staying_Management (
+                            Staying_id, Booking_id, Checkin_date, Checkout_date,
+                            Payment_method, Staying_status, Total_amount,
+                            Created_at, Updated_at, By_role
+                        )
+                        VALUES (?, ?, GETDATE(), ?, ?, 0, ?, GETDATE(), GETDATE(), 'admin')
+                    """;
             PreparedStatement insertStayingStmt = conn.prepareStatement(insertStayingSql);
             insertStayingStmt.setString(1, stayingId);
             insertStayingStmt.setString(2, bookingId);
-            // planned checkout may be empty or malformed; guard parsing and fall back to current time
+            // planned checkout may be empty or malformed; guard parsing and fall back to
+            // current time
             java.sql.Timestamp checkoutTs;
             try {
                 String planned = booking.getPlannedCheckOut();
@@ -181,26 +197,26 @@ public class CheckinRepository {
             insertStayingStmt.executeUpdate();
 
             String updateBookingSql = """
-            UPDATE Booking_Management
-            SET Booking_status = 4
-            WHERE Booking_id = ?
-        """;
+                        UPDATE Booking_Management
+                        SET Booking_status = 4
+                        WHERE Booking_id = ?
+                    """;
             PreparedStatement updateBookingStmt = conn.prepareStatement(updateBookingSql);
             updateBookingStmt.setString(1, bookingId);
             updateBookingStmt.executeUpdate();
 
             String insertRoomsSql = """
-            INSERT INTO Staying_Room_Customer (Staying_id, Room_id, Customer_id)
-            SELECT ?, br.Room_id, cm.Customer_id
-            FROM Booking_Room br
-            JOIN Customer_Management cm ON cm.Phone_num = ?
-            WHERE br.Booking_id = ?
-            AND NOT EXISTS (
-                SELECT 1
-                FROM Staying_Room_Customer src
-                WHERE src.Staying_id = ? AND src.Room_id = br.Room_id AND src.Customer_id = cm.Customer_id
-            )
-        """;
+                        INSERT INTO Staying_Room_Customer (Staying_id, Room_id, Customer_id)
+                        SELECT ?, br.Room_id, cm.Customer_id
+                        FROM Booking_Room br
+                        JOIN Customer_Management cm ON cm.Phone_num = ?
+                        WHERE br.Booking_id = ?
+                        AND NOT EXISTS (
+                            SELECT 1
+                            FROM Staying_Room_Customer src
+                            WHERE src.Staying_id = ? AND src.Room_id = br.Room_id AND src.Customer_id = cm.Customer_id
+                        )
+                    """;
             PreparedStatement insertRoomsStmt = conn.prepareStatement(insertRoomsSql);
             insertRoomsStmt.setString(1, stayingId);
             insertRoomsStmt.setString(2, booking.getGuestPhone());
@@ -221,12 +237,14 @@ public class CheckinRepository {
     public static Map<String, String> getAllCustomers() {
         Map<String, String> customerMap = new HashMap<>();
         String sql = """
-            SELECT Customer_id, Customer_name
-            FROM Customer_Management
-            ORDER BY Customer_name
-        """;
+                    SELECT Customer_id, Customer_name
+                    FROM Customer_Management
+                    ORDER BY Customer_name
+                """;
 
-        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+        try (Connection conn = DButil.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 customerMap.put(rs.getString("Customer_name"), rs.getString("Customer_id"));
             }
@@ -240,13 +258,13 @@ public class CheckinRepository {
     public static Map<String, String> getCustomersForRoom(String stayingId, String roomNumber) {
         Map<String, String> customerMap = new HashMap<>();
         String sql = """
-            SELECT cm.Customer_id, cm.Customer_name
-            FROM Staying_Room_Customer src
-            JOIN Room_Management rm ON src.Room_id = rm.Room_id
-            JOIN Customer_Management cm ON src.Customer_id = cm.Customer_id
-            WHERE src.Staying_id = ? AND rm.Room_num = ?
-            ORDER BY cm.Customer_name
-        """;
+                    SELECT cm.Customer_id, cm.Customer_name
+                    FROM Staying_Room_Customer src
+                    JOIN Room_Management rm ON src.Room_id = rm.Room_id
+                    JOIN Customer_Management cm ON src.Customer_id = cm.Customer_id
+                    WHERE src.Staying_id = ? AND rm.Room_num = ?
+                    ORDER BY cm.Customer_name
+                """;
 
         try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
@@ -262,15 +280,16 @@ public class CheckinRepository {
         return customerMap;
     }
 
-    public static void assignCustomerToRoom(String stayingId, String roomNumber, String customerId) throws SQLException {
+    public static void assignCustomerToRoom(String stayingId, String roomNumber, String customerId)
+            throws SQLException {
         try (Connection conn = DButil.getConnection()) {
             conn.setAutoCommit(false);
 
             String findRoomIdSql = """
-                SELECT Room_id
-                FROM Room_Management
-                WHERE Room_num = ?
-            """;
+                        SELECT Room_id
+                        FROM Room_Management
+                        WHERE Room_num = ?
+                    """;
             PreparedStatement findRoomStmt = conn.prepareStatement(findRoomIdSql);
             findRoomStmt.setString(1, roomNumber);
             ResultSet roomRs = findRoomStmt.executeQuery();
@@ -280,10 +299,10 @@ public class CheckinRepository {
             String roomId = roomRs.getString("Room_id");
 
             String checkAssignmentSql = """
-                SELECT 1
-                FROM Staying_Room_Customer
-                WHERE Staying_id = ? AND Room_id = ? AND Customer_id = ?
-            """;
+                        SELECT 1
+                        FROM Staying_Room_Customer
+                        WHERE Staying_id = ? AND Room_id = ? AND Customer_id = ?
+                    """;
             PreparedStatement checkAssignmentStmt = conn.prepareStatement(checkAssignmentSql);
             checkAssignmentStmt.setString(1, stayingId);
             checkAssignmentStmt.setString(2, roomId);
@@ -295,9 +314,9 @@ public class CheckinRepository {
             }
 
             String assignSql = """
-                INSERT INTO Staying_Room_Customer (Staying_id, Room_id, Customer_id)
-                VALUES (?, ?, ?)
-            """;
+                        INSERT INTO Staying_Room_Customer (Staying_id, Room_id, Customer_id)
+                        VALUES (?, ?, ?)
+                    """;
             PreparedStatement assignStmt = conn.prepareStatement(assignSql);
             assignStmt.setString(1, stayingId);
             assignStmt.setString(2, roomId);
@@ -312,15 +331,16 @@ public class CheckinRepository {
         }
     }
 
-    public static void removeCustomerFromRoom(String stayingId, String roomNumber, String customerId) throws SQLException {
+    public static void removeCustomerFromRoom(String stayingId, String roomNumber, String customerId)
+            throws SQLException {
         try (Connection conn = DButil.getConnection()) {
             conn.setAutoCommit(false);
 
             String findRoomIdSql = """
-                SELECT Room_id
-                FROM Room_Management
-                WHERE Room_num = ?
-            """;
+                        SELECT Room_id
+                        FROM Room_Management
+                        WHERE Room_num = ?
+                    """;
             PreparedStatement findRoomStmt = conn.prepareStatement(findRoomIdSql);
             findRoomStmt.setString(1, roomNumber);
             ResultSet roomRs = findRoomStmt.executeQuery();
@@ -330,9 +350,9 @@ public class CheckinRepository {
             String roomId = roomRs.getString("Room_id");
 
             String deleteSql = """
-                DELETE FROM Staying_Room_Customer
-                WHERE Staying_id = ? AND Room_id = ? AND Customer_id = ?
-            """;
+                        DELETE FROM Staying_Room_Customer
+                        WHERE Staying_id = ? AND Room_id = ? AND Customer_id = ?
+                    """;
             PreparedStatement deleteStmt = conn.prepareStatement(deleteSql);
             deleteStmt.setString(1, stayingId);
             deleteStmt.setString(2, roomId);
@@ -354,12 +374,14 @@ public class CheckinRepository {
     public static Map<String, String> getAllServices() {
         Map<String, String> serviceMap = new HashMap<>();
         String sql = """
-            SELECT Service_id, Service_name
-            FROM Service_Management
-            ORDER BY Service_name
-        """;
+                    SELECT Service_id, Service_name
+                    FROM Service_Management
+                    ORDER BY Service_name
+                """;
 
-        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+        try (Connection conn = DButil.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 serviceMap.put(rs.getString("Service_name"), rs.getString("Service_id"));
             }
@@ -373,13 +395,13 @@ public class CheckinRepository {
     public static Map<String, String> getServicesForRoom(String stayingId, String roomNumber) {
         Map<String, String> serviceMap = new HashMap<>();
         String sql = """
-            SELECT sm.Service_id, sm.Service_name
-            FROM Staying_Room_Service srs
-            JOIN Room_Management rm ON srs.Room_id = rm.Room_id
-            JOIN Service_Management sm ON srs.Service_id = sm.Service_id
-            WHERE srs.Staying_id = ? AND rm.Room_num = ?
-            ORDER BY sm.Service_name
-        """;
+                    SELECT sm.Service_id, sm.Service_name
+                    FROM Staying_Room_Service srs
+                    JOIN Room_Management rm ON srs.Room_id = rm.Room_id
+                    JOIN Service_Management sm ON srs.Service_id = sm.Service_id
+                    WHERE srs.Staying_id = ? AND rm.Room_num = ?
+                    ORDER BY sm.Service_name
+                """;
 
         try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
@@ -400,10 +422,10 @@ public class CheckinRepository {
             conn.setAutoCommit(false);
 
             String findRoomIdSql = """
-                SELECT Room_id
-                FROM Room_Management
-                WHERE Room_num = ?
-            """;
+                        SELECT Room_id
+                        FROM Room_Management
+                        WHERE Room_num = ?
+                    """;
             PreparedStatement findRoomStmt = conn.prepareStatement(findRoomIdSql);
             findRoomStmt.setString(1, roomNumber);
             ResultSet roomRs = findRoomStmt.executeQuery();
@@ -413,10 +435,10 @@ public class CheckinRepository {
             String roomId = roomRs.getString("Room_id");
 
             String checkAssignmentSql = """
-                SELECT Quantity
-                FROM Staying_Room_Service
-                WHERE Staying_id = ? AND Room_id = ? AND Service_id = ?
-            """;
+                        SELECT Quantity
+                        FROM Staying_Room_Service
+                        WHERE Staying_id = ? AND Room_id = ? AND Service_id = ?
+                    """;
             PreparedStatement checkAssignmentStmt = conn.prepareStatement(checkAssignmentSql);
             checkAssignmentStmt.setString(1, stayingId);
             checkAssignmentStmt.setString(2, roomId);
@@ -426,10 +448,10 @@ public class CheckinRepository {
             if (checkRs.next()) {
                 int currentQuantity = checkRs.getInt("Quantity");
                 String updateSql = """
-                    UPDATE Staying_Room_Service
-                    SET Quantity = ?
-                    WHERE Staying_id = ? AND Room_id = ? AND Service_id = ?
-                """;
+                            UPDATE Staying_Room_Service
+                            SET Quantity = ?
+                            WHERE Staying_id = ? AND Room_id = ? AND Service_id = ?
+                        """;
                 PreparedStatement updateStmt = conn.prepareStatement(updateSql);
                 updateStmt.setInt(1, currentQuantity + 1);
                 updateStmt.setString(2, stayingId);
@@ -438,9 +460,9 @@ public class CheckinRepository {
                 updateStmt.executeUpdate();
             } else {
                 String assignSql = """
-                    INSERT INTO Staying_Room_Service (Staying_id, Room_id, Service_id, Quantity)
-                    VALUES (?, ?, ?, 1)
-                """;
+                            INSERT INTO Staying_Room_Service (Staying_id, Room_id, Service_id, Quantity)
+                            VALUES (?, ?, ?, 1)
+                        """;
                 PreparedStatement assignStmt = conn.prepareStatement(assignSql);
                 assignStmt.setString(1, stayingId);
                 assignStmt.setString(2, roomId);
@@ -456,15 +478,16 @@ public class CheckinRepository {
         }
     }
 
-    public static void removeServiceFromRoom(String stayingId, String roomNumber, String serviceId) throws SQLException {
+    public static void removeServiceFromRoom(String stayingId, String roomNumber, String serviceId)
+            throws SQLException {
         try (Connection conn = DButil.getConnection()) {
             conn.setAutoCommit(false);
 
             String findRoomIdSql = """
-                SELECT Room_id
-                FROM Room_Management
-                WHERE Room_num = ?
-            """;
+                        SELECT Room_id
+                        FROM Room_Management
+                        WHERE Room_num = ?
+                    """;
             PreparedStatement findRoomStmt = conn.prepareStatement(findRoomIdSql);
             findRoomStmt.setString(1, roomNumber);
             ResultSet roomRs = findRoomStmt.executeQuery();
@@ -474,9 +497,9 @@ public class CheckinRepository {
             String roomId = roomRs.getString("Room_id");
 
             String deleteSql = """
-                DELETE FROM Staying_Room_Service
-                WHERE Staying_id = ? AND Room_id = ? AND Service_id = ?
-            """;
+                        DELETE FROM Staying_Room_Service
+                        WHERE Staying_id = ? AND Room_id = ? AND Service_id = ?
+                    """;
             PreparedStatement deleteStmt = conn.prepareStatement(deleteSql);
             deleteStmt.setString(1, stayingId);
             deleteStmt.setString(2, roomId);
@@ -495,15 +518,16 @@ public class CheckinRepository {
         }
     }
 
-    public static void updateServiceQuantity(String stayingId, String roomNumber, String serviceId, int quantity) throws SQLException {
+    public static void updateServiceQuantity(String stayingId, String roomNumber, String serviceId, int quantity)
+            throws SQLException {
         try (Connection conn = DButil.getConnection()) {
             conn.setAutoCommit(false);
 
             String findRoomIdSql = """
-                SELECT Room_id
-                FROM Room_Management
-                WHERE Room_num = ?
-            """;
+                        SELECT Room_id
+                        FROM Room_Management
+                        WHERE Room_num = ?
+                    """;
             PreparedStatement findRoomStmt = conn.prepareStatement(findRoomIdSql);
             findRoomStmt.setString(1, roomNumber);
             ResultSet roomRs = findRoomStmt.executeQuery();
@@ -513,10 +537,10 @@ public class CheckinRepository {
             String roomId = roomRs.getString("Room_id");
 
             String updateSql = """
-                UPDATE Staying_Room_Service
-                SET Quantity = ?
-                WHERE Staying_id = ? AND Room_id = ? AND Service_id = ?
-            """;
+                        UPDATE Staying_Room_Service
+                        SET Quantity = ?
+                        WHERE Staying_id = ? AND Room_id = ? AND Service_id = ?
+                    """;
             PreparedStatement updateStmt = conn.prepareStatement(updateSql);
             updateStmt.setInt(1, quantity);
             updateStmt.setString(2, stayingId);
@@ -538,10 +562,10 @@ public class CheckinRepository {
 
     public static String getCheckinDate(String stayingId) {
         String sql = """
-            SELECT Checkin_date
-            FROM Staying_Management
-            WHERE Staying_id = ?
-        """;
+                    SELECT Checkin_date
+                    FROM Staying_Management
+                    WHERE Staying_id = ?
+                """;
         try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
             ResultSet rs = pstmt.executeQuery();
@@ -560,10 +584,10 @@ public class CheckinRepository {
             conn.setAutoCommit(false);
 
             String findBookingIdSql = """
-                SELECT Booking_id
-                FROM Booking_Management
-                WHERE Book_contact = ? AND Book_by = ?
-            """;
+                        SELECT Booking_id
+                        FROM Booking_Management
+                        WHERE Book_contact = ? AND Book_by = ?
+                    """;
             PreparedStatement findStmt = conn.prepareStatement(findBookingIdSql);
             findStmt.setString(1, guestPhone);
             findStmt.setString(2, guestName);
@@ -574,15 +598,15 @@ public class CheckinRepository {
             String bookingId = rs.getString("Booking_id");
 
             String totalAmountSql = """
-                SELECT 
-                    COALESCE(SUM(rm.Room_price), 0) + COALESCE(SUM(sm.Service_price * srs.Quantity), 0) AS Total
-                FROM Booking_Room br
-                JOIN Room_Management rm ON br.Room_id = rm.Room_id
-                LEFT JOIN Staying_Room_Service srs ON br.Room_id = srs.Room_id AND srs.Staying_id = ?
-                LEFT JOIN Service_Management sm ON srs.Service_id = sm.Service_id
-                WHERE br.Booking_id = ?
-                GROUP BY br.Booking_id
-            """;
+                        SELECT
+                            COALESCE(SUM(rm.Room_price), 0) + COALESCE(SUM(sm.Service_price * srs.Quantity), 0) AS Total
+                        FROM Booking_Room br
+                        JOIN Room_Management rm ON br.Room_id = rm.Room_id
+                        LEFT JOIN Staying_Room_Service srs ON br.Room_id = srs.Room_id AND srs.Staying_id = ?
+                        LEFT JOIN Service_Management sm ON srs.Service_id = sm.Service_id
+                        WHERE br.Booking_id = ?
+                        GROUP BY br.Booking_id
+                    """;
             PreparedStatement totalStmt = conn.prepareStatement(totalAmountSql);
             totalStmt.setString(1, stayingId);
             totalStmt.setString(2, bookingId);
@@ -590,10 +614,10 @@ public class CheckinRepository {
             int totalAmount = totalRs.next() ? totalRs.getInt("Total") : 0;
 
             String updateBookingSql = """
-                UPDATE Booking_Management
-                SET Payment_method = ?, Deposit_amount = ?, Updated_at = GETDATE()
-                WHERE Booking_id = ?
-            """;
+                        UPDATE Booking_Management
+                        SET Payment_method = ?, Deposit_amount = ?, Updated_at = GETDATE()
+                        WHERE Booking_id = ?
+                    """;
             PreparedStatement updateBookingStmt = conn.prepareStatement(updateBookingSql);
             updateBookingStmt.setString(1, paymentMethod);
             updateBookingStmt.setInt(2, depositAmount);
@@ -601,10 +625,10 @@ public class CheckinRepository {
             updateBookingStmt.executeUpdate();
 
             String updateStayingSql = """
-                UPDATE Staying_Management
-                SET Payment_method = ?, Total_amount = ?, Updated_at = GETDATE()
-                WHERE Staying_id = ?
-            """;
+                        UPDATE Staying_Management
+                        SET Payment_method = ?, Total_amount = ?, Updated_at = GETDATE()
+                        WHERE Staying_id = ?
+                    """;
             PreparedStatement updateStayingStmt = conn.prepareStatement(updateStayingSql);
             updateStayingStmt.setString(1, paymentMethod);
             updateStayingStmt.setInt(2, totalAmount);
@@ -624,10 +648,10 @@ public class CheckinRepository {
             conn.setAutoCommit(false);
 
             String checkStayingSql = """
-                SELECT Staying_id
-                FROM Staying_Management
-                WHERE Staying_id = ?
-            """;
+                        SELECT Staying_id
+                        FROM Staying_Management
+                        WHERE Staying_id = ?
+                    """;
             PreparedStatement checkStmt = conn.prepareStatement(checkStayingSql);
             checkStmt.setString(1, stayingId);
             ResultSet rs = checkStmt.executeQuery();
@@ -636,10 +660,10 @@ public class CheckinRepository {
             }
 
             String updateStayingSql = """
-                UPDATE Staying_Management
-                SET Checkin_date = GETDATE(), Staying_status = 1, Updated_at = GETDATE()
-                WHERE Staying_id = ?
-            """;
+                        UPDATE Staying_Management
+                        SET Checkin_date = GETDATE(), Staying_status = 1, Updated_at = GETDATE()
+                        WHERE Staying_id = ?
+                    """;
             PreparedStatement updateStmt = conn.prepareStatement(updateStayingSql);
             updateStmt.setString(1, stayingId);
             updateStmt.executeUpdate();
@@ -667,10 +691,10 @@ public class CheckinRepository {
             }
 
             String updateSql = """
-                UPDATE Staying_Management
-                SET Checkout_date = GETDATE(), Staying_status = 2, Updated_at = GETDATE()
-                WHERE Staying_id = ?
-            """;
+                        UPDATE Staying_Management
+                        SET Checkout_date = GETDATE(), Staying_status = 2, Updated_at = GETDATE()
+                        WHERE Staying_id = ?
+                    """;
             try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
                 updateStmt.setString(1, stayingId);
                 updateStmt.executeUpdate();
@@ -708,14 +732,15 @@ public class CheckinRepository {
     }
 
     /**
-     * Return the Staying_status integer for a given stayingId, or null if not found.
+     * Return the Staying_status integer for a given stayingId, or null if not
+     * found.
      */
     public static Integer getStayingStatus(String stayingId) {
         String sql = """
-            SELECT Staying_status
-            FROM Staying_Management
-            WHERE Staying_id = ?
-        """;
+                    SELECT Staying_status
+                    FROM Staying_Management
+                    WHERE Staying_id = ?
+                """;
         try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -735,13 +760,15 @@ public class CheckinRepository {
     public static java.util.List<String> getAvailableRooms() {
         java.util.List<String> rooms = new java.util.ArrayList<>();
         String sql = """
-            SELECT Room_num
-            FROM Room_Management
-            -- Room_status is stored as tinyint: 0 = Available/Empty, 1 = Occupied, 2 = Cleaning
-            WHERE Room_status = 0
-            ORDER BY Room_num
-        """;
-        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+                    SELECT Room_num
+                    FROM Room_Management
+                    -- Room_status is stored as tinyint: 0 = Available/Empty, 1 = Occupied, 2 = Cleaning
+                    WHERE Room_status = 0
+                    ORDER BY Room_num
+                """;
+        try (Connection conn = DButil.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 rooms.add(rs.getString("Room_num"));
             }
@@ -752,14 +779,16 @@ public class CheckinRepository {
     }
 
     /**
-     * Add a room to an existing staying. Will set room status to 'Occupied' and insert a Staying_Room_Customer row.
-     * Attempts to associate a customer by booking phone if available. Returns true on success.
+     * Add a room to an existing staying. Will set room status to 'Occupied' and
+     * insert a Staying_Room_Customer row.
+     * Attempts to associate a customer by booking phone if available. Returns true
+     * on success.
      */
     public static boolean addRoomToStaying(String stayingId, String roomNum) throws SQLException {
         try (Connection conn = DButil.getConnection()) {
             conn.setAutoCommit(false);
 
-                    String findRoomSql = "SELECT Room_id, Room_status FROM Room_Management WHERE Room_num = ?";
+            String findRoomSql = "SELECT Room_id, Room_status FROM Room_Management WHERE Room_num = ?";
             try (PreparedStatement findRoomStmt = conn.prepareStatement(findRoomSql)) {
                 findRoomStmt.setString(1, roomNum);
                 try (ResultSet rs = findRoomStmt.executeQuery()) {
@@ -778,7 +807,8 @@ public class CheckinRepository {
                     try (PreparedStatement pb = conn.prepareStatement(findBookingSql)) {
                         pb.setString(1, stayingId);
                         try (ResultSet r2 = pb.executeQuery()) {
-                            if (r2.next()) bookingId = r2.getString("Booking_id");
+                            if (r2.next())
+                                bookingId = r2.getString("Booking_id");
                         }
                     }
 
@@ -788,13 +818,16 @@ public class CheckinRepository {
                         try (PreparedStatement pc = conn.prepareStatement(findCustomerSql)) {
                             pc.setString(1, bookingId);
                             try (ResultSet r3 = pc.executeQuery()) {
-                                if (r3.next()) customerId = r3.getString("Customer_id");
+                                if (r3.next())
+                                    customerId = r3.getString("Customer_id");
                             }
                         }
                     }
 
-                    // Insert mapping into Staying_Room_Customer. The schema requires Customer_id NOT NULL,
-                    // so we must have a customer to insert. If none found, fail with a clear message.
+                    // Insert mapping into Staying_Room_Customer. The schema requires Customer_id
+                    // NOT NULL,
+                    // so we must have a customer to insert. If none found, fail with a clear
+                    // message.
                     if (customerId != null) {
                         String insertSql = "INSERT INTO Staying_Room_Customer (Staying_id, Room_id, Customer_id) VALUES (?, ?, ?)";
                         try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
@@ -804,7 +837,8 @@ public class CheckinRepository {
                             insertStmt.executeUpdate();
                         }
                     } else {
-                        throw new SQLException("No customer found for this staying; assign a customer before adding a room.");
+                        throw new SQLException(
+                                "No customer found for this staying; assign a customer before adding a room.");
                     }
 
                     // Update room status
@@ -825,7 +859,8 @@ public class CheckinRepository {
     }
 
     /**
-     * Remove a room from a staying. Will fail if the room has any assigned services; otherwise removes mappings and sets room to Available.
+     * Remove a room from a staying. Will fail if the room has any assigned
+     * services; otherwise removes mappings and sets room to Available.
      */
     public static boolean removeRoomFromStaying(String stayingId, String roomNum) throws SQLException {
         try (Connection conn = DButil.getConnection()) {
@@ -836,7 +871,8 @@ public class CheckinRepository {
             try (PreparedStatement fr = conn.prepareStatement(findRoomSql)) {
                 fr.setString(1, roomNum);
                 try (ResultSet r = fr.executeQuery()) {
-                    if (!r.next()) throw new SQLException("Room not found: " + roomNum);
+                    if (!r.next())
+                        throw new SQLException("Room not found: " + roomNum);
                     roomId = r.getString("Room_id");
                 }
             }
@@ -880,7 +916,8 @@ public class CheckinRepository {
     }
 
     /**
-     * Delete a staying and all related mappings (room assignments, services), and set related rooms to Available.
+     * Delete a staying and all related mappings (room assignments, services), and
+     * set related rooms to Available.
      */
     public static void deleteStaying(String stayingId) throws SQLException {
         try (Connection conn = DButil.getConnection()) {
@@ -892,7 +929,8 @@ public class CheckinRepository {
             try (PreparedStatement prs = conn.prepareStatement(roomsSql)) {
                 prs.setString(1, stayingId);
                 try (ResultSet rs = prs.executeQuery()) {
-                    while (rs.next()) roomIds.add(rs.getString("Room_id"));
+                    while (rs.next())
+                        roomIds.add(rs.getString("Room_id"));
                 }
             }
 
@@ -940,8 +978,11 @@ public class CheckinRepository {
      */
     public static int countCurrentCheckins() {
         String sql = "SELECT COUNT(*) AS cnt FROM Staying_Management WHERE Staying_status = 1";
-        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
-            if (rs.next()) return rs.getInt("cnt");
+        try (Connection conn = DButil.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next())
+                return rs.getInt("cnt");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -949,12 +990,16 @@ public class CheckinRepository {
     }
 
     /**
-     * Return count of stayings that checked out today (date portion of Checkout_date = today).
+     * Return count of stayings that checked out today (date portion of
+     * Checkout_date = today).
      */
     public static int countTodayCheckouts() {
         String sql = "SELECT COUNT(*) AS cnt FROM Staying_Management WHERE Checkout_date IS NOT NULL AND CAST(Checkout_date AS date) = CAST(GETDATE() AS date)";
-        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
-            if (rs.next()) return rs.getInt("cnt");
+        try (Connection conn = DButil.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next())
+                return rs.getInt("cnt");
         } catch (SQLException e) {
             e.printStackTrace();
         }
