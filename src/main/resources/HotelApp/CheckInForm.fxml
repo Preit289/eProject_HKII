@@ -4,14 +4,17 @@
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
-    fx:controller="HotelApp.CheckInFormController"
-    prefWidth="900" prefHeight="560">
+            fx:controller="HotelApp.CheckInFormController"
+            prefWidth="900" prefHeight="560"
+            stylesheets="@styles.css">
 
     <!-- Top: Title -->
     <top>
-        <Label fx:id="lblTitle" text="Check-in Details"
-            style="-fx-font-size: 18px; -fx-font-weight: bold;"
-            BorderPane.alignment="CENTER" />
+        <HBox spacing="8" alignment="CENTER_LEFT" style="-fx-padding: 8 12 8 12;">
+            <Label fx:id="lblTitle" styleClass="form-title" text="Check-in Details"/>
+            <Pane HBox.hgrow="ALWAYS" />
+            <Label fx:id="lblStayingStatus" text="" styleClass="status-chip" />
+        </HBox>
     </top>
 
     <!-- Center: Form + Table -->
@@ -60,8 +63,7 @@
                 </HBox>
             </GridPane>
 
-            <!-- TableView -->
-            <TableView fx:id="tblRooms" prefHeight="320" VBox.vgrow="ALWAYS">
+            <TableView fx:id="tblRooms" GridPane.rowIndex="4" GridPane.columnSpan="4" prefHeight="260" styleClass="table-view">
                 <columns>
                     <TableColumn fx:id="colRoomNum" text="Room No" prefWidth="80" />
                     <TableColumn fx:id="colCategory" text="Category" prefWidth="100" />
@@ -81,12 +83,13 @@
 
     <!-- Bottom: Buttons -->
     <bottom>
-        <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding:10;">
-            <Button fx:id="btnPrint" text="Print" onAction="#onPrint" styleClass="button-secondary" />
-            <Button fx:id="btnDelete" text="Delete" onAction="#onDelete"
-                styleClass="button-secondary" />
-            <Button fx:id="btnUpdate" text="Update" onAction="#onUpdate" styleClass="button-primary" />
-            <Button fx:id="btnClose" text="Close" onAction="#onClose" styleClass="button-secondary" />
+    <HBox spacing="8" style="-fx-padding: 10;" alignment="CENTER_RIGHT" styleClass="content-actions">
+            <Button fx:id="btnPrint" text="Print" onAction="#onPrint" styleClass="button-secondary"/>
+            <Button fx:id="btnCheckOut" text="Check Out" onAction="#onCheckOut" styleClass="button-primary"/>
+            <Button fx:id="btnSetStatus" text="Set Status" onAction="#onSetStatus" styleClass="button-secondary"/>
+            <Button fx:id="btnDelete" text="Delete" onAction="#onDelete" styleClass="button-secondary"/>
+            <Button fx:id="btnUpdate" text="Update" onAction="#onUpdate" styleClass="button-primary"/>
+            <Button fx:id="btnClose" text="Close" onAction="#onClose" styleClass="button-secondary"/>
         </HBox>
     </bottom>
 

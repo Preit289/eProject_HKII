@@ -35,7 +35,7 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
-        System.setProperty("prism.lcdtext", "false");         // Thêm vào main method trước khi launch để force anti-aliasing
+        System.setProperty("prism.lcdtext", "false");       
         launch();
     }
 

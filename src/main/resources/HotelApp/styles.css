@@ -77,14 +77,14 @@
     -fx-scale-x: 1;
     -fx-scale-y: 1;
 }
-/* Khi hover */
+/* Hover state */
 .button-primary:hover {
     -fx-background-color: #1f4566; /* Màu sáng hơn một chút */
     -fx-text-fill: white;
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
 }
-/* Khi pressed */
+/* Pressed state */
 .button-primary:pressed {
     -fx-background-color: #12293a; /* press tối hơn để tạo hiệu ứng nhấn */
     -fx-text-fill: white;
@@ -92,9 +92,9 @@
     -fx-scale-y: 1.05;
 }
 .button-primary .btn-icon {
-    -fx-icon-color: yellow;   /* Màu mặc định */
+    -fx-icon-color: yellow;   /* Default color */
 }
-/* Khi hover button -> icon đổi màu */
+/* On button hover -> icon color change */
 .button-primary:hover .btn-icon {
     -fx-icon-color: white;
 }
@@ -130,7 +130,7 @@
 .button-secondary .btn-icon {
     -fx-icon-color: yellow;   /* Màu mặc định */
 }
-/* Khi hover button -> icon đổi màu */
+/* On button hover -> icon color change */
 .button-secondary:hover .btn-icon {
     -fx-icon-color: white;
 }
@@ -165,7 +165,7 @@
     -fx-alignment: CENTER;
 }
 
-/* Dòng trong bảng */
+/* Table row */
 .table-row-cell {
     -fx-background-color: #f8f9fa;
     -fx-padding: 4 0 4 0;
@@ -175,7 +175,7 @@
     -fx-background-color: #eef1f5; /* Zebra stripes */
 }
 
-/* Dòng được chọn - nền sáng hơn để làm nổi bật chữ */
+/* Selected row - lighter background to emphasize text */
 .table-row-cell:selected {
     -fx-background-color: #d6e4f0; /* Màu nền nhạt hơn */
     -fx-background-insets: 0;
@@ -189,18 +189,18 @@
     -fx-font-size: 13px;
 }
 
-/* Text trong cell khi được chọn - làm nổi bật chữ */
+/* Text in selected cell - emphasize text */
 .table-cell:selected {
     -fx-text-fill: #1a3c5a; /* Màu chữ đậm hơn */
     -fx-font-weight: bold; /* Làm đậm chữ */
 }
 
-/* Khi hover vào 1 row */
+/* On row hover */
 .table-row-cell:hover {
     -fx-background-color: #d6e4f0;
 }
 
-/* Tùy chọn: Thêm hiệu ứng cho chữ khi hover (nếu muốn) */
+/* Optional: add hover text effect (if desired) */
 .table-row-cell:hover .table-cell {
     -fx-text-fill: #1a3c5a;
     -fx-font-weight: bold;
@@ -210,4 +210,19 @@
     -fx-font-weight: bold;
     -fx-text-fill: #2c3e50;     
 }
+
+.status-chip {
+    -fx-padding: 6 12 6 12;
+    -fx-background-radius: 12;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+}
+.status-occupied {
+    -fx-background-color: #f39c12; /* amber */
+}
+.status-checkedout {
+    -fx-background-color: #7f8c8d; /* gray */
+}
+
 

@@ -8,6 +8,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
+@SuppressWarnings("unused")
 public class AdminDashboardController {
     @FXML
     private TableView<Account> accountTable;

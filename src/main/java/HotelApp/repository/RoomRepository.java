@@ -9,6 +9,7 @@ import java.util.List;
 
 import HotelApp.db.DButil;
 import HotelApp.model.Room;
+import HotelApp.model.DashboardRoom;
 
 public class RoomRepository {
 
@@ -157,5 +158,44 @@ public class RoomRepository {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * Return a list of DashboardRoom used by the dashboard view. For each room, if it's assigned to a current staying,
+     * aggregate customer names (comma-separated). This query matches the "checked-in" notion by using Staying_status = 1.
+     */
+    public static java.util.List<DashboardRoom> getDashboardRooms() {
+        java.util.List<DashboardRoom> out = new java.util.ArrayList<>();
+        String sql = """
+            SELECT rm.Room_num, rm.Room_status,
+                   COALESCE(cust.Customers, '') AS Guests
+            FROM Room_Management rm
+            LEFT JOIN (
+                SELECT src.Room_id, STRING_AGG(cm.Customer_name, ', ') AS Customers
+                FROM Staying_Room_Customer src
+                JOIN Staying_Management sm ON src.Staying_id = sm.Staying_id AND sm.Staying_status = 1
+                JOIN Customer_Management cm ON src.Customer_id = cm.Customer_id
+                GROUP BY src.Room_id
+            ) cust ON rm.Room_id = cust.Room_id
+            ORDER BY rm.Room_num
+        """;
+
+        try (Connection conn = DButil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                String roomNum = rs.getString("Room_num");
+                int st = rs.getInt("Room_status");
+                String status = switch (st) {
+                    case 0 -> "Available";
+                    case 1 -> "Occupied";
+                    case 2 -> "Cleaning";
+                    default -> "Unknown";
+                };
+                String guests = rs.getString("Guests");
+                out.add(new DashboardRoom(roomNum, status, guests));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return out;
     }
 }

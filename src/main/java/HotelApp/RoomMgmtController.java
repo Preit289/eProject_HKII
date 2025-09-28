@@ -19,6 +19,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+@SuppressWarnings("unused")
 public class RoomMgmtController {
 
     @FXML
@@ -55,7 +56,7 @@ public class RoomMgmtController {
     private Room selectedRoom;
 
     @FXML
-    private void initialize() {
+    public void initialize() {
         setupTableColumns();
         setupChoiceBoxes();
         loadRooms();
@@ -75,17 +76,17 @@ public class RoomMgmtController {
 
     private void setupChoiceBoxes() {
         // Setup categories
-        cbCategory.setItems(FXCollections.observableArrayList("single", "double", "suite"));
+        cbCategory.setItems(FXCollections.observableArrayList("Single", "Double", "Suite"));
 
         // Setup qualities
-        cbQuality.setItems(FXCollections.observableArrayList(
-                "standard", "superior", "deluxe", "premium"
-        ));
+    cbQuality.setItems(FXCollections.observableArrayList(
+        "Standard", "Superior", "Deluxe", "Premium"
+    ));
 
         // Setup statuses
-        cbStatus.setItems(FXCollections.observableArrayList(
-                "Available", "Occupied", "Cleaning"
-        ));
+    cbStatus.setItems(FXCollections.observableArrayList(
+        "Available", "Occupied", "Cleaning"
+    ));
     }
 
     private void loadRooms() {
