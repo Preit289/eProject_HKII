@@ -218,16 +218,11 @@
     -fx-text-fill: white;
     -fx-border-color: transparent;
 }
-.status-reserved {
+.status-occupied {
     -fx-background-color: #f39c12; /* amber */
-}
-.status-checkedin {
-    -fx-background-color: #27ae60; /* green */
 }
 .status-checkedout {
     -fx-background-color: #7f8c8d; /* gray */
 }
-.status-cancelled {
-    -fx-background-color: #c0392b; /* red */
-}
+
 

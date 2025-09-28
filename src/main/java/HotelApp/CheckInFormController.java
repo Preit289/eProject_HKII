@@ -1,44 +1,56 @@
 package HotelApp;
 
-import HotelApp.model.Checkin;
-import HotelApp.model.Services;
-import HotelApp.repository.CheckinRepository;
-import HotelApp.repository.ServicesRepository;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.beans.property.*;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
-import java.sql.*;
-import HotelApp.db.DButil;
-
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Locale; // Keep Locale import for usage in NumberFormat
-
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import HotelApp.db.DButil;
+import HotelApp.model.Checkin;
+import HotelApp.model.Services;
+import HotelApp.repository.CheckinRepository;
+import HotelApp.repository.ServicesRepository;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.print.PageLayout;
 import javafx.print.PrinterJob;
 import javafx.scene.Group;
-
-import javafx.scene.text.Text;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
 
 // removed unused java.io imports
 
@@ -283,47 +295,32 @@ public class CheckInFormController {
     }
 
     private void updateStatusUI(Integer status) {
-        String label = "";
-        String style = "status-chip";
-        if (status == null) {
-            label = "Unknown";
-        } else {
-            switch (status) {
-                case 0 -> {
-                    label = "Reserved";
-                    style += " status-reserved";
-                }
-                case 1 -> {
-                    label = "Checked-in";
-                    style += " status-checkedin";
-                }
-                case 2 -> {
-                    label = "Checked-out";
-                    style += " status-checkedout";
-                }
-                case 3 -> {
-                    label = "Cancelled";
-                    style += " status-cancelled";
-                }
-                default -> label = "Status " + status;
-            }
-        }
-        lblStayingStatus.setText(label);
-        lblStayingStatus.getStyleClass().clear();
-        lblStayingStatus.getStyleClass().addAll("status-chip");
+        String label = "Unknown";
+        String extraClass = "";
+
         if (status != null) {
             switch (status) {
-                case 2 -> lblStayingStatus.getStyleClass().add("status-checkedout");
-                case 1 -> lblStayingStatus.getStyleClass().add("status-checkedin");
-                case 0 -> lblStayingStatus.getStyleClass().add("status-reserved");
-                case 3 -> lblStayingStatus.getStyleClass().add("status-cancelled");
+                case 0 -> {
+                    label = "Occupied";
+                    extraClass = "status-occupied";
+                }
+                case 1 -> {
+                    label = "Checked-out";
+                    extraClass = "status-checkedout";
+                }
             }
         }
 
-        // Disable checkout button only if the staying is already checked-out (status ==
-        // 2)
-        boolean checkedOut = (status != null && status == 2);
-        btnCheckOut.setDisable(checkedOut);
+        lblStayingStatus.setText(label);
+
+        lblStayingStatus.getStyleClass().clear();
+        lblStayingStatus.getStyleClass().add("status-chip");
+        if (!extraClass.isEmpty()) {
+            lblStayingStatus.getStyleClass().add(extraClass);
+        }
+
+        // Disable checkout button nếu đã checkout
+        btnCheckOut.setDisable(status != null && status == 1);
     }
 
     private String getPaymentMethod(String phone) {
@@ -933,10 +930,8 @@ public class CheckInFormController {
             return;
         }
         Map<Integer, String> statusMap = Map.of(
-                0, "Reserved",
-                1, "Checked-in",
-                2, "Checked-out",
-                3, "Cancelled");
+                0, "Occupied",
+                1, "Checked-out");
         List<String> choices = statusMap.values().stream().toList();
         ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.get(0), choices);
         dialog.setTitle("Set Staying Status");
@@ -1047,7 +1042,7 @@ public class CheckInFormController {
         LocalDate checkin = LocalDate.parse(txtCheckinDate.getText(), dtFormatter);
         LocalDate checkout = LocalDate.parse(txtCheckoutDate.getText(), dtFormatter);
         long nights = Math.max(1, ChronoUnit.DAYS.between(checkin, checkout));
-        
+
         ServicesRepository servicesRepo = new ServicesRepository();
         int row = 1;
 
@@ -1119,7 +1114,8 @@ public class CheckInFormController {
                             .filter(svc -> svc.getServiceName().equalsIgnoreCase(serviceName))
                             .mapToInt(Services::getServicePrice)
                             .findFirst().orElse(0);
-                        // System.out.println("Room " + room.roomNumber() + ": pricePerNight=" + room.price() + ", nights=" + nights + ", roomTotal=" + roomTotal);
+                    // System.out.println("Room " + room.roomNumber() + ": pricePerNight=" +
+                    // room.price() + ", nights=" + nights + ", roomTotal=" + roomTotal);
                     totalAmount += servicePrice * qty;
                 }
             }
