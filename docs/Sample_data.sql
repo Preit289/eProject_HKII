@@ -2,17 +2,24 @@
 
 -- 1. RoomType_Amenity (phải insert trước Room_Management)
 INSERT INTO RoomType_Amenity VALUES
+-- Single Rooms
 (N'Single', N'Standard', 1, N'Giường đơn, TV, Wifi, Tủ lạnh'),
 (N'Single', N'Deluxe', 1, N'Giường đơn, TV, Wifi, Tủ lạnh, Máy sấy'),
 (N'Single', N'Premium', 1, N'Giường đơn, TV, Wifi, Tủ lạnh, Ban công'),
-(N'Double', N'Standard', 2, N'Giường đôi, TV, Wifi'),
-(N'Double', N'Deluxe', 2, N'Giường đôi, TV, Wifi, Mini bar'),
-(N'Double', N'Premium', 2, N'Giường đôi, TV, Wifi, Mini bar, Máy pha cà phê'),
-(N'Double', N'Superior', 2, N'Giường đôi, TV, Wifi, Mini bar, Ban công'),
-(N'Suite', N'Standard', 2, N'Phòng khách, Giường đôi, TV, Wifi'),
-(N'Suite', N'Deluxe', 2, N'Phòng khách, Giường đôi, TV, Wifi, Mini bar'),
-(N'Suite', N'Premium', 2, N'Phòng khách, Giường đôi, TV, Wifi, Mini bar, Ban công'),
-(N'Suite', N'Royal', 2, N'Phòng khách, Giường đôi, TV, Wifi, Mini bar, Ban công, Jacuzzi');
+(N'Single', N'Superior', 1, N'Giường đơn, TV, Wifi, Tủ lạnh, Ban công, Máy pha cà phê'),
+
+-- Double Rooms
+(N'Double', N'Standard', 2, N'Giường đôi, TV, Wifi, Tủ lạnh'),
+(N'Double', N'Deluxe', 2, N'Giường đôi, TV, Wifi, Tủ lạnh, Mini bar'),
+(N'Double', N'Premium', 2, N'Giường đôi, TV, Wifi, Tủ lạnh, Mini bar, Máy pha cà phê'),
+(N'Double', N'Superior', 2, N'Giường đôi, TV, Wifi, Tủ lạnh, Mini bar, Ban công, Máy pha cà phê'),
+
+-- Suite Rooms
+(N'Suite', N'Standard', 2, N'Phòng khách, Giường đôi, TV, Wifi, Tủ lạnh'),
+(N'Suite', N'Deluxe', 2, N'Phòng khách, Giường đôi, TV, Wifi, Tủ lạnh, Mini bar'),
+(N'Suite', N'Premium', 2, N'Phòng khách, Giường đôi, TV, Wifi, Tủ lạnh, Mini bar, Ban công'),
+(N'Suite', N'Superior', 2, N'Phòng khách, Giường đôi, TV, Wifi, Tủ lạnh, Mini bar, Ban công, Máy pha cà phê'),
+(N'Suite', N'Royal', 2, N'Phòng khách, Giường đôi, TV, Wifi, Tủ lạnh, Mini bar, Ban công, Jacuzzi');
 
 -- 2. Room_Management
 INSERT INTO Room_Management VALUES
@@ -31,9 +38,9 @@ INSERT INTO Room_Management VALUES
 -- 3. Account_Management
 INSERT INTO Account_Management VALUES
 ('admin', '123456', 1),
-('staff1', '123456', 0),
-('staff2', '123456', 0),
-('reception1', '123456', 0);
+('staff1', 'staff123', 0),
+('staff2', 'staff234', 0),
+('reception1', 'recep123', 0);
 
 -- 4. Customer_Management
 INSERT INTO Customer_Management VALUES
