@@ -210,4 +210,17 @@
     -fx-font-weight: bold;
     -fx-text-fill: #2c3e50;     
 }
+.status-chip {
+    -fx-background-color: #f0ad4e;
+    -fx-text-fill: white;
+    -fx-padding: 4 8;
+    -fx-background-radius: 4;
+    -fx-font-weight: bold;
+}
+.status-occupied {
+    -fx-background-color: #f0ad4e;
+}
+.status-checkedout {
+    -fx-background-color: #28a745;
+}
 
