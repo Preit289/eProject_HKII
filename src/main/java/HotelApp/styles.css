@@ -1,0 +1,226 @@
+@font-face {
+    font-family: 'SF Pro Rounded';
+    src: url("fonts/SF-Pro-Rounded-Medium.otf");
+}
+
+.root {
+    -fx-font-family: 'SF Pro Rounded';
+    -fx-font-size: 14px;
+    /*    -fx-font-smoothing-type: gray;*/
+
+}
+.view-pane {
+    -fx-padding: 20;
+}
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+/* Main.fxml styles */
+.mainFxmlClass {
+    -fx-background-color: #f4f4f4;
+}
+
+.sidebar {
+    -fx-background-color: #2c3e50;
+    -fx-pref-width: 200px;
+}
+
+.brand {
+    -fx-font-size: 20px;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-padding: 10px;
+}
+
+.nav-btn {
+    -fx-background-color: #34495e;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-pref-width: 180px;
+    -fx-padding: 10px;
+}
+
+.nav-btn:hover {
+    -fx-background-color: #1abc9c;
+}
+
+.header {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 0 1 0;
+}
+
+.page-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.content-area {
+    -fx-background-color: #ffffff;
+    -fx-padding: 10px;
+}
+
+.statusbar {
+    -fx-background-color: #ecf0f1;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* ===== Buttons ===== */
+.button-primary {
+    -fx-background-color: #17324a;
+    -fx-text-fill: yellow;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+}
+/* Khi hover */
+.button-primary:hover {
+    -fx-background-color: #1f4566; /* Màu sáng hơn một chút */
+    -fx-text-fill: white;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+/* Khi pressed */
+.button-primary:pressed {
+    -fx-background-color: #12293a; /* press tối hơn để tạo hiệu ứng nhấn */
+    -fx-text-fill: white;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+.button-primary .btn-icon {
+    -fx-icon-color: yellow;   /* Màu mặc định */
+}
+/* Khi hover button -> icon đổi màu */
+.button-primary:hover .btn-icon {
+    -fx-icon-color: white;
+}
+.button-primary:pressed .btn-icon {
+    -fx-icon-color: white;
+}
+
+
+.button-secondary {
+    -fx-background-color: #6c757d; /* Normal */
+    -fx-text-fill: yellow;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+}
+
+
+.button-secondary:hover {
+    -fx-background-color: #5a6268; /* Hover */
+    -fx-text-fill: white;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.button-secondary:pressed {
+    -fx-background-color: #444b50; /* Pressed */
+    -fx-text-fill: white;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+.button-secondary .btn-icon {
+    -fx-icon-color: yellow;   /* Màu mặc định */
+}
+/* Khi hover button -> icon đổi màu */
+.button-secondary:hover .btn-icon {
+    -fx-icon-color: white;
+}
+.button-secondary:pressed .btn-icon {
+    -fx-icon-color: white;
+}
+
+/* ================== TableView ================== */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-color: #dcdcdc;
+    -fx-border-radius: 6;
+    -fx-padding: 5;
+}
+
+/* Filler fix (xóa đường trắng) */
+.table-view .filler {
+    -fx-background-color: #17324a; /* cùng màu header */
+}
+
+/* Header (cột) */
+.table-view .column-header-background {
+    -fx-background-color: #17324a;
+    -fx-background-radius: 6 6 0 0;
+}
+
+.table-view .column-header,
+.table-view .column-header .label {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;
+}
+
+/* Dòng trong bảng */
+.table-row-cell {
+    -fx-background-color: #f8f9fa;
+    -fx-padding: 4 0 4 0;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #eef1f5; /* Zebra stripes */
+}
+
+/* Dòng được chọn - nền sáng hơn để làm nổi bật chữ */
+.table-row-cell:selected {
+    -fx-background-color: #d6e4f0; /* Màu nền nhạt hơn */
+    -fx-background-insets: 0;
+}
+
+/* Text trong cell */
+.table-cell {
+    -fx-alignment: CENTER-LEFT;
+    -fx-padding: 4 8 4 8;
+    -fx-text-fill: #333;
+    -fx-font-size: 13px;
+}
+
+/* Text trong cell khi được chọn - làm nổi bật chữ */
+.table-cell:selected {
+    -fx-text-fill: #1a3c5a; /* Màu chữ đậm hơn */
+    -fx-font-weight: bold; /* Làm đậm chữ */
+}
+
+/* Khi hover vào 1 row */
+.table-row-cell:hover {
+    -fx-background-color: #d6e4f0;
+}
+
+/* Tùy chọn: Thêm hiệu ứng cho chữ khi hover (nếu muốn) */
+.table-row-cell:hover .table-cell {
+    -fx-text-fill: #1a3c5a;
+    -fx-font-weight: bold;
+}
+.form-title {
+    -fx-font-size: 24px;        
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;     
+}
+.status-chip {
+    -fx-background-color: #f0ad4e;
+    -fx-text-fill: white;
+    -fx-padding: 4 8;
+    -fx-background-radius: 4;
+    -fx-font-weight: bold;
+}
+.status-occupied {
+    -fx-background-color: #f0ad4e;
+}
+.status-checkedout {
+    -fx-background-color: #28a745;
+}
+

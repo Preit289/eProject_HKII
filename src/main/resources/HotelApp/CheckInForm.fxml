@@ -43,8 +43,8 @@
 
             <Label text="Rooms" styleClass="section-title" GridPane.rowIndex="3"/>
             <HBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                <Button text="Add room"    onAction="#onAddRoom"    styleClass="button-secondary"/>
-                <Button text="Remove room" onAction="#onRemoveRoom" styleClass="button-secondary"/>
+                <Button text="Add room"  fx:id="btnAddRoom"  onAction="#onAddRoom"    styleClass="button-secondary"/>
+                <Button text="Remove room" fx:id="btnRemoveRoom" onAction="#onRemoveRoom" styleClass="button-secondary"/>
             </HBox>
 
             <TableView fx:id="tblRooms" GridPane.rowIndex="4" GridPane.columnSpan="4" prefHeight="260" styleClass="table-view">
