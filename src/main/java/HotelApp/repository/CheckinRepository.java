@@ -1,6 +1,5 @@
 package HotelApp.repository;
 
-import HotelApp.DateTime;
 import HotelApp.db.DButil;
 import HotelApp.model.Checkin;
 import java.sql.*;
