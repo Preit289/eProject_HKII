@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="HotelApp.BookingController" spacing="8" stylesheets="@HotelApp/styles.css">
+
+    <HBox spacing="8">
+        <TextField fx:id="txtSearch" promptText="Search booker / phone" HBox.hgrow="ALWAYS"/>
+        <Button text="Search" onAction="#onSearch" />
+        <Button text="Book"   onAction="#onCreate" />
+    </HBox>
+
+    <TableView fx:id="tblBooking" prefHeight="600" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colId"          text="BookingId"     prefWidth="120"/>
+            <TableColumn fx:id="colBooker"      text="Booker"        prefWidth="160"/>
+            <TableColumn fx:id="colPhone"       text="Phone"         prefWidth="120"/>
+            <TableColumn fx:id="colDeposit"     text="Deposit"       prefWidth="100"/>
+            <TableColumn fx:id="colPay"         text="Payment"       prefWidth="120"/>
+            <TableColumn fx:id="colRooms"       text="Rooms"         prefWidth="140"/>
+            <TableColumn fx:id="colCreatedAt"   text="Created At"    prefWidth="160"/>
+            <!-- Cột mới: Check-in Date -->
+            <TableColumn fx:id="colCheckinDate" text="Check-in Date" prefWidth="160"/>
+        </columns>
+    </TableView>
+</VBox>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="HotelApp.BookingFormController"
+            prefWidth="800" prefHeight="520">
+
+    <!-- Heading -->
+    <top>
+        <HBox alignment="CENTER" style="-fx-padding: 15;">
+            <Label fx:id="lblTitle" text="New Booking"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+        </HBox>
+    </top>
+
+    <!-- Form -->
+    <center>
+       <GridPane hgap="10" vgap="12" style="-fx-padding: 20;">
+    <columnConstraints>
+        <!-- Label cột 0: nhỏ hơn -->
+        <ColumnConstraints minWidth="80" maxWidth="100"/>
+        <!-- Input cột 1 -->
+        <ColumnConstraints hgrow="ALWAYS"/>
+        <!-- Label cột 2 -->
+        <ColumnConstraints minWidth="80" maxWidth="100"/>
+        <!-- Input cột 3 -->
+        <ColumnConstraints hgrow="ALWAYS"/>
+    </columnConstraints>
+
+            <!-- Row 0 -->
+            <Label text="Booker" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtBooker" promptText="Customer name" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label text="Phone" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+            <TextField fx:id="txtPhone" promptText="Phone number" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+            <!-- Row 1 -->
+            <Label text="Deposit" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtDeposit" promptText="0" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Label text="Payment" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+            <HBox spacing="12" GridPane.rowIndex="1" GridPane.columnIndex="3">
+                <RadioButton fx:id="rbCash" text="Cash" selected="true">
+                    <toggleGroup>
+                        <ToggleGroup fx:id="paymentGroup"/>
+                    </toggleGroup>
+                </RadioButton>
+                <RadioButton fx:id="rbCard" text="Card" toggleGroup="$paymentGroup"/>
+                <RadioButton fx:id="rbOnline" text="Online" toggleGroup="$paymentGroup"/>
+            </HBox>
+
+            <!-- Row 2 -->
+            <Label text="Check-in" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <DatePicker fx:id="dpCheckin" promptText="yyyy-MM-dd" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            <Label text="Check-out" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+            <DatePicker fx:id="dpCheckout" promptText="yyyy-MM-dd" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+
+            <!-- Row 3: Room ops -->
+            <HBox spacing="8" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="4">
+                <Button text="Add room" onAction="#onAddRoom"/>
+                <Button text="Remove selected" onAction="#onRemoveRoom"/>
+            </HBox>
+
+            <!-- Row 4: Rooms table -->
+            <TableView fx:id="tblRooms" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="4"
+                       prefHeight="320">
+                <columns>
+                    <TableColumn fx:id="colRoomNum" text="Room No" prefWidth="120"/>
+                    <TableColumn fx:id="colCategory" text="Category" prefWidth="140"/>
+                    <TableColumn fx:id="colQuality" text="Quality" prefWidth="140"/>
+                    <TableColumn fx:id="colPrice" text="Price" prefWidth="120"/>
+                </columns>
+            </TableView>
+        </GridPane>
+    </center>
+
+    <!-- Footer -->
+    <bottom>
+        <HBox spacing="8" alignment="CENTER_RIGHT" style="-fx-padding: 10;">
+            <Button fx:id="btnDelete" text="Delete" onAction="#onDelete"/>
+            <Button fx:id="btnSave" text="Save" onAction="#onSave"/>
+            <Button text="Close" onAction="#onClose"/>
+        </HBox>
+    </bottom>
+</BorderPane>

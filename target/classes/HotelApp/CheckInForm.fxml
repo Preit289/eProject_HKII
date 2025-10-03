@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
+    fx:controller="HotelApp.CheckInFormController"
+    prefWidth="900" prefHeight="560">
+
+    <!-- Top: Title -->
+    <top>
+        <Label fx:id="lblTitle" text="Check-in Details"
+            style="-fx-font-size: 18px; -fx-font-weight: bold;"
+            BorderPane.alignment="CENTER" />
+    </top>
+
+    <!-- Center: Form + Table -->
+    <center>
+        <VBox spacing="10" styleClass="view-pane">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10" />
+            </padding>
+            <!-- Form GridPane -->
+            <GridPane hgap="15" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="120" halignment="RIGHT" />
+                    <ColumnConstraints hgrow="ALWAYS" />
+                    <ColumnConstraints minWidth="120" halignment="RIGHT" />
+                    <ColumnConstraints hgrow="ALWAYS" />
+                </columnConstraints>
+
+
+                <!-- Row 0 -->
+                <Label text="Booker:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                <TextField fx:id="txtBooker" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+                <Label text="Phone:" GridPane.rowIndex="0" GridPane.columnIndex="2" />
+                <TextField fx:id="txtPhone" GridPane.rowIndex="0" GridPane.columnIndex="3" />
+
+                <!-- Row 1 -->
+                <Label text="Payment:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                <ComboBox fx:id="cbPayment" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+                <Label text="Deposit:" GridPane.rowIndex="1" GridPane.columnIndex="2" />
+                <TextField fx:id="txtDeposit" GridPane.rowIndex="1" GridPane.columnIndex="3" />
+
+                <!-- Row 2 -->
+                <Label text="Start Date:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+                <TextField fx:id="txtCheckinDate" editable="false" GridPane.rowIndex="2"
+                    GridPane.columnIndex="1" />
+                <Label text="Out Date:" GridPane.rowIndex="2" GridPane.columnIndex="2" />
+                <TextField fx:id="txtCheckoutDate" editable="false" GridPane.rowIndex="2"
+                    GridPane.columnIndex="3" />
+
+                <!-- Row 3 -->
+                <Label text="Rooms:" styleClass="section-title" GridPane.rowIndex="3"
+                    GridPane.columnIndex="0" />
+                <HBox spacing="8" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                    <Button text="Add room" onAction="#onAddRoom" styleClass="button-secondary" />
+                    <Button text="Remove room" onAction="#onRemoveRoom"
+                        styleClass="button-secondary" />
+                </HBox>
+            </GridPane>
+
+            <!-- TableView -->
+            <TableView fx:id="tblRooms" prefHeight="320" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colRoomNum" text="Room No" prefWidth="80" />
+                    <TableColumn fx:id="colCategory" text="Category" prefWidth="100" />
+                    <TableColumn fx:id="colQuality" text="Quality" prefWidth="100" />
+                    <TableColumn fx:id="colPrice" text="Price" prefWidth="80" />
+                    <TableColumn fx:id="colCustomer" text="Customer" prefWidth="120" />
+                    <TableColumn fx:id="colServices" text="Services" prefWidth="120" />
+                    <TableColumn fx:id="colAssign" text="Assign Customer" prefWidth="100" />
+                    <TableColumn fx:id="colAssignService" text="Assign Service" prefWidth="100" />
+                    <TableColumn fx:id="colRemoveCustomer" text="Remove Customer" prefWidth="100" />
+                    <TableColumn fx:id="colRemoveService" text="Remove Service" prefWidth="100" />
+                    <TableColumn fx:id="colEditServiceQty" text="Edit Service Qty" prefWidth="100" />
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+
+    <!-- Bottom: Buttons -->
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding:10;">
+            <Button fx:id="btnPrint" text="Print" onAction="#onPrint" styleClass="button-secondary" />
+            <Button fx:id="btnDelete" text="Delete" onAction="#onDelete"
+                styleClass="button-secondary" />
+            <Button fx:id="btnUpdate" text="Update" onAction="#onUpdate" styleClass="button-primary" />
+            <Button fx:id="btnClose" text="Close" onAction="#onClose" styleClass="button-secondary" />
+        </HBox>
+    </bottom>
+
+    <!-- Padding for BorderPane -->
+    <padding>
+        <Insets top="5" right="10" bottom="5" left="10" />
+    </padding>
+</BorderPane>

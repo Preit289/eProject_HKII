@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="HotelApp.CheckInController"
+      spacing="15" alignment="TOP_LEFT" styleClass="view-pane">
+
+    <Label text="Check-in Management" styleClass="section-title"/>
+
+    <!-- Search Bar Section -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Search:"/>
+        <TextField fx:id="txtSearchPhone" promptText="Enter phone number..." prefWidth="250"/>
+        <Button fx:id="btnSearch" text="Search" onAction="#onSearch"/>
+        <Button fx:id="btnCheckin" text="Checkin" onAction="#onCheckin" styleClass="button-primary"/>
+        <Button fx:id="btnUpdate" text="Update" onAction="#onUpdate" styleClass="button-primary"/>
+    </HBox>
+
+    <TableView fx:id="tblBookings" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colGuestName" text="Customer Name" prefWidth="180"/>
+            <TableColumn fx:id="colGuestPhone" text="Phone Number" prefWidth="150"/>
+            <TableColumn fx:id="colRoomNumbers" text="Room Numbers" prefWidth="150"/>
+            <TableColumn fx:id="colRoomCategory" text="Room Category" prefWidth="120"/>
+            <TableColumn fx:id="colRoomType" text="Room Type" prefWidth="120"/>
+            <TableColumn fx:id="colCheckIn" text="Planned Check-in" prefWidth="150"/>
+            <TableColumn fx:id="colCheckOut" text="Planned Check-out" prefWidth="150"/>
+        </columns>
+    </TableView>
+
+</VBox>
