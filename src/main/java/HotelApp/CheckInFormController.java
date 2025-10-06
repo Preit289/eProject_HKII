@@ -39,6 +39,14 @@ import javafx.scene.layout.StackPane;
 import java.io.File;
 import java.io.IOException;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import javafx.geometry.HPos;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+
+
 public class CheckInFormController {
 
     @FXML
@@ -275,8 +283,7 @@ public class CheckInFormController {
                     FROM Booking_Management
                     WHERE Book_contact = ?
                 """;
-        try (Connection conn = DButil.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, phone);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
@@ -294,8 +301,7 @@ public class CheckInFormController {
                     FROM Booking_Management
                     WHERE Book_contact = ?
                 """;
-        try (Connection conn = DButil.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, phone);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
@@ -313,12 +319,11 @@ public class CheckInFormController {
                     FROM Staying_Management
                     WHERE Staying_id = ?
                 """;
-        try (Connection conn = DButil.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next() && rs.getTimestamp("Checkin_date") != null) {
-                return rs.getTimestamp("Checkin_date").toString();
+                return rs.getTimestamp("Checkin_date").toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -332,12 +337,11 @@ public class CheckInFormController {
                     FROM Staying_Management
                     WHERE Staying_id = ?
                 """;
-        try (Connection conn = DButil.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next() && rs.getTimestamp("Checkout_date") != null) {
-                return rs.getTimestamp("Checkout_date").toString();
+                return rs.getTimestamp("Checkout_date").toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -375,8 +379,7 @@ public class CheckInFormController {
                     WHERE bm.Book_contact = ?
                 """;
 
-        try (Connection conn = DButil.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DButil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stayingId);
             pstmt.setString(2, stayingId);
             pstmt.setString(3, booking.getGuestPhone());
@@ -419,8 +422,8 @@ public class CheckInFormController {
         dialog.getDialogPane().lookupButton(assignButtonType).setDisable(true);
         customerListView.getSelectionModel().getSelectedItems()
                 .addListener((javafx.beans.Observable observable) -> dialog.getDialogPane()
-                        .lookupButton(assignButtonType).setDisable(
-                                customerListView.getSelectionModel().getSelectedItems().isEmpty()));
+                .lookupButton(assignButtonType).setDisable(
+                customerListView.getSelectionModel().getSelectedItems().isEmpty()));
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == assignButtonType) {
@@ -479,8 +482,8 @@ public class CheckInFormController {
         dialog.getDialogPane().lookupButton(removeButtonType).setDisable(true);
         customerListView.getSelectionModel().getSelectedItems()
                 .addListener((javafx.beans.Observable observable) -> dialog.getDialogPane()
-                        .lookupButton(removeButtonType).setDisable(
-                                customerListView.getSelectionModel().getSelectedItems().isEmpty()));
+                .lookupButton(removeButtonType).setDisable(
+                customerListView.getSelectionModel().getSelectedItems().isEmpty()));
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == removeButtonType) {
@@ -537,8 +540,8 @@ public class CheckInFormController {
         dialog.getDialogPane().lookupButton(assignButtonType).setDisable(true);
         serviceListView.getSelectionModel().getSelectedItems()
                 .addListener((javafx.beans.Observable observable) -> dialog.getDialogPane()
-                        .lookupButton(assignButtonType).setDisable(
-                                serviceListView.getSelectionModel().getSelectedItems().isEmpty()));
+                .lookupButton(assignButtonType).setDisable(
+                serviceListView.getSelectionModel().getSelectedItems().isEmpty()));
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == assignButtonType) {
@@ -596,8 +599,8 @@ public class CheckInFormController {
         dialog.getDialogPane().lookupButton(removeButtonType).setDisable(true);
         serviceListView.getSelectionModel().getSelectedItems()
                 .addListener((javafx.beans.Observable observable) -> dialog.getDialogPane()
-                        .lookupButton(removeButtonType).setDisable(
-                                serviceListView.getSelectionModel().getSelectedItems().isEmpty()));
+                .lookupButton(removeButtonType).setDisable(
+                serviceListView.getSelectionModel().getSelectedItems().isEmpty()));
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == removeButtonType) {
@@ -656,10 +659,10 @@ public class CheckInFormController {
         dialog.getDialogPane().lookupButton(updateButtonType).setDisable(true);
         serviceComboBox.getSelectionModel().selectedItemProperty()
                 .addListener((obs, oldVal, newVal) -> dialog.getDialogPane().lookupButton(updateButtonType).setDisable(
-                        newVal == null || txtQuantity.getText().trim().isEmpty()));
+                newVal == null || txtQuantity.getText().trim().isEmpty()));
         txtQuantity.textProperty()
                 .addListener((obs, oldVal, newVal) -> dialog.getDialogPane().lookupButton(updateButtonType).setDisable(
-                        serviceComboBox.getSelectionModel().isEmpty() || newVal.trim().isEmpty()));
+                serviceComboBox.getSelectionModel().isEmpty() || newVal.trim().isEmpty()));
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == updateButtonType) {
@@ -773,9 +776,40 @@ public class CheckInFormController {
 
     @FXML
     private void onPrint() {
-        PrinterJob job = PrinterJob.createPrinterJob();
-        if (job == null || !job.showPrintDialog(btnPrint.getScene().getWindow()))
+        // Parse check-in and check-out dates
+        String checkinStr = txtCheckinDate.getText();
+        String checkoutStr = txtCheckoutDate.getText();
+
+        if (checkinStr.isEmpty() || checkoutStr.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Check-in or check-out date is not set. Cannot print bill.");
+            alert.showAndWait();
             return;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+        LocalDateTime checkinDateTime;
+        LocalDateTime checkoutDateTime;
+        try {
+            checkinDateTime = LocalDateTime.parse(checkinStr, formatter);
+            checkoutDateTime = LocalDateTime.parse(checkoutStr, formatter);
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid date format. Cannot calculate stay duration: " + e.getMessage());
+            alert.showAndWait();
+            return;
+        }
+
+        // Calculate nights (use toLocalDate() to ignore time)
+        long nights = ChronoUnit.DAYS.between(checkinDateTime.toLocalDate(), checkoutDateTime.toLocalDate());
+        if (nights <= 0) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid stay duration (check-out must be after check-in).");
+            alert.showAndWait();
+            return;
+        }
+
+        PrinterJob job = PrinterJob.createPrinterJob();
+        if (job == null || !job.showPrintDialog(btnPrint.getScene().getWindow())) {
+            return;
+        }
 
         PageLayout pageLayout = job.getJobSettings().getPageLayout();
         double pageWidth = pageLayout.getPrintableWidth();
@@ -784,8 +818,8 @@ public class CheckInFormController {
         VBox printContent = new VBox(15);
         printContent.setPadding(new Insets(20));
         printContent.setStyle("-fx-background-color: white;");
-        printContent.setPrefWidth(pageWidth * 0.8);
-        printContent.setMaxWidth(pageWidth * 0.8);
+        printContent.setPrefWidth(pageWidth * 0.95); // Use more of the page width for better fit
+        printContent.setMaxWidth(pageWidth * 0.95);
 
         // ===== Hotel Header =====
         Label hotelName = new Label("HOTEL");
@@ -806,17 +840,25 @@ public class CheckInFormController {
         guestInfo.addRow(1, new Label("Phone:"), new Label(txtPhone.getText()));
         guestInfo.addRow(2, new Label("Check-in:"), new Label(txtCheckinDate.getText()));
         guestInfo.addRow(3, new Label("Check-out:"), new Label(txtCheckoutDate.getText()));
+        guestInfo.addRow(4, new Label("Nights:"), new Label(String.valueOf(nights)));
         guestInfo.getChildren().filtered(n -> n instanceof Label)
-                .forEach(n -> ((Label) n).setStyle("-fx-font-size: 12;"));
+                .forEach(n -> {
+                    ((Label) n).setStyle("-fx-font-size: 12;");
+                    if (!((Label) n).getText().startsWith("Guest") && !((Label) n).getText().startsWith("Phone")) {
+                        ((Label) n).setWrapText(true);
+                        ((Label) n).setMaxWidth(200); // Allow wrapping for long values
+                    }
+                });
 
         // ===== Room List =====
         GridPane roomGrid = new GridPane();
-        roomGrid.setHgap(20);
+        roomGrid.setHgap(10);
         roomGrid.setVgap(8);
         roomGrid.addRow(0,
                 new Label("Room No."),
                 new Label("Category"),
-                new Label("Price"),
+                new Label("Price/Night"),
+                new Label("Total Room Cost"),
                 new Label("Services"));
         roomGrid.getChildren().filtered(n -> n instanceof Label)
                 .forEach(n -> ((Label) n).setStyle("-fx-font-weight: bold; -fx-font-size: 12;"));
@@ -824,13 +866,32 @@ public class CheckInFormController {
         int row = 1;
         ServicesRepository servicesRepo = new ServicesRepository();
         double totalAmount = 0;
+        double maxPriceWidth = 0; // To determine the widest price field
 
         for (RoomVM room : tblRooms.getItems()) {
-            Label roomNo = new Label(room.roomNumber());
-            Label category = new Label(room.category());
-            Label price = new Label(vndFormat.format(room.price()));
-            totalAmount += room.price();
+            double roomPricePerNight = room.price();
+            double roomTotal = roomPricePerNight * nights;
+            totalAmount += roomTotal;
 
+            // Labels with wrapping for text
+            Label roomNo = new Label(room.roomNumber());
+            roomNo.setWrapText(true);
+            roomNo.setMaxWidth(80);
+
+            Label category = new Label(room.category());
+            category.setWrapText(true);
+            category.setMaxWidth(120);
+
+            // Labels for numbers, sized to fit content
+            Label pricePerNight = new Label(vndFormat.format(roomPricePerNight));
+            pricePerNight.setMinWidth(computeTextWidth(pricePerNight.getText(), 12) + 10);
+            maxPriceWidth = Math.max(maxPriceWidth, pricePerNight.getMinWidth());
+
+            Label roomTotalLabel = new Label(vndFormat.format(roomTotal));
+            roomTotalLabel.setMinWidth(computeTextWidth(roomTotalLabel.getText(), 12) + 10);
+            maxPriceWidth = Math.max(maxPriceWidth, roomTotalLabel.getMinWidth());
+
+            // Services with unit price
             VBox servicesBox = new VBox(2);
             if (room.services() != null && !room.services().isEmpty()) {
                 String[] servicesArr = room.services().split("\n");
@@ -845,7 +906,6 @@ public class CheckInFormController {
                         }
                     }
 
-                    // Tính tổng tiền dịch vụ nhưng không hiển thị riêng lẻ
                     int servicePrice = 0;
                     List<Services> allServices = servicesRepo.getAllServices();
                     for (Services svc : allServices) {
@@ -856,31 +916,55 @@ public class CheckInFormController {
                     }
                     totalAmount += servicePrice * qty;
 
-                    Label lbl = new Label(serviceName + " x" + qty + "\n(" + vndFormat.format(servicePrice) + ")");
-
+                    Label lbl = new Label(serviceName + " x" + qty + "( " + vndFormat.format(servicePrice * qty) + ")");
                     lbl.setStyle("-fx-font-size: 12;");
+                    lbl.setWrapText(true);
+                    lbl.setMaxWidth(150);
                     servicesBox.getChildren().add(lbl);
                 }
             } else {
                 servicesBox.getChildren().add(new Label("-"));
             }
 
-            roomGrid.addRow(row++, roomNo, category, price, servicesBox);
+            // Adjust column widths based on content
+            roomGrid.add(roomNo, 0, row);
+            GridPane.setHalignment(roomNo, HPos.LEFT);
+            roomGrid.add(category, 1, row);
+            GridPane.setHalignment(category, HPos.LEFT);
+            roomGrid.add(pricePerNight, 2, row);
+            GridPane.setHalignment(pricePerNight, HPos.RIGHT);
+            roomGrid.add(roomTotalLabel, 3, row);
+            GridPane.setHalignment(roomTotalLabel, HPos.RIGHT);
+            roomGrid.add(servicesBox, 4, row);
+            GridPane.setHalignment(servicesBox, HPos.LEFT);
+
+            row++;
+        }
+
+        // Set minimum width for price columns based on the widest number
+        for (Node node : roomGrid.getChildren()) {
+            if (node instanceof Label && (node.getParent().getChildrenUnmodifiable().indexOf(node) == 2 || node.getParent().getChildrenUnmodifiable().indexOf(node) == 3)) {
+                ((Label) node).setMinWidth(maxPriceWidth);
+            }
         }
 
         // ===== Summary =====
-        double deposit = txtDeposit.getText().isEmpty() ? 0 : Double.parseDouble(txtDeposit.getText());
-        double balance = totalAmount - deposit;
-
         GridPane summary = new GridPane();
         summary.setHgap(50);
         summary.setVgap(8);
         summary.addRow(0, new Label("Payment Method:"), new Label(cbPayment.getValue()));
         summary.addRow(1, new Label("Total Amount:"), new Label(vndFormat.format(totalAmount)));
-        summary.addRow(2, new Label("Deposit Paid:"), new Label(vndFormat.format(deposit)));
-        summary.addRow(3, new Label("Balance Due:"), new Label(vndFormat.format(balance)));
+        summary.addRow(2, new Label("Deposit Paid:"), new Label(vndFormat.format(Double.parseDouble(txtDeposit.getText().isEmpty() ? "0" : txtDeposit.getText()))));
+        summary.addRow(3, new Label("Balance Due:"), new Label(vndFormat.format(totalAmount - Double.parseDouble(txtDeposit.getText().isEmpty() ? "0" : txtDeposit.getText()))));
         summary.getChildren().filtered(n -> n instanceof Label)
-                .forEach(n -> ((Label) n).setStyle("-fx-font-size: 14; -fx-font-weight: bold;"));
+                .forEach(n -> {
+                    ((Label) n).setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
+                    if (!((Label) n).getText().startsWith("Payment")) {
+                        ((Label) n).setWrapText(true);
+                        ((Label) n).setMaxWidth(150);
+                        GridPane.setHalignment(n, HPos.RIGHT);
+                    }
+                });
 
         Label footer = new Label("Thank you for choosing our hotel!");
         footer.setStyle("-fx-font-size: 12; -fx-font-style: italic; -fx-padding: 20 0 0 0;");
@@ -902,8 +986,9 @@ public class CheckInFormController {
             Group page = new Group(wrapper);
             page.setClip(new Rectangle(0, y, pageWidth, pageHeight));
             page.setTranslateY(-y);
-            if (!job.printPage(page))
+            if (!job.printPage(page)) {
                 break;
+            }
             y += pageHeight;
         }
 
@@ -911,4 +996,10 @@ public class CheckInFormController {
         new Alert(Alert.AlertType.INFORMATION, "Bill printed successfully!").showAndWait();
     }
 
+    // Helper method to compute text width based on font size
+    private double computeTextWidth(String text, int fontSize) {
+        Text tempText = new Text(text);
+        tempText.setFont(javafx.scene.text.Font.font(fontSize));
+        return tempText.getLayoutBounds().getWidth();
+    }
 }
